@@ -1,2 +1,24 @@
-# FSHT
-Ajanvarausjärjestelmä - FullStack-harjoitustyö 
+# FullStack - harjoitustyö
+
+### AIHE
+Ajanvarausjärjestelmä
+
+
+Suunnitelma:
+
+
+---
+
+### SOVELLUS
+Sovellus löytyy osoitteesta: 
+
+Käyttöohjeet:
+
+---
+
+
+### TUNTIKIRJANPITO
+
+link
+
+---

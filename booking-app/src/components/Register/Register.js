@@ -1,9 +1,8 @@
 import React from 'react'
 import { Typography, Paper, Avatar, Button, FormControl, Input, InputLabel } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
-import withStyles from '@material-ui/core/styles/withStyles'
 import { makeStyles } from '@material-ui/core/styles';
-import { Link, withRouter } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
     main: {
@@ -51,7 +50,7 @@ const Register = () => {
                 </Typography>
                 <form className={classes.form}>
                     <FormControl margin="normal" required fullWidth>
-                        <InputLabel htmlFor="username">Käyttäjänimi</InputLabel>
+                        <InputLabel htmlFor="username">Nimi</InputLabel>
                         <Input id="username" name="username" autoComplete="off" autoFocus />
                     </FormControl>
                     <FormControl margin="normal" required fullWidth>
@@ -69,7 +68,7 @@ const Register = () => {
                         variant="contained"
                         color="primary"
                         className={classes.submit}>
-                        Register
+                        Rekisteröidy
                     </Button>
 
                     <Button
@@ -77,8 +76,10 @@ const Register = () => {
                         fullWidth
                         variant="contained"
                         color="secondary"
-                        className={classes.submit}>
-                        Go back to Login
+                        className={classes.submit}
+                        component={Link}
+                        to='/login'>
+                        Kirjautumisikkunaan->
                     </Button>
                 </form>
             </Paper>

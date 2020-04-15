@@ -4,37 +4,55 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import { makeStyles } from '@material-ui/core/styles'
 import { Link } from 'react-router-dom'
 
+import { auth } from '../../firebase'
+
 const useStyles = makeStyles((theme) => ({
     main: {
         width: 'auto',
         display: 'block', // Fix IE 11 issue.
-        marginLeft: theme.spacing.unit * 3,
-        marginRight: theme.spacing.unit * 3,
-        [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
+        marginLeft: theme.spacing(3),
+        marginRight: theme.spacing(3),
+        [theme.breakpoints.up(400 + theme.spacing(3 * 2))]: {
             width: 400,
             marginLeft: 'auto',
             marginRight: 'auto',
         },
     },
     paper: {
-        marginTop: theme.spacing.unit * 8,
+        marginTop: theme.spacing(8),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 3}px ${theme.spacing.unit * 3}px`,
+        padding: `${theme.spacing(2)}px ${theme.spacing(3)}px ${theme.spacing(3)}px`,
     },
     avatar: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
         backgroundColor: theme.palette.secondary.main,
     },
     form: {
         width: '100%', // Fix IE 11 issue.
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(),
     },
     submit: {
-        marginTop: theme.spacing.unit * 3,
+        marginTop: theme.spacing(3),
     },
 }))
+
+const handleLogin = (e) => {
+    e.preventDefault()
+    const name = e.target.name.value
+    const email = e.target.email.value
+    const password = e.target.password.value
+    try {
+        auth.signInWithEmailAndPassword(email, password)
+        console.log(auth.currentUser)
+        const user = auth.currentUser
+
+        console.log(user)
+    } catch (exception) {
+        console.log(exception)
+    }
+}
 
 const Login = () => {
     const  classes = useStyles()
@@ -48,7 +66,7 @@ const Login = () => {
                 <Typography component="h1" variant="h5">
                     Kirjaudu sisään
                 </Typography>
-                <form className={classes.form}>
+                <form className={classes.form} onSubmit={handleLogin}>
                     <FormControl margin="normal" required fullWidth>
                         <InputLabel htmlFor="email">Sähköposti</InputLabel>
                         <Input id="email" name="email" autoComplete="off" autoFocus />
@@ -66,14 +84,13 @@ const Login = () => {
                         Kirjaudu
                     </Button>
                     <Button
-                        type="submit"
                         fullWidth
                         variant="outlined"
                         color="secondary"
                         className={classes.submit}
                         component={Link}
                         to='/register'>
-                        Rekisteröidy
+                        Rekisteröintiin->
                     </Button>
                 </form>
             </Paper>

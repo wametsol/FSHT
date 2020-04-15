@@ -4,37 +4,51 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom'
 
+import { auth } from '../../firebase'
+
 const useStyles = makeStyles((theme) => ({
     main: {
         width: 'auto',
-        display: 'block', // Fix IE 11 issue.
-        marginLeft: theme.spacing.unit * 3,
-        marginRight: theme.spacing.unit * 3,
-        [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
+        display: 'block',
+        marginLeft: theme.spacing(3),
+        marginRight: theme.spacing(3),
+        [theme.breakpoints.up(400 + theme.spacing(3 * 2))]: {
             width: 400,
             marginLeft: 'auto',
             marginRight: 'auto',
         },
     },
     paper: {
-        marginTop: theme.spacing.unit * 8,
+        marginTop: theme.spacing(8),
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 3}px ${theme.spacing.unit * 3}px`,
+        padding: `${theme.spacing(2)}px ${theme.spacing(3)}px ${theme.spacing(3)}px`,
     },
     avatar: {
-        margin: theme.spacing.unit,
+        margin: theme.spacing(),
         backgroundColor: theme.palette.secondary.main,
     },
     form: {
-        width: '100%', // Fix IE 11 issue.
-        marginTop: theme.spacing.unit,
+        width: '100%', 
+        marginTop: theme.spacing(),
     },
     submit: {
-        marginTop: theme.spacing.unit * 3,
+        marginTop: theme.spacing(3),
     },
 }))
+
+const handleSubmit = (e) => {
+    e.preventDefault()
+    const name = e.target.name.value
+    const email = e.target.email.value
+    const password = e.target.password.value
+    try {
+        auth.createUserWithEmailAndPassword(email, password)
+    } catch (exception) {
+        console.log(exception)
+    }
+}
 
 const Register = () => {
     const  classes = useStyles()
@@ -48,10 +62,10 @@ const Register = () => {
                 <Typography component="h1" variant="h5">
                     Luo käyttäjätili
                 </Typography>
-                <form className={classes.form}>
+                <form className={classes.form} onSubmit={handleSubmit}>
                     <FormControl margin="normal" required fullWidth>
-                        <InputLabel htmlFor="username">Nimi</InputLabel>
-                        <Input id="username" name="username" autoComplete="off" autoFocus />
+                        <InputLabel htmlFor="name">Nimi</InputLabel>
+                        <Input id="name" name="name" autoComplete="off" autoFocus />
                     </FormControl>
                     <FormControl margin="normal" required fullWidth>
                         <InputLabel htmlFor="email">Sähköposti</InputLabel>
@@ -72,7 +86,6 @@ const Register = () => {
                     </Button>
 
                     <Button
-                        type="submit"
                         fullWidth
                         variant="contained"
                         color="secondary"

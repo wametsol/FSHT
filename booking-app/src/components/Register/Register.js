@@ -2,7 +2,7 @@ import React from 'react'
 import { Typography, Paper, Avatar, Button, FormControl, Input, InputLabel } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import { makeStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 
 import { auth } from '../../firebase'
 
@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: theme.palette.secondary.main,
     },
     form: {
-        width: '100%', 
+        width: '100%',
         marginTop: theme.spacing(),
     },
     submit: {
@@ -38,20 +38,40 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
-const handleSubmit = (e) => {
-    e.preventDefault()
-    const name = e.target.name.value
-    const email = e.target.email.value
-    const password = e.target.password.value
-    try {
-        auth.createUserWithEmailAndPassword(email, password)
-    } catch (exception) {
-        console.log(exception)
-    }
-}
 
 const Register = () => {
-    const  classes = useStyles()
+    const classes = useStyles()
+    const history = useHistory()
+
+
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        const name = e.target.name.value
+        const email = e.target.email.value
+        const password = e.target.password.value
+        try {
+            auth.createUserWithEmailAndPassword(email, password).then(() => {
+                var user = auth.currentUser
+                user.updateProfile({
+                    displayName: name
+                }).then(() => {
+                    console.log('Added name')
+                    //window.localStorage.setItem('loggedBookerUser', JSON.stringify(user))
+                    history.push('/')
+                    return auth.currentUser
+                }).catch((error) => {
+                    console.log(error)
+                })
+            }).catch((error) => {
+                console.log(error)
+            })
+
+
+        } catch (exception) {
+            console.log(exception)
+        }
+    }
 
     return (
         <main className={classes.main}>
@@ -69,11 +89,11 @@ const Register = () => {
                     </FormControl>
                     <FormControl margin="normal" required fullWidth>
                         <InputLabel htmlFor="email">Sähköposti</InputLabel>
-                        <Input id="email" name="email" autoComplete="off"  />
+                        <Input id="email" name="email" autoComplete="off" />
                     </FormControl>
                     <FormControl margin="normal" required fullWidth>
                         <InputLabel htmlFor="password">Salasana</InputLabel>
-                        <Input name="password" type="password" id="password" autoComplete="off"  />
+                        <Input name="password" type="password" id="password" autoComplete="off" />
                     </FormControl>
 
                     <Button

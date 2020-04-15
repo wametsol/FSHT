@@ -1,8 +1,12 @@
-import React from 'react'
-import { Typography, Paper, Avatar, Button, FormControl, Input, InputLabel } from '@material-ui/core'
+import React, { useState } from 'react'
+import { Typography, Paper, Avatar, Button, FormControl, Input, InputLabel, CircularProgress } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import { makeStyles } from '@material-ui/core/styles'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
+import CheckIcon from '@material-ui/icons/Check';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { green } from '@material-ui/core/colors'
+
 
 import { auth } from '../../firebase'
 
@@ -36,26 +40,56 @@ const useStyles = makeStyles((theme) => ({
     submit: {
         marginTop: theme.spacing(3),
     },
+    wrapper: {
+        margin: theme.spacing(1),
+        position: 'relative',
+    },
+    success: {
+        color: green[500]
+    },
+    btnSuccess: {
+        backgroundColor: green[500]
+    },
 }))
 
-const handleLogin = (e) => {
-    e.preventDefault()
-    const name = e.target.name.value
-    const email = e.target.email.value
-    const password = e.target.password.value
-    try {
-        auth.signInWithEmailAndPassword(email, password)
-        console.log(auth.currentUser)
-        const user = auth.currentUser
 
-        console.log(user)
-    } catch (exception) {
-        console.log(exception)
+
+const Login = ({setSuccessMessage}) => {
+    const classes = useStyles()
+    const history = useHistory()
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const timer = React.useRef();
+
+    const handleLogin = (e) => {
+        e.preventDefault()
+
+        const email = e.target.email.value
+        const password = e.target.password.value
+        console.log(e)
+        try {
+            if (!loading) {
+                setSuccess(false)
+                setLoading(true)
+            }
+            return auth.signInWithEmailAndPassword(email, password).then(() => {
+                setSuccess(true)
+
+                timer.current = setTimeout(() => {
+                    setLoading(false)
+                    setSuccessMessage(`Kirjautuminen onnistui, tervetuloa.`)
+                    setTimeout(() => {
+                        setSuccessMessage(null)
+                      }, 5000);
+                    history.push('/')
+                }, 500)
+            }).catch(error => {
+                console.log(error)
+            })
+        } catch (exception) {
+            console.log(exception)
+        }
     }
-}
-
-const Login = () => {
-    const  classes = useStyles()
 
     return (
         <main className={classes.main}>
@@ -75,23 +109,31 @@ const Login = () => {
                         <InputLabel htmlFor="password">Salasana</InputLabel>
                         <Input name="password" type="password" id="password" autoComplete="off" />
                     </FormControl>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        className={classes.submit}>
-                        Kirjaudu
-                    </Button>
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        color="secondary"
-                        className={classes.submit}
-                        component={Link}
-                        to='/register'>
-                        Rekisteröintiin->
-                    </Button>
+                    {success ? <CheckIcon size={25} className={classes.success} /> :
+                        <div className={classes.wrapper}>
+                            {loading ? <CircularProgress size={25} className={classes.success} /> :
+                                <div>
+                                    <Button
+                                        type="submit"
+                                        fullWidth
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={loading}>
+                                        Kirjaudu
+                                    </Button>
+                                    <Button
+                                        fullWidth
+                                        variant="outlined"
+                                        color="secondary"
+                                        className={classes.submit}
+                                        component={Link}
+                                        to='/register'
+                                        disabled={loading}>
+                                        Rekisteröintiin->
+                                    </Button>)
+                                </div>}
+                        </div>}
+
                 </form>
             </Paper>
         </main>

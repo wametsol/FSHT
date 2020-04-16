@@ -4,7 +4,6 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import { makeStyles } from '@material-ui/core/styles'
 import { Link, useHistory } from 'react-router-dom'
 import CheckIcon from '@material-ui/icons/Check';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { green } from '@material-ui/core/colors'
 
 
@@ -54,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-const Login = ({setSuccessMessage}) => {
+const Login = ({setSuccessMessage, setErrorMessage}) => {
     const classes = useStyles()
     const history = useHistory()
     const [loading, setLoading] = useState(false);
@@ -83,7 +82,16 @@ const Login = ({setSuccessMessage}) => {
                     history.push('/')
                 }, 1000)
             }).catch(error => {
-                console.log(error)
+                var errorMsg = 'Tapahtui virhe, yritä uudelleen'
+                if(error.code === 'auth/user-not-found'){
+                    errorMsg = 'Virheellinen sähköposti tai salasana'
+                }
+                setLoading(false)
+                setErrorMessage(errorMsg)
+                setTimeout(() => {
+                    setErrorMessage(null)
+                  }, 5000);
+                console.log(error.code)
             })
         } catch (exception) {
             console.log(exception)
@@ -129,7 +137,7 @@ const Login = ({setSuccessMessage}) => {
                                         to='/register'
                                         disabled={loading}>
                                         Rekisteröintiin->
-                                    </Button>)
+                                    </Button>
                                 </div>}
                         </div>}
 

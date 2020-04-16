@@ -1,5 +1,5 @@
-import React, { useImperativeHandle, useState } from 'react'
-import { Alert, Autocomplete } from '@material-ui/lab'
+import React from 'react'
+import { Alert } from '@material-ui/lab'
 import { makeStyles } from '@material-ui/core/styles'
 import { Zoom } from '@material-ui/core'
 
@@ -26,7 +26,7 @@ const Notification = React.forwardRef((props, ref) => {
 
   /*
   ------
-  Tried to fix <Zoom> transition, which causes 'React strickmode warning'. Issue is with material ui. 
+  Tried to fix <Zoom> transition, which causes 'React strictmode warning'. Issue is with material ui. 
   
   Should be fixed in next Material-UI v5 in future.
   Maybe some other solution to go.
@@ -48,7 +48,7 @@ const Notification = React.forwardRef((props, ref) => {
   if (message === null) {
     return null
   }
-  if (type == 'error') {
+  if (type === 'error') {
     return (
       <div className={classes.centered}>
         <Zoom in={true}>
@@ -59,7 +59,7 @@ const Notification = React.forwardRef((props, ref) => {
       </div>
     )
   }
-  if (type == 'success') {
+  if (type === 'success') {
     return (
 
       <div className={classes.centered} >

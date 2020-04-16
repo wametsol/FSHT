@@ -12,7 +12,8 @@ import {Switch,Route} from 'react-router-dom'
 import {MuiThemeProvider,createMuiTheme} from '@material-ui/core/styles';
 import {CssBaseline, CircularProgress} from '@material-ui/core';
 import { auth } from '../../firebase'
-import Alert from '@material-ui/lab/Alert'
+import BookingHomePage from '../BookingHome/BookingHomePage';
+import NewBooker from '../NewBooker/NewBooker';
 
 const theme=createMuiTheme()
 
@@ -67,10 +68,16 @@ const App = () => {
       <div>
         <Switch>
           <Route exact path ='/login'>
-          <Login setSuccessMessage={setSuccessMessage}/>
+          <Login setErrorMessage={setErrorMessage} setSuccessMessage={setSuccessMessage}/>
           </Route>
           <Route exact path ='/register'>
             <Register/>
+          </Route>
+          <Route exact path='/booker'>
+            <BookingHomePage/>
+          </Route>
+          <Route exact path='/newbooker'>
+            <NewBooker/>
           </Route>
           <Route exact path ='/' >
             <HomePage/>

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
     AppBar,
     Toolbar,
-    Typography,
     Button,
     IconButton,
     makeStyles,
@@ -24,12 +23,38 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         flexGrow: 0,
+        '&:hover': {
+            fontWeight: 'bold',
+            backgroundColor: '#4557ff'
+        }
     },
     right: {
         marginLeft: 'auto'
     },
     list: {
         width: 250,
+    },
+    logoutButton: {
+        '&:hover': {
+            backgroundColor: '#ff0066',
+            fontWeight: 'bold'
+        }
+    },
+    navButton: {
+        '&:hover': {
+            backgroundColor: '#4557ff',
+            border: 'solid 4px #999999'
+        }
+    },
+    homeButton: {
+        flexGrow: 0,
+        fontSize: 25,
+        '&:hover': {
+            background: 'linear-gradient(#3f51b5 60%, #2e91bf 100%)',
+            fontWeight: 'bold',
+            //backgroundColor: '#4f64db',
+            borderRadius: 5
+        }
     }
 }))
 
@@ -60,12 +85,12 @@ const Navigation = () => {
         <AppBar position='static'>
             <Toolbar>
 
-                <Button color="inherit" component={Link} to='/'><Typography edge='start' variant="h6" className={classes.title}>Varaaja</Typography></Button>
+                <Button className={classes.homeButton} color="inherit" component={Link} to='/'>Varaaja</Button>
 
                 <div className={classes.right}>
                     {!user
-                        ? <em><Button variant='outlined' color="inherit" component={Link} to='/register'>Rekisteröidy</Button>
-                            <Button variant='outlined' color="inherit" component={Link} to='/login'>Kirjaudu</Button></em>
+                        ? <em><Button className={classes.navButton} variant='outlined' color="inherit" component={Link} to='/register'>Rekisteröidy</Button>
+                            <Button className={classes.navButton} variant='outlined' color="inherit" component={Link} to='/login'>Kirjaudu</Button></em>
                         : (<em>Hei {user.displayName}
 
                             <IconButton color="inherit" >
@@ -74,7 +99,7 @@ const Navigation = () => {
                             <IconButton onClick={() => setDrawerOpen(true)} className={classes.menuButton} color='inherit' aria-label='menu'>
                                 <MenuIcon />
                             </IconButton>
-                            <Button variant='outlined' color="inherit" onClick={logout} >Logout</Button>
+                            <Button className={classes.logoutButton} variant='outlined' color="inherit" onClick={logout} >Logout</Button>
                             <Drawer anchor='right' open={drawerOpen} onClose={() => setDrawerOpen(false)}>
                                 <List className={classes.list}>
                                     <ListItem>

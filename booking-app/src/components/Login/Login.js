@@ -66,7 +66,6 @@ const Login = ({setSuccessMessage}) => {
 
         const email = e.target.email.value
         const password = e.target.password.value
-        console.log(e)
         try {
             if (!loading) {
                 setSuccess(false)
@@ -82,7 +81,7 @@ const Login = ({setSuccessMessage}) => {
                         setSuccessMessage(null)
                       }, 5000);
                     history.push('/')
-                }, 500)
+                }, 1000)
             }).catch(error => {
                 console.log(error)
             })

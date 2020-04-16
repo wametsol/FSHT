@@ -2,17 +2,8 @@ import React, { useEffect, useState} from 'react';
 import { auth } from '../../firebase'
 import { AppBar, Tabs, Tab, Typography, Box, Paper } from '@material-ui/core';
 const HomePage = () => {
-    const [user, setUser] = useState(null)
     const [value, setValue] = useState(0)
-
-    useEffect(() => {
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                setUser(user)
-            }
-        })
-    }, )
-
+    const user = auth.currentUser
     const handleChange = (event, newValue) => {
         setValue(newValue)
     }

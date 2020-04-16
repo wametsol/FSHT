@@ -1,4 +1,4 @@
-Projekti alustettu [Create React App](https://github.com/facebook/create-react-app).
+Projekti alustettu [Create React App](https://github.com/facebook/create-react-app), tyylittely [Material Ui](https://material-ui.com/) avulla ja backendinä toimii [Firebase](https://firebase.google.com/).
 
 
 

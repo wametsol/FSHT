@@ -1,72 +1,16 @@
 import React, {  useState } from 'react';
 import { auth } from '../../firebase'
-import { Stepper, Step, StepLabel, StepButton, Typography, Button, TextField, InputAdornment, CircularProgress } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles'
-import { Link, useHistory } from 'react-router-dom'
-import CheckIcon from '@material-ui/icons/Check';
-import { green } from '@material-ui/core/colors'
+import { Stepper, Step, StepButton, Typography, Button, TextField, InputAdornment, CircularProgress } from '@material-ui/core';
+import useStyles from './useStyles'
+import {useHistory } from 'react-router-dom'
+import CheckIcon from '@material-ui/icons/Check'
+import BlockIcon from '@material-ui/icons/Block'
+
 import clsx from 'clsx'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
 import PhoneIcon from '@material-ui/icons/Phone';
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        display: 'flex',
-        flexWrap: 'wrap'
-
-    },
-    stepBar: {
-        width: '100%',
-    },
-    innerForm: {
-        marginLeft: theme.spacing(10),
-        marginRight: theme.spacing(10),
-        marginTop: theme.spacing(5),
-        width: '100%',
-    },
-    textField: {
-        marginLeft: theme.spacing(1),
-        marginRight: theme.spacing(1),
-        width: '25ch',
-    },
-    checkBtn: {
-        margin: 8,
-        backgroundColor: '#b0d1b8',
-        '&:hover': {
-            backgroundColor: '#90ad97',
-        }
-    },
-    success: {
-        color: green[500],
-    },
-
-    buttonSuccess: {
-        margin: 8,
-        backgroundColor: green[500],
-        '&:hover': {
-            backgroundColor: green[600],
-        }
-    },
-    addressSuccess: {
-        color: green[500],
-        backgroundColor: green[100]
-    },
-    addresInput: {
-
-    },
-    basicText: {
-        margin: 8,
-        width: '35%'
-    },
-    subTitle: {
-        textSize: 20
-    }
-}))
-
-
-
 
 
 
@@ -74,12 +18,22 @@ const useStyles = makeStyles((theme) => ({
 const NewBooker = () => {
     const user = auth.currentUser
     const classes = useStyles()
+    const history = useHistory()
 
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
 
     const [activeStep, setActiveStep] = React.useState(0)
-    const [completed, setCompleted] = React.useState({})
+    const [completed, setCompleted] = React.useState([false, false, false])
+
+    const [systName, setSystName] = React.useState('')
+    const [webAddress, setWebAddress] = React.useState('')
+
+    const [publicName, setPublicName] = React.useState('')
+    const [publicCompany, setPublicCompany] = React.useState('')
+    const [publicEmail, setPublicEmail] = React.useState('')
+    const [publicPhone, setPublicPhone] = React.useState('')
+    
 
 
     const buttonClassname = clsx({
@@ -102,7 +56,9 @@ const NewBooker = () => {
             case 1:
                 return contactInformation()
             case 2:
-                return 'This is the bit I really care about!';
+                return constructInformation();
+            case 3:
+                return checkInformation()
             default:
                 return 'Unknown step';
         }
@@ -115,7 +71,8 @@ const NewBooker = () => {
     }
 
     const completedSteps = () => {
-        return Object.keys(completed).length;
+        const complSteps = Object.keys(completed).filter(object => completed[object] === true)
+        return complSteps.length
     }
 
     const isLastStep = () => {
@@ -134,6 +91,10 @@ const NewBooker = () => {
                 steps.findIndex((step, i) => !(i in completed))
                 : activeStep + 1
         setActiveStep(newActiveStep)
+
+        if(isLastStep() && allStepsCompleted()){
+            creationComplete()
+        }
     }
 
     const handleBack = () => {
@@ -184,6 +145,55 @@ const NewBooker = () => {
         setLoading(true)
 
     }
+    const isReady = () => {
+        console.log(completed)
+        Object.keys(completed).map(key => {
+            if(!completed[key]){
+                return false
+            }
+        })
+        if(completedSteps() !== totalSteps() - 1){
+            return false
+        }
+
+        return true
+    }
+
+    const checkInformation = () => (
+        <div>
+            {isReady() ? (
+            <div><Typography variant='h4'>Varmista antamasi tiedot</Typography>
+            <Typography>Sivustosi nimi: {systName}</Typography>
+            <Typography>Sivustosi osoite: www.ajanvaraus.web.app/{webAddress}</Typography>
+            <Typography>______________</Typography>
+            <Typography>Yhteystiedot sivullesi:</Typography>
+            <Typography>Yritys: {publicCompany}</Typography>
+            <Typography>Nimi: {publicName}</Typography>
+            <Typography>Sähköposti: {publicEmail}</Typography>
+            <Typography>Puhelin: {publicPhone}</Typography>
+            
+            </div>)
+            : (
+                <div>
+                    <Typography>Et ole varmistanut kaikkia kohtia vielä.</Typography>
+            
+                {Object.keys(completed).map(key => {
+                    //if(!completed[key]){
+                        return (<Typography key={key}>{Number(key)+1} <em className={classes.inlineIcons}>{completed[key] ? <CheckIcon size={25} className={classes.success} /> : <BlockIcon size={25} className={classes.error}/>}</em></Typography>)
+                    //}
+            })}
+        
+                </div>
+            )}
+            
+        </div>
+    )
+
+    const constructInformation = () => (
+        <div>
+
+        </div>
+    )
 
     const basicInformation = () => (
         <div  >
@@ -196,6 +206,7 @@ const NewBooker = () => {
                 fullWidth
                 margin="dense"
                 variant='outlined'
+                onChange={({target}) => setSystName(target.value)}
             />
             <TextField
                 id="address"
@@ -205,7 +216,10 @@ const NewBooker = () => {
                 helperText="Sivusto josta ajanvarausjärjestelmäsi löytyy luomisen jälkeen"
                 margin="dense"
                 className={classes.addresInput}
-                onChange={() => setSuccess(false)}
+                onChange={({target}) => {
+                    setSuccess(false)
+                    setWebAddress(target.value)
+                }}
                 variant='outlined'
                 InputProps={{
                     className: addressClassname,
@@ -227,13 +241,11 @@ const NewBooker = () => {
 
     const contactInformation = () => (
         <div>
-
-            <Typography>____________________________________________________________________________________________________________________</Typography>
             <Typography variant='h4'>Yhteystiedot asiakkaille </Typography>
             <Typography>Voit halutessasi määritellä profiilista poikkeavat yhteystiedot, jotka näytetään asiakkaille sivustollasi.</Typography>
             <Typography>Järjestelmän ja sinun välinen kommunikaatio tapahtuu kuitenkin profiiliin talletettujen tietojen mukaan.</Typography>
-            <TextField className={classes.basicText} id="contactName" label="Nimi" variant="outlined" />
-            <TextField className={classes.basicText} id="contactCompany" label="Yritys" variant="outlined" />
+            <TextField className={classes.basicText} id="contactName" label="Nimi" variant="outlined" onChange={({target}) => setPublicName(target.value)}/>
+            <TextField className={classes.basicText} id="contactCompany" label="Yritys" variant="outlined" onChange={({target}) => setPublicCompany(target.value)} />
 
             <TextField InputProps={{
                 startAdornment: (
@@ -241,17 +253,27 @@ const NewBooker = () => {
                         <AlternateEmailIcon />
                     </InputAdornment>
                 ),
-            }} className={classes.basicText} id="bookerEmail" label="Sähköposti" variant="outlined" />
+            }} className={classes.basicText} id="bookerEmail" label="Sähköposti" variant="outlined" onChange={({target}) => setPublicEmail(target.value)} />
             <TextField InputProps={{
                 startAdornment: (
                     <InputAdornment position="start">
                         <PhoneIcon />
                     </InputAdornment>
                 ),
-            }} className={classes.basicText} id="bookerPhone" label="Puhelinnumero" variant="outlined" />
+            }} className={classes.basicText} id="bookerPhone" label="Puhelinnumero" variant="outlined"  onChange={({target}) => setPublicPhone(target.value)}/>
 
         </div>
     )
+
+    const creationComplete = () => {
+        setLoading(true)
+        setTimeout(() => {
+            setLoading(false)
+            setTimeout(() => {
+                history.push('/booker')
+            }, 2000)
+            }, 3000)   
+    }
 
     return (
         <div>
@@ -279,9 +301,14 @@ const NewBooker = () => {
                         <div>
                             {allStepsCompleted() ? (
                                 <div>
+                            {loading ? (<div><Typography>Kaikki näyttää hyvältä, aloitan tiedostojen lähettämisen palvelimelle, odota hetki!</Typography><CircularProgress size={25} className={classes.success} /></div>) : (
+                            <div><Typography>Tiedostojen lähettäminen onnistui, hienoa! Ohjaan sinut järjestelmän sivulle.</Typography><CheckIcon size={25} className={classes.success} /> </div>)}
                                     <Typography className={classes.instructions}>
+                                        
                                         Kaikki valmiina!
+                                        
             </Typography>
+            
                                     <Button onClick={handleReset}>Nollaa kaikki</Button>
                                 </div>
                             ) : (
@@ -308,7 +335,7 @@ const NewBooker = () => {
                                     </Typography>
                                 ) : (<Typography>Kun olet valmis kohdan {activeStep + 1}: ''{getSteps()[activeStep]}'' kanssa, paina
                                     <Button variant="contained" color="primary" style={{ margin: 8 }} onClick={handleComplete}>
-                                        {completedSteps() === totalSteps() - 1 ? 'Lopetus' : 'Valmis'}
+                                        {isReady() ? 'Lopetus' : 'Valmis'}
                                     </Button></Typography>
                                     ))}
                         </div>

@@ -1,7 +1,7 @@
 import React, { useState} from 'react';
 import { auth } from '../../firebase'
 import { Tabs, Tab, Typography,  Paper } from '@material-ui/core';
-const BookingHomePage = () => {
+const BookingAdminPage = () => {
     const [value, setValue] = useState(0)
     const user = auth.currentUser
     const handleChange = (event, newValue) => {
@@ -35,4 +35,4 @@ const BookingHomePage = () => {
 }
 
 
-export default BookingHomePage
+export default BookingAdminPage

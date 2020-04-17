@@ -20,6 +20,9 @@ const config = {
   }
 firebase.initializeApp(config);
 
+
+
+
 export default firebase;
 export const analytics = firebase.analytics();
 export const auth = firebase.auth();

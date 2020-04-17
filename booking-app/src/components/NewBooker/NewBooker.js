@@ -1,5 +1,5 @@
 import React, {  useState } from 'react';
-import { auth } from '../../firebase'
+import { auth, firestore } from '../../firebase'
 import { Stepper, Step, StepButton, Typography, Button, TextField, InputAdornment, CircularProgress } from '@material-ui/core';
 import useStyles from './useStyles'
 import {useHistory } from 'react-router-dom'
@@ -11,6 +11,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
 import PhoneIcon from '@material-ui/icons/Phone';
+
 
 
 
@@ -238,7 +239,6 @@ const NewBooker = () => {
 
         </div>
     )
-
     const contactInformation = () => (
         <div>
             <Typography variant='h4'>Yhteystiedot asiakkaille </Typography>
@@ -267,12 +267,37 @@ const NewBooker = () => {
 
     const creationComplete = () => {
         setLoading(true)
-        setTimeout(() => {
+        
+        try {
+            const bookerObject = {
+                bookerCreator: user.email,
+                bookerName: systName,
+                bookerAddress: webAddress,
+                publicInformation:{
+                    company: publicCompany,
+                    name: publicName,
+                    email: publicEmail,
+                    phone: publicPhone
+                }
+            }
+            let setDoc = firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
+                console.log(response)
+                console.log(setDoc)
+                setTimeout(() => {
+                    setLoading(false)
+                    setTimeout(() => {
+                        history.push('/booker')
+                    }, 2000)
+                    }, 3000)   
+            })
+        } catch (error) {
             setLoading(false)
-            setTimeout(() => {
-                history.push('/booker')
-            }, 2000)
-            }, 3000)   
+            console.log(error)
+        }
+        
+        
+        
+        
     }
 
     return (

@@ -6,14 +6,15 @@ import Register from '../Register/Register'
 import HomePage from '../Home/HomePage';
 import Navigation from '../Navigation/Navigation'
 import Notification from '../Notification/Notification'
+import BookingAdminPage from '../BookingAdminPage/BookinAdminPage';
+import NewBooker from '../NewBooker/NewBooker';
+import BookingPage from '../BookingPage/BookingPage'
 
 import {Switch,Route} from 'react-router-dom'
 
 import {MuiThemeProvider,createMuiTheme} from '@material-ui/core/styles';
 import {CssBaseline, CircularProgress} from '@material-ui/core';
 import { auth } from '../../firebase'
-import BookingHomePage from '../BookingHome/BookingHomePage';
-import NewBooker from '../NewBooker/NewBooker';
 
 const theme=createMuiTheme()
 
@@ -74,7 +75,7 @@ const App = () => {
             <Register/>
           </Route>
           <Route exact path='/booker'>
-            <BookingHomePage/>
+            <BookingAdminPage/>
           </Route>
           <Route exact path='/newbooker'>
             <NewBooker/>
@@ -82,6 +83,10 @@ const App = () => {
           <Route exact path ='/' >
             <HomePage/>
           </Route>
+          <Route exact path ='/*' >
+            <BookingPage/>
+          </Route>
+          
         </Switch>
         </div>
         </MuiThemeProvider>

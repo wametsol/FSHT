@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth, firestore } from '../../firebase'
+import firebase, { auth, firestore } from '../../firebase'
 import { Tabs, Tab, Typography, Paper, CircularProgress, TextField, Button } from '@material-ui/core';
 import { Link, Switch, Route, useRouteMatch } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
@@ -31,15 +31,19 @@ const BookingAdminPage = () => {
     const [bookerObject, setBookerObject] = useState(null)
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [serviceName, setServiceName] = useState('')
+    const [serviceDescription, setServiceDescription] = useState('')
+    const [servicePrice, setServicePrice] = useState('')
+    const [serviceTimeLength, setServiceTimeLength] = useState('')
     const handleChange = (event, newValue) => {
         setValue(newValue)
     }
     const classes = useStyles()
     const baseAddress = pagematch.params.id
-    useEffect(() => {
-        try {
-            setLoading(true)
-            firestore.collection(`booker${pagematch.params.id}`).get()
+
+    const fetchData = () => {
+        
+        firestore.collection(`booker${pagematch.params.id}`).get()
                 .then((response) => {
                     if (response.empty) {
                         setError(true)
@@ -55,6 +59,11 @@ const BookingAdminPage = () => {
                     setLoading(false)
                     setError(true)
                 })
+            }
+    useEffect(() => {
+        try {
+            setLoading(true)
+            fetchData()
         } catch (error) {
             console.log(error)
             setLoading(false)
@@ -62,6 +71,37 @@ const BookingAdminPage = () => {
         }
     }, [])
 
+
+    const addNewService = (e) => {
+        e.preventDefault()
+        try {
+            setLoading(true)
+            const serviceObject = {
+                service: serviceName,
+                description: serviceDescription,
+                price: servicePrice,
+                timelength: serviceTimeLength
+            }
+            console.log(serviceName)
+            console.log(serviceDescription)
+            console.log(servicePrice)
+            console.log(serviceTimeLength)
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({services: firebase.firestore.FieldValue.arrayUnion(serviceObject)})
+            .then((res) => {
+                    console.log(res)
+                    setServiceName('')
+                    setServiceDescription('')
+                    setServicePrice('')
+                    setServiceTimeLength('')
+                    fetchData()
+                })
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            setError(true)
+        }
+
+    }
 
     const getTabContent = (tab) => {
         switch (tab) {
@@ -96,6 +136,9 @@ const BookingAdminPage = () => {
                                 helperText="Tämä tulee palvelusi nimeksi. Esimerkiksi 'Hieronta'"
                                 margin="dense"
                                 variant='outlined'
+                                disabled={loading}
+                                value={serviceName}
+                                onChange={({ target }) => setServiceName(target.value)}
                             />
                             <TextField
                                 id="description"
@@ -104,6 +147,9 @@ const BookingAdminPage = () => {
                                 helperText="Tämä tulee kuvaukseksi palvelulle. Esimerkiksi 'Normaali tunnin hieronta'"
                                 margin="dense"
                                 variant='outlined'
+                                disabled={loading}
+                                value={serviceDescription}
+                                onChange={({ target }) => setServiceDescription(target.value)}
                             /><TextField
                                 id="price"
                                 label="Palvelusi hinta"
@@ -111,6 +157,9 @@ const BookingAdminPage = () => {
                                 helperText="Määrittele palvelullesi hinta"
                                 margin="dense"
                                 variant='outlined'
+                                disabled={loading}
+                                value={servicePrice}
+                                onChange={({ target }) => setServicePrice(target.value)}
                             /><TextField
                                 id="timelength"
                                 label="Varauksen kesto"
@@ -118,8 +167,11 @@ const BookingAdminPage = () => {
                                 helperText="Esimerkiksi 00.55.00"
                                 margin="dense"
                                 variant='outlined'
+                                disabled={loading}
+                                value={serviceTimeLength}
+                                onChange={({ target }) => setServiceTimeLength(target.value)}
                             />
-                            <Button><AddCircleIcon className={classes.addButton} /></Button>
+                            {loading ? <CircularProgress className={classes.addButton} size={25} /> : <Button onClick={addNewService}><AddCircleIcon className={classes.addButton} /></Button>}
 
                         </form>
                         {bookerObject.services.map(service => (

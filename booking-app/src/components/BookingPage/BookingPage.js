@@ -48,6 +48,15 @@ const BookingPage = () => {
                 <Typography>{bookerObject.publicInformation.email}</Typography>
                 <Typography>{bookerObject.publicInformation.phone}</Typography>
 
+                {bookerObject.services.map(object => (
+                    <div key={object.service}>
+                    <Typography>{object.service}</Typography>
+                    <Typography>{object.price}</Typography>
+                    <Typography>{object.description}</Typography>
+                    <Typography>{object.timelength}</Typography>
+                    </div>
+                ))}
+
             </div>
         )
     }

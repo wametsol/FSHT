@@ -1,5 +1,5 @@
 import React, {  useState } from 'react';
-import { auth, firestore } from '../../firebase'
+import firebase, { auth, firestore } from '../../firebase'
 import { Stepper, Step, StepButton, Typography, Button, TextField, InputAdornment, CircularProgress } from '@material-ui/core';
 import useStyles from './useStyles'
 import {useHistory } from 'react-router-dom'
@@ -34,6 +34,10 @@ const NewBooker = () => {
     const [publicCompany, setPublicCompany] = React.useState('')
     const [publicEmail, setPublicEmail] = React.useState('')
     const [publicPhone, setPublicPhone] = React.useState('')
+
+
+    // serviceObject : {serviceName, serviceDesc}
+    const [bookerServices, setBookerServices] = React.useState([])
     
 
 
@@ -278,11 +282,18 @@ const NewBooker = () => {
                     name: publicName,
                     email: publicEmail,
                     phone: publicPhone
-                }
+                },
+                services: bookerServices,
+                admins: [user.email]
             }
             let setDoc = firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
-                console.log(response)
-                console.log(setDoc)
+
+                
+
+                firestore.collection('userCollection').doc(user.email).update({bookers: firebase.firestore.FieldValue.arrayUnion({address: webAddress, name: systName})})
+                .then((res) => {
+                    console.log(res)
+                })
                 setTimeout(() => {
                     setLoading(false)
                     setTimeout(() => {
@@ -299,7 +310,6 @@ const NewBooker = () => {
         
         
     }
-
     return (
         <div>
             {!user ?

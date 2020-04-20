@@ -65,22 +65,27 @@ const App = () => {
       <MuiThemeProvider theme={theme}>
       <CssBaseline/>
       {notification()}
-      <Navigation/>
+      
       <div>
         <Switch>
           <Route exact path ='/login'>
+          <Navigation/>
           <Login setErrorMessage={setErrorMessage} setSuccessMessage={setSuccessMessage}/>
           </Route>
           <Route exact path ='/register'>
+          <Navigation/>
             <Register/>
           </Route>
-          <Route exact path='/booker'>
+          <Route exact path='/*/admin'>
+          <Navigation/>
             <BookingAdminPage/>
           </Route>
           <Route exact path='/newbooker'>
+          <Navigation/>
             <NewBooker/>
           </Route>
           <Route exact path ='/' >
+          <Navigation/>
             <HomePage/>
           </Route>
           <Route exact path ='/*' >

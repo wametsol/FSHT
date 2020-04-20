@@ -1,13 +1,12 @@
-import React from 'react';
-import { auth } from '../../firebase'
+import React, { useEffect, useState } from 'react';
+import { auth, firestore } from '../../firebase'
 import { Typography, Button} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
 import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
     newBooker:{
-        marginTop: 20,
-        marginRight: '75%',
+        margin: 20,
         backgroundColor: '#00c7d1',
         color: 'grey',
 
@@ -16,6 +15,16 @@ const useStyles = makeStyles((theme) => ({
             fontWeight: 'bold'
         }
         
+    },
+    existingBookers:{
+        margin: 20,
+        display: 'inline',
+        backgroundColor: '#b8d4bf',
+        color: 'grey',
+
+        '&:hover': {
+            background: 'linear-gradient(#b8d4bf 10%, #44d468 70%)',
+        }
     }
 }))
 
@@ -23,6 +32,40 @@ const useStyles = makeStyles((theme) => ({
 const HomePage = () => {
     const user = auth.currentUser
     const classes = useStyles()
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+    const [bookers, setBookers] = useState([])
+
+    useEffect(() => {
+        try {
+            setLoading(true)
+            firestore.collection('userCollection').doc(user.email).get()
+                .then((response) => {
+                    if (response.empty) {
+                        setError(true)
+                        setLoading(false)
+                    }
+                    console.log(response.data())
+                    
+                    response.data().bookers.forEach(booker => {
+                        console.log(booker)
+                        setBookers(bookers.concat(booker))
+                        setLoading(false)
+                    })
+                    
+                })
+                .catch(error => {
+                    console.log(error)
+                    setLoading(false)
+                    setError(true)
+                })
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            setError(true)
+        }
+    }, [])
 
     return (
         <div>
@@ -37,7 +80,17 @@ const HomePage = () => {
                         to='/newbooker'>
                         Luo uusi järjestelmä
                     </Button>
-                    <Typography>Hei {user.displayName}</Typography>
+                    <Typography>Hei {user.displayName}, järjestelmäsi: </Typography>
+                    {bookers.map(booker => (
+                        <div key={booker.name}>
+                        <Typography>{booker.name}: </Typography>
+                        <Button className={classes.existingBookers} variant="outlined" component={Link} to={`/${booker.address}`}>Sivustolle</Button>
+                        <Button className={classes.existingBookers} variant="outlined" component={Link} to={`/${booker.address}/admin`}>Admin paneeliin</Button>
+                        <Typography>________________________________________________</Typography>
+                        </div>
+                    ))}
+                    
+                    
                     
 
                 </div>)

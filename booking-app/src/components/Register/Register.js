@@ -4,7 +4,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import { makeStyles } from '@material-ui/core/styles';
 import { Link, useHistory } from 'react-router-dom'
 
-import { auth } from '../../firebase'
+import { auth, firestore } from '../../firebase'
 
 const useStyles = makeStyles((theme) => ({
     main: {
@@ -51,7 +51,14 @@ const Register = () => {
         const email = e.target.email.value
         const password = e.target.password.value
         try {
-            auth.createUserWithEmailAndPassword(email, password).then(() => {
+            auth.createUserWithEmailAndPassword(email, password).then((registeredUser) => {
+                firestore.collection('userCollection').doc(email)
+                .set({
+                    uid: registeredUser.user.uid,
+                    name: name,
+                    email: email,
+                    bookers: []
+                })
                 var user = auth.currentUser
                 user.updateProfile({
                     displayName: name

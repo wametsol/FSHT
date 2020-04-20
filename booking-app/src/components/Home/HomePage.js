@@ -48,11 +48,8 @@ const HomePage = () => {
                     }
                     console.log(response.data())
                     
-                    response.data().bookers.forEach(booker => {
-                        console.log(booker)
-                        setBookers(bookers.concat(booker))
-                        setLoading(false)
-                    })
+                    setBookers(response.data().bookers)
+                    setLoading(false)
                     
                 })
                 .catch(error => {

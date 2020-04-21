@@ -38,6 +38,19 @@ const App = () => {
       setfbInitialized(result)
     })
   })
+
+  const successMessageSetter = (message) => {
+    setSuccessMessage(message)
+    setTimeout(() => {
+      setSuccessMessage(null)
+    }, 5000);
+  }
+  const errorMessageSetter = (message) => {
+    setErrorMessage(message)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 5000);
+  }
   /*
   const notificationRef = React.createRef()
   ------
@@ -70,7 +83,7 @@ const App = () => {
         <Switch>
           <Route exact path ='/login'>
           <Navigation/>
-          <Login setErrorMessage={setErrorMessage} setSuccessMessage={setSuccessMessage}/>
+          <Login setErrorMessage={errorMessageSetter} setSuccessMessage={successMessageSetter}/>
           </Route>
           <Route exact path ='/register'>
           <Navigation/>
@@ -78,7 +91,7 @@ const App = () => {
           </Route>
           <Route exact path='/*/admin'>
           <Navigation/>
-            <BookingAdminPage/>
+            <BookingAdminPage setErrorMessage={errorMessageSetter} setSuccessMessage={successMessageSetter} />
           </Route>
           <Route exact path='/newbooker'>
           <Navigation/>

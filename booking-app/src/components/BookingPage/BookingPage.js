@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react'
+import 'date-fns'
+import { format } from 'date-fns'
 import { auth, firestore } from '../../firebase'
-import { FormHelperText, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent } from '@material-ui/core'
+import { Grid, FormHelperText, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { useRouteMatch } from 'react-router-dom'
 import IconButton from '@material-ui/core/IconButton'
 import MenuIcon from '@material-ui/icons/Menu'
 import CallIcon from '@material-ui/icons/Call'
-import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
+import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
+import DateFnsUtils from '@date-io/date-fns'
+import { fi } from 'date-fns/locale'
+import {
+    MuiPickersUtilsProvider,
+    KeyboardTimePicker,
+    KeyboardDatePicker,
+  } from '@material-ui/pickers';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -61,6 +70,7 @@ const BookingPage = () => {
     const [error, setError] = useState(false);
     const [bookerObject, setBookerObject] = useState(null)
     const [chosenService, setChosenService] = useState('')
+    const [selectedDate, setSelectedDate] = React.useState(new Date())
     const classes = useStyles()
 
     useEffect(() => {
@@ -91,6 +101,9 @@ const BookingPage = () => {
         }
     }, [])
 
+    const handleDateChange = (date) => {
+        setSelectedDate(date)
+      }
 
     const handleSelectChange = (e) => {
         setChosenService(e.target.value)
@@ -123,8 +136,9 @@ const BookingPage = () => {
                         </CardContent>
                     </Card>
                     <Paper>
-                        <div >
-                            <Typography className={classes.selector}>Aloita valitsemalla palvelu </Typography>
+                        <Grid container spacing={3}>
+                            <Grid item xs={6}>
+                        <div className={classes.selector} >
                             <FormControl className={classes.formControl}>
                                 <InputLabel id="">
                                     Palvelu
@@ -142,8 +156,29 @@ const BookingPage = () => {
 
                                 </Select>
                             </FormControl>
+                            {!chosenService.service ? <em/> : <div>
+                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                <KeyboardDatePicker
+          disableToolbar
+          variant="inline"
+          format="MM/dd/yyyy"
+          margin="normal"
+          id="date-picker-inline"
+          label="Päivämäärä"
+          value={selectedDate}
+          onChange={handleDateChange}
+          KeyboardButtonProps={{
+            'aria-label': 'change date',
+          }}
+        />
+        <div>{format(selectedDate, "EEEE" , { locale: fi})}</div>
+        </MuiPickersUtilsProvider> 
+                            </div>}
+                            
+                                        
                         </div>
-
+                        </Grid>
+                        <Grid item xs={6}>
                         {!chosenService.service ? <em/> : <div>
                             <div key={chosenService.service}>
                                 <Typography>Valittuna</Typography>
@@ -155,7 +190,21 @@ const BookingPage = () => {
                             </Paper>
                             </div>
                             </div>}
+                            </Grid>
+                            </Grid>
+
+
+                        {!chosenService.service ? <em/> : <div>
+                            <br/>
+                            <Divider />
+                            <div>Valitse sopiva aika</div>
+                            
+                            
+                            
+                            </div>}
+
                     </Paper>
+
                 </div>
                 <div className={classes.footer}>
                     <Typography >Yhteystiedot </Typography>

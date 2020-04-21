@@ -76,9 +76,6 @@ const Login = ({setSuccessMessage, setErrorMessage}) => {
                 timer.current = setTimeout(() => {
                     setLoading(false)
                     setSuccessMessage(`Kirjautuminen onnistui, tervetuloa.`)
-                    setTimeout(() => {
-                        setSuccessMessage(null)
-                      }, 5000);
                     history.push('/')
                 }, 1000)
             }).catch(error => {
@@ -88,9 +85,6 @@ const Login = ({setSuccessMessage, setErrorMessage}) => {
                 }
                 setLoading(false)
                 setErrorMessage(errorMsg)
-                setTimeout(() => {
-                    setErrorMessage(null)
-                  }, 5000);
                 console.log(error.code)
             })
         } catch (exception) {

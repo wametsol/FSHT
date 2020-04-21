@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-const BookingAdminPage = () => {
+const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
     const pagematch = useRouteMatch('/:id')
     const [value, setValue] = useState(0)
     const user = auth.currentUser
@@ -116,7 +116,7 @@ const BookingAdminPage = () => {
         } catch (error) {
             console.log(error)
             setLoading(false)
-            setError(true)
+            setErrorMessage('Tapahtui odottamaton virhe')
         }
     }, [])
 
@@ -124,6 +124,9 @@ const BookingAdminPage = () => {
     const addNewService = (e) => {
         e.preventDefault()
         try {
+            if(serviceName.length === 0 || servicePrice.length === 0 || serviceDescription.length === 0 || serviceTimeLength.length === 0){
+                setErrorMessage('Antamassasi syötteessä oli vikaa, tarkista antamasi tiedot')
+            } else {
             setLoading(true)
             const serviceObject = {
                 service: serviceName,
@@ -131,10 +134,6 @@ const BookingAdminPage = () => {
                 price: servicePrice,
                 timelength: serviceTimeLength
             }
-            console.log(serviceName)
-            console.log(serviceDescription)
-            console.log(servicePrice)
-            console.log(serviceTimeLength)
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayUnion(serviceObject) })
                 .then((res) => {
                     console.log(res)
@@ -144,11 +143,12 @@ const BookingAdminPage = () => {
                     setServiceTimeLength('')
                     fetchData()
                     setLoading(false)
-                })
+                    setSuccessMessage(`Palvelun '${serviceObject.service}' lisääminen onnistui`)
+                })}
         } catch (error) {
             console.log(error)
             setLoading(false)
-            setError(true)
+            setErrorMessage('Tapahtui odottamaton virhe')
         }
 
     }
@@ -162,7 +162,7 @@ const BookingAdminPage = () => {
                 .then(response => {
                     if (response.empty || bookerObject.admins.filter(a => a.email === newAdmin).length > 0) {
                         setLoading(false)
-                        setError(true)
+                        setErrorMessage('Antamallasi osoitteella ei löytynyt käyttäjää')
                     } else {
 
 
@@ -176,6 +176,7 @@ const BookingAdminPage = () => {
                                 setNewAdmin('')
                                 fetchData()
                                 setLoading(false)
+                                setSuccessMessage(`Käyttäjä ${adminObject.name} lisätty adminksi`)
                             })
                     }
                 })
@@ -311,7 +312,7 @@ const BookingAdminPage = () => {
                                 onChange={({ target }) => setServiceTimeLength(target.value)}
                             />
                             {loading ? <CircularProgress className={classes.addButton} size={25} /> : <Button onClick={addNewService}><AddCircleIcon className={classes.addButton} /></Button>}
-
+                            {error ? <div className={classes.errorMessage}>Tietojen antamisessa tapahtui virhe, tarkasta kentät</div> : <em />}
                         </form>
                         {bookerObject.services.map(service => (
                             <div className={classes.root} key={service.service}>

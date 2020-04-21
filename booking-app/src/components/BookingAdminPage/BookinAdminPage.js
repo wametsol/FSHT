@@ -159,29 +159,29 @@ const BookingAdminPage = () => {
             setError(false)
             setLoading(true)
             firestore.collection('userCollection').doc(newAdmin).get()
-            .then(response => {
-                if(response.empty || bookerObject.admins.filter(a => a.email === newAdmin).length > 0){
-                    setLoading(false)
-                    setError(true)
-                } else {
+                .then(response => {
+                    if (response.empty || bookerObject.admins.filter(a => a.email === newAdmin).length > 0) {
+                        setLoading(false)
+                        setError(true)
+                    } else {
 
-                
-                const adminObject = {
-                    email: response.data().email,
-                    name: response.data().name
-                }
-                firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ admins: firebase.firestore.FieldValue.arrayUnion(adminObject) })
-                .then(res => {
-                    console.log(res)
-                    setNewAdmin('')
-                    fetchData()
-                    setLoading(false)
+
+                        const adminObject = {
+                            email: response.data().email,
+                            name: response.data().name
+                        }
+                        firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ admins: firebase.firestore.FieldValue.arrayUnion(adminObject) })
+                            .then(res => {
+                                console.log(res)
+                                setNewAdmin('')
+                                fetchData()
+                                setLoading(false)
+                            })
+                    }
                 })
-            }
-            })
-            
 
-            
+
+
             /*
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayUnion(serviceObject) })
                 .then((res) => {
@@ -199,6 +199,48 @@ const BookingAdminPage = () => {
             setError(true)
         }
     }
+
+    const removeAdmin = (admin) => {
+        console.log(admin)
+
+        try {
+            setError(false)
+            setLoading(true)
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ admins: firebase.firestore.FieldValue.arrayRemove(admin) })
+                .then(res => {
+                    console.log(res)
+                    fetchData()
+                    setLoading(false)
+                })
+
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            setError(true)
+        }
+    }
+
+    const removeService = (service) => {
+        console.log(service)
+
+        try {
+            setError(false)
+            setLoading(true)
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayRemove(service) })
+                .then(res => {
+                    console.log(res)
+                    fetchData()
+                    setLoading(false)
+                })
+
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            setError(true)
+        }
+
+    }
+
 
     const getTabContent = (tab) => {
         switch (tab) {
@@ -272,12 +314,42 @@ const BookingAdminPage = () => {
 
                         </form>
                         {bookerObject.services.map(service => (
-                            <Paper variant='outlined' className={classes.singleService} key={service.service}>
-                                <Typography variant='h5'>Palvelun nimi: {service.service}</Typography>
-                                <Typography>Kuvaus: {service.description}</Typography>
-                                <Typography>Hinta: {service.price}€</Typography>
-                                <Typography>Varauksen kesto: {service.timelength}</Typography>
-                            </Paper>
+                            <div className={classes.root} key={service.service}>
+                                <ExpansionPanel >
+                                    <ExpansionPanelSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        aria-controls="panel1c-content"
+                                        id="panel1c-header"
+                                    >
+                                        <div className={classes.column}>
+                                            <Typography className={classes.heading}>{service.service}</Typography>
+                                        </div>
+                                        <div className={classes.column}>
+                                            <Typography className={classes.secondaryHeading}>{service.description}</Typography>
+                                        </div>
+
+                                    </ExpansionPanelSummary>
+                                    <ExpansionPanelDetails className={classes.details}>
+                                        <div className={classes.column} />
+                                        <div className={classes.column}>
+                                            <Typography>Hinta: {service.price}€</Typography>
+                                        </div>
+                                        <div className={clsx(classes.column, classes.helper)}>
+                                            <Typography variant="caption">
+                                                Varauksen kesto: {service.timelength}
+                                                <br />
+                                            </Typography>
+                                        </div>
+                                    </ExpansionPanelDetails>
+                                    <Divider />
+                                    <ExpansionPanelActions>
+                                        <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
+                                        <Button size="small" color="secondary" onClick={() => removeService(service)}>
+                                            Poista
+                                    </Button>
+                                    </ExpansionPanelActions>
+                                </ExpansionPanel>
+                            </div>
                         ))}</div>
                 }
             </div>
@@ -293,20 +365,20 @@ const BookingAdminPage = () => {
                 -----------------------------------------------------
                 <Typography>Lisää ja poista admin käyttäjiä sivulta</Typography>
                 <div>
-                <TextField
-                                id="newadmin"
-                                label="Email"
-                                style={{ margin: 4 }}
-                                helperText="Lisää admin emaililla"
-                                margin="dense"
-                                variant='outlined'
-                                disabled={loading}
-                                value={newAdmin}
-                                onChange={({ target }) => setNewAdmin(target.value)}
-                            />
-                            {loading ? <CircularProgress className={classes.addButton} size={25} /> : <Button onClick={addNewAdmin}><AddCircleIcon className={classes.addButton} /></Button>}
-                            {error ? <div className={classes.errorMessage}>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <em />}
-                            </div>
+                    <TextField
+                        id="newadmin"
+                        label="Email"
+                        style={{ margin: 4 }}
+                        helperText="Lisää admin emaililla"
+                        margin="dense"
+                        variant='outlined'
+                        disabled={loading}
+                        value={newAdmin}
+                        onChange={({ target }) => setNewAdmin(target.value)}
+                    />
+                    {loading ? <CircularProgress className={classes.addButton} size={25} /> : <Button onClick={addNewAdmin}><AddCircleIcon className={classes.addButton} /></Button>}
+                    {error ? <div className={classes.errorMessage}>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <em />}
+                </div>
                 {bookerObject.admins.map(admin => (
                     <div key={admin.email} >
                         <div className={classes.root}>
@@ -326,22 +398,23 @@ const BookingAdminPage = () => {
                                 <ExpansionPanelDetails className={classes.details}>
                                     <div className={classes.column} />
                                     <div className={classes.column}>
-                                        {admin.email === bookerObject.bookerCreator ? <Chip label="Owner" onDelete={() => { }} /> : <em/>}
+                                        {admin.email === bookerObject.bookerCreator ? <div><Chip label="Owner" onDelete={() => { }} /></div> : <em />}
                                         <Chip label="Admin" onDelete={() => { }} />
+                                        <Chip label="Booker" onDelete={() => { }} />
                                     </div>
                                     <div className={clsx(classes.column, classes.helper)}>
                                         <Typography variant="caption">
-                                           Lisää tietoa
+                                            Lisää tietoa
                                        <br />
                                         </Typography>
                                     </div>
                                 </ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions>
-                                <Tooltip title={`Poista henkilön ${admin.name} adminoikeudet `} arrow><Button size='small' className={classes.removeAdmin}><CancelIcon /></Button></Tooltip>
+                                    <Tooltip title={`Poista henkilön ${admin.name} adminoikeudet `} arrow><span><Button disabled={admin.email === bookerObject.bookerCreator} size='small' className={classes.removeAdmin} onClick={() => removeAdmin(admin)}><CancelIcon /></Button></span></Tooltip>
                                     <Button size="small" color="primary">
                                         Save
-          </Button>
+                                    </Button>
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
                         </div>

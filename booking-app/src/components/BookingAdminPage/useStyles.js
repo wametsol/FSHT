@@ -57,6 +57,14 @@ const useStyles = makeStyles((theme) => ({
     },
     errorMessage: {
         color: 'red'
+    },
+    sliderInner: {
+        marginLeft: 20,
+        marginRight: 20
+    },
+    sliderOuter: {
+        margin: 20,
+        border: 'solid 1px'
     }
 }))
 

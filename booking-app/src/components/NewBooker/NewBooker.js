@@ -269,6 +269,20 @@ const NewBooker = () => {
         </div>
     )
 
+    const initialTimetable = {
+        base: [8, 16],
+        weekDays: {
+            mon: [8, 16],
+            tue: [8, 16],
+            wed: [8, 16],
+            thu: [8, 16],
+            fri: [8, 16],
+        },
+        weekEnds: {
+            sat: [8, 16],
+            sun: [8, 16]
+        }
+    }
     const creationComplete = () => {
         setLoading(true)
         
@@ -284,7 +298,8 @@ const NewBooker = () => {
                     phone: publicPhone
                 },
                 services: bookerServices,
-                admins: [user.email]
+                admins: [user.email],
+                timeTables: initialTimetable
             }
             let setDoc = firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
 
@@ -297,7 +312,7 @@ const NewBooker = () => {
                 setTimeout(() => {
                     setLoading(false)
                     setTimeout(() => {
-                        history.push('/booker')
+                        history.push(`/${webAddress}/admin`)
                     }, 2000)
                     }, 3000)   
             })

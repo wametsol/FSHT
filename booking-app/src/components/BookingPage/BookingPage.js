@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import 'date-fns'
-import { format } from 'date-fns'
+import { format, getDay } from 'date-fns'
 import { auth, firestore } from '../../firebase'
 import { Grid, FormHelperText, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
@@ -16,6 +16,7 @@ import {
     KeyboardTimePicker,
     KeyboardDatePicker,
   } from '@material-ui/pickers';
+import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes } from '../BookingAdminPage/TimeTableServices'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -46,7 +47,8 @@ const useStyles = makeStyles((theme) => ({
     },
     footerObject: {
         marginLeft: '5%',
-        marginTop: 'auto'
+        marginTop: 'auto',
+        flexBasis: '33.33%',
     },
     footerContent: {
         display: 'flex',
@@ -108,6 +110,20 @@ const BookingPage = () => {
     const handleSelectChange = (e) => {
         setChosenService(e.target.value)
     }
+
+        const timeObject = [
+            {content: '10-11'},
+            {content: '11-12'},
+            {content: '12-13'},
+            {content: '13-14'},
+            {content: '14-15'},
+            {content: '15-16'},
+            {content: '16-17'},
+            {content: '17-18'},
+            {content: '18-19'},
+            {content: '19-20'},
+            
+        ]
 
 
     if (bookerObject) {
@@ -171,7 +187,7 @@ const BookingPage = () => {
             'aria-label': 'change date',
           }}
         />
-        <div>{format(selectedDate, "EEEE" , { locale: fi})}</div>
+        <div>{format(selectedDate, "EEEE" , { locale: fi})} : {getSingleDayTimes(getDay(selectedDate),bookerObject.timeTables)}</div>
         </MuiPickersUtilsProvider> 
                             </div>}
                             
@@ -200,8 +216,12 @@ const BookingPage = () => {
                             <div>Valitse sopiva aika</div>
                             
                             
-                            
+                            {timeObject.map(time => (
+                            <div>{time.content}</div>
+                        ))}
                             </div>}
+
+                        
 
                     </Paper>
 
@@ -221,6 +241,13 @@ const BookingPage = () => {
                             <Typography color="textSecondary">{bookerObject.publicInformation.company}</Typography>
                             <Typography color="textSecondary">JokuRandomOsoite 123</Typography>
                             <Typography color="textSecondary">02250, Espoo</Typography>
+                        </div>
+                        <div className={classes.footerObject}>
+                            <Typography color="textSecondary">Avoinna: </Typography>
+                            <Typography>{sameAsBase(bookerObject.timeTables) ? <div>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</div> : <div>{getWeekdayTimes(bookerObject.timeTables)}</div>}</Typography>
+                            <Typography>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
+                            <Typography>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
+                            <Typography color="textSecondary">{}</Typography>
                         </div>
                     </div>
                 </div>

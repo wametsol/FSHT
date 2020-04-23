@@ -37,20 +37,20 @@ export const getWeekdayTimes = (value) => {
 
 const getDayContent = (day, timetables) => {
     switch (day) {
-        case 0:
-            return getFormattedTimes(timetables.weekDays.mon)
         case 1:
-            return getFormattedTimes(timetables.weekDays.tue)
+            return timetables.weekDays.mon
         case 2:
-            return getFormattedTimes(timetables.weekDays.wed)
+            return timetables.weekDays.tue
         case 3:
-            return getFormattedTimes(timetables.weekDays.thu)
+            return timetables.weekDays.wed
         case 4:
-            return getFormattedTimes(timetables.weekDays.fri)
+            return timetables.weekDays.thu
         case 5:
-            return getFormattedTimes(timetables.weekEnds.sat)
+            return timetables.weekDays.fri
         case 6:
-            return getFormattedTimes(timetables.weekEnds.sun)
+            return timetables.weekEnds.sat
+        case 0:
+            return timetables.weekEnds.sun
         default:
             return 'Unknown step';
     }
@@ -58,6 +58,10 @@ const getDayContent = (day, timetables) => {
 
 export const getSingleDayTimes = (day, timetables) => {
     return getDayContent(day, timetables)
+}
+
+export const getSingleDayTimesText = (day, timetables) => {
+    return getFormattedTimes(getDayContent(day, timetables))
 }
 export const valueLabelFormat = (value) => {
     var label = ''
@@ -73,8 +77,14 @@ export const valueLabelFormat = (value) => {
     if (value - Math.floor(value) === 0.25) {
         label += Math.floor(value) + '.15'
     }
-    if (value - Math.floor(value) === 0) {
-        label += value + '.00'
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0) {
+        label += Math.floor(value) + '.00'
+    }
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.33) {
+        label += Math.floor(value) + '.20'
+    }
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.67) {
+        label += Math.floor(value) + '.40'
     }
     return label
 

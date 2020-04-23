@@ -24,15 +24,23 @@ const ServiceTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData
     const addNewService = (e) => {
         e.preventDefault()
         try {
-            if(serviceName.length === 0 || servicePrice.length === 0 || serviceDescription.length === 0 || serviceTimeLength.length === 0){
+
+            var str = serviceTimeLength.split(':')
+            if(!str[0] || !str[1] || isNaN(str[0]) || isNaN(str[1]) || str[0].length>2 || str[1].length>2){
+                setErrorMessage('Virhe palvelun keston määrityksessä. Anna kesto muodossa HH:MM')
+            }else if(serviceName.length === 0 || servicePrice.length === 0 || serviceDescription.length === 0 || serviceTimeLength.length === 0){
                 setErrorMessage('Antamassasi syötteessä oli vikaa, tarkista antamasi tiedot')
             } else {
             setLoading(true)
+            const timeObject = {
+                hours: Number(str[0]) ,
+                minutes: Number(str[1])
+            }
             const serviceObject = {
                 service: serviceName,
                 description: serviceDescription,
                 price: servicePrice,
-                timelength: serviceTimeLength
+                timelength: timeObject
             }
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayUnion(serviceObject) })
                 .then((res) => {
@@ -116,13 +124,14 @@ const ServiceTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData
                                 id="timelength"
                                 label="Varauksen kesto"
                                 style={{ margin: 4 }}
-                                helperText="Esimerkiksi 00.55.00"
+                                helperText="Anna muodossa hh:mm"
                                 margin="dense"
                                 variant='outlined'
                                 disabled={loading}
                                 value={serviceTimeLength}
                                 onChange={({ target }) => setServiceTimeLength(target.value)}
                             />
+                            
                             {loading ? <CircularProgress className={classes.addButton} size={25} /> : <Button onClick={addNewService}><AddCircleIcon className={classes.addButton} /></Button>}
                             {error ? <div className={classes.errorMessage}>Tietojen antamisessa tapahtui virhe, tarkasta kentät</div> : <em />}
                         </form>
@@ -149,7 +158,7 @@ const ServiceTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData
                                         </div>
                                         <div className={clsx(classes.column, classes.helper)}>
                                             <Typography variant="caption">
-                                                Varauksen kesto: {service.timelength}
+                                                Varauksen kesto: {service.timelength.hours}h {service.timelength.minutes}m.
                                                 <br />
                                             </Typography>
                                         </div>

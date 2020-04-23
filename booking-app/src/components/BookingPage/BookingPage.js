@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import 'date-fns'
 import { format, getDay } from 'date-fns'
 import { auth, firestore } from '../../firebase'
-import { Grid, FormHelperText, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider } from '@material-ui/core'
+import { Grid, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { useRouteMatch } from 'react-router-dom'
 import IconButton from '@material-ui/core/IconButton'
@@ -16,7 +16,7 @@ import {
     KeyboardTimePicker,
     KeyboardDatePicker,
   } from '@material-ui/pickers';
-import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes } from '../BookingAdminPage/TimeTableServices'
+import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -109,21 +109,28 @@ const BookingPage = () => {
 
     const handleSelectChange = (e) => {
         setChosenService(e.target.value)
+        console.log(getSingleDayTimes(getDay(selectedDate),bookerObject.timeTables))
     }
 
-        const timeObject = [
-            {content: '10-11'},
-            {content: '11-12'},
-            {content: '12-13'},
-            {content: '13-14'},
-            {content: '14-15'},
-            {content: '15-16'},
-            {content: '16-17'},
-            {content: '17-18'},
-            {content: '18-19'},
-            {content: '19-20'},
+    const getFreeTimes = () => {
+        console.log(getDay(selectedDate))
+        const dayTimes = (getSingleDayTimes(getDay(selectedDate),bookerObject.timeTables))
+        console.log('TIMELENGTH : ' + chosenService.timelength.hours + " " + chosenService.timelength.minutes)
+        const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes/60
+        console.log(timeSlot)
+        var timeObject = []
+        for (var x = dayTimes[0]; x<dayTimes[1]; x+=timeSlot ){
+            console.log('x:' + x + ' , x+0.25:' + x+timeSlot)
+            const singleTime = {
+                start: x,
+                end: x+timeSlot
+            }
             
-        ]
+            timeObject.push(singleTime)
+        //<div>{x} - {x+0.25}</div>
+        }
+        return timeObject
+    }
 
 
     if (bookerObject) {
@@ -187,7 +194,7 @@ const BookingPage = () => {
             'aria-label': 'change date',
           }}
         />
-        <div>{format(selectedDate, "EEEE" , { locale: fi})} : {getSingleDayTimes(getDay(selectedDate),bookerObject.timeTables)}</div>
+        <div>{format(selectedDate, "EEEE" , { locale: fi})} : {getSingleDayTimesText(getDay(selectedDate),bookerObject.timeTables)}</div>
         </MuiPickersUtilsProvider> 
                             </div>}
                             
@@ -202,7 +209,7 @@ const BookingPage = () => {
                                 <Typography variant='h5'>Palvelun nimi: {chosenService.service}</Typography>
                                 <Typography>Kuvaus: {chosenService.description}</Typography>
                                 <Typography>Hinta: {chosenService.price}€</Typography>
-                                <Typography>Varauksen kesto: {chosenService.timelength}</Typography>
+                                <Typography>Varauksen kesto: {chosenService.timelength.hours}h {chosenService.timelength.minutes}m</Typography>
                             </Paper>
                             </div>
                             </div>}
@@ -213,12 +220,13 @@ const BookingPage = () => {
                         {!chosenService.service ? <em/> : <div>
                             <br/>
                             <Divider />
-                            <div>Valitse sopiva aika</div>
-                            
-                            
-                            {timeObject.map(time => (
-                            <div>{time.content}</div>
-                        ))}
+                            {getFreeTimes().length===0 ? <div>Ei vapaita aikoja</div>:
+                            <div> 
+                            <div>Valitse sopiva aika (aikoja vapaana: {getFreeTimes().length}</div>
+
+                            {getFreeTimes().map(time => (
+                                <Paper>{getFormattedTimes([time.start, time.end])}<Button size='small'>Varaa</Button></Paper>
+                            ))}</div>  }
                             </div>}
 
                         
@@ -244,7 +252,7 @@ const BookingPage = () => {
                         </div>
                         <div className={classes.footerObject}>
                             <Typography color="textSecondary">Avoinna: </Typography>
-                            <Typography>{sameAsBase(bookerObject.timeTables) ? <div>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</div> : <div>{getWeekdayTimes(bookerObject.timeTables)}</div>}</Typography>
+                            <Typography>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <div>{getWeekdayTimes(bookerObject.timeTables)}</div>}</Typography>
                             <Typography>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
                             <Typography>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
                             <Typography color="textSecondary">{}</Typography>

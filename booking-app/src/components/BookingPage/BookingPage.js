@@ -72,6 +72,7 @@ const BookingPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [bookerObject, setBookerObject] = useState(null)
+    const [bookings, setBookings] = useState(null)
     const [chosenService, setChosenService] = useState('')
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -87,7 +88,17 @@ const BookingPage = () => {
                         setError(true)
                         setLoading(false)
                     }
+                    console.log(response.data)
                     setBookerObject(response.data())
+
+                    firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
+                    .then(res => {
+                        if(res.empty){
+
+                        }
+                        setBookings(res.data())
+                        
+                    })
                     setLoading(false)
                     /*
                     
@@ -102,6 +113,9 @@ const BookingPage = () => {
                     setLoading(false)
                     setError(true)
                 })
+
+            
+            
             console.log(bookerObject)
         } catch (error) {
             console.log(error)
@@ -109,6 +123,8 @@ const BookingPage = () => {
             setError(true)
         }
     }, [])
+
+    
 
     const handleDateChange = (date) => {
         setSelectedDate(date)
@@ -120,7 +136,9 @@ const BookingPage = () => {
     }
 
     const getFreeTimes = () => {
-        //console.log(getDay(selectedDate))
+        const dailyBookings = bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]]
+
+        
         const dayTimes = (getSingleDayTimes(getDay(selectedDate),bookerObject.timeTables))
         //console.log('TIMELENGTH : ' + chosenService.timelength.hours + " " + chosenService.timelength.minutes)
         const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes/60
@@ -130,7 +148,13 @@ const BookingPage = () => {
             //console.log('x:' + x + ' , x+0.25:' + x+timeSlot)
             const singleTime = {
                 start: Number(x.toFixed(2)),
-                end: Number((x+timeSlot).toFixed(2))
+                end: Number((x+timeSlot).toFixed(2)),
+                bookedAlready:false
+            }
+            for (const b in dailyBookings){
+                if(dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end > singleTime.start ){
+                    singleTime.bookedAlready=true
+                }
             }
             
             timeObject.push(singleTime)
@@ -237,7 +261,7 @@ const BookingPage = () => {
                             <div>Valitse sopiva aika (aikoja vapaana: {getFreeTimes().length}</div>
 
                             {getFreeTimes().map(time => (
-                                <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button size='small'  onClick={() => popConfirmation({service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress})}>Varaa</Button></Paper>
+                                <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small'  onClick={() => popConfirmation({service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress})}>{time.bookedAlready? <span>VARATTU</span>: <span>Varaa</span>}</Button></Paper>
                             ))}</div>  }
                             </div>}
 

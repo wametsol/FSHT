@@ -7,11 +7,13 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 import { Typography, CircularProgress } from '@material-ui/core';
-import { auth, firestore } from '../../firebase'
+import firebase, { auth, firestore } from '../../firebase'
 import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
 import 'date-fns'
 import { format, getDay } from 'date-fns'
 import { fi } from 'date-fns/locale'
+
+import CheckIcon from '@material-ui/icons/Check'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -20,18 +22,16 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }) => {
     const user = auth.currentUser
     const [loading, setLoading] = useState(false);
-    console.log(data)
-    console.log(data.target)
+    const [success, setSuccess] = useState(false)
+    const [error, setError] = useState(false)
 
     const handleClickOpen = () => {
         setOpen(true);
     };
 
     const confirmBooking = () => {
-        setLoading(true)
-        console.log(data)
         
-
+        console.log(data)
         const bookingObject = {
 
             bookingDate: format(data.date, `dd/MM/yyyy`),
@@ -42,31 +42,69 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
                 email: auth.currentUser.email
             },
             times: data.times
+            
         }
-        var dates = []
-        dates[`${(format(data.date, `dd:MM:yyyy`))}`] = bookingObject
-        console.log(dates)
-        console.log(typeof(Object(format(data.date, `dd:MM:yyyy`))))
-        console.log(bookingObject.bookingDate)
+
+
         try {
-            firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `dd:MM:yyyy`)}`).get().then( doc => {
-                //console.log(doc)
-                if(!doc.empty){
+            setLoading(true)
+            firestore.collection(`booker${data.target}`).doc('bookings').get().then( doc => {
+                console.log(!!doc.data()[`${format(data.date, `dd:MM:yyyy`)}`])
+                console.log(doc.data()[`${format(data.date, `dd:MM:yyyy`)}`])
+
+
+                if(!!doc.data()[`${format(data.date, `dd:MM:yyyy`)}`]){
+                    console.log(doc.data())
+                    const bookings = doc.data()[`${format(data.date, `dd:MM:yyyy`)}`]
                     console.log('HURRAA ON')
+                    console.log(bookings)
+                    if((bookings.filter(booking => booking.times.start===data.times.start)).length===0){
+
+                        firestore.collection(`booker${data.target}`).doc('bookings').update({[`${format(data.date, `dd:MM:yyyy`)}`] : firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
+                            console.log(res)
+                            setSuccess(true)
+                            setLoading(false)
+                            setTimeout(() => {
+                                setSuccess(false)
+                                setOpen(false)
+                              }, 2000);
+                            
+                        })
+                    }else{
+                        console.log('AIKA ON JO VARATTU')
+                        setError(true)
+                        setLoading(false)
+                        setTimeout(() => {
+                            setError(false)
+                            setOpen(false)
+                          }, 2000);
+
+                    }
+                    
+                   
                 }else{
                     console.log('EI OO, TEHÄÄN!')
-                    firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `dd:MM:yyyy`)}`).doc('active').set({bookings: [bookingObject]}, {merge:true})
-                    //firestore.collection(`booker${data.target}`).doc('bookings').set((Object(format(data.date, `dd:MM:yyyy`))))
-                    //.collection(bookingObject.bookingDate).doc() firebase.firestore.FieldValue.arrayUnion(serviceObject)}).document().set({bookingObject}, {merge:true})
 
+                    
+
+                    firestore.collection(`booker${data.target}`).doc('bookings').update({[`${format(data.date, `dd:MM:yyyy`)}`] : firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
+                        console.log(`Added document at '${res}'`);
+                        setSuccess(true)
+                            setLoading(false)
+                            setTimeout(() => {
+                                setSuccess(false)
+                                setOpen(false)
+                              }, 2000);
+
+                    })   
                 }
             })
             console.log(bookingObject)
     
-            setLoading(false)
+            
             
         } catch (error) {
-            
+            setLoading(false)
         }
 
     }
@@ -103,7 +141,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
                     </DialogContentText>
                 </DialogContent>
                 
-                    {loading? <div style={{alignSelf:'center', marginBottom:20}}>Varaustasi vahvistetaan<CircularProgress size={25}/> </div>: <div>
+                    {error? <Typography style={{margin: 'auto'}}>Aika on jo varattu, yritä uudelleen</Typography>: <div style={{margin: 'auto'}} > {success? <Typography style={{margin: 'auto'}}>Varauksesi onnistui{<CheckIcon/>}</Typography> : <div>{loading? <Typography style={{margin:'auto', marginBottom:20}}>Varaustasi vahvistetaan<CircularProgress size={25}/> </Typography>: <div>
                     <DialogActions>
                     <Button onClick={handleClose} color="secondary">
                         Palaa
@@ -112,7 +150,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
                         Hyväksy
           </Button>
           </DialogActions>
-          </div>}
+                    </div>}</div> } </div>}
                 
             </Dialog>
         </div>

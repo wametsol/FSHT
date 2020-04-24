@@ -23,16 +23,20 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
 
     const fetchData = () => {
 
-        firestore.collection(`booker${pagematch.params.id}`).get()
+        firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
             .then((response) => {
                 if (response.empty) {
                     setError(true)
                     setLoading(false)
                 }
+                setBookerObject(response.data())
+                setLoading(false)
+                /*
                 response.forEach(doc => {
                     setBookerObject(doc.data())
                     setLoading(false)
                 })
+                */
             })
             .catch(error => {
                 console.log(error)

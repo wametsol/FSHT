@@ -302,7 +302,6 @@ const NewBooker = () => {
                 timeTables: initialTimetable
             }
             let setDoc = firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
-
                 
 
                 firestore.collection('userCollection').doc(user.email).update({bookers: firebase.firestore.FieldValue.arrayUnion({address: webAddress, name: systName})})

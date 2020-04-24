@@ -9,6 +9,10 @@ import useStyles from './useStyles'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
+
 const ServiceTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData}) => {
     const pagematch = useRouteMatch('/:id')
     const classes = useStyles()

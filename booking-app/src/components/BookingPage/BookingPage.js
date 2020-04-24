@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import 'date-fns'
 import { format, getDay } from 'date-fns'
 import { auth, firestore } from '../../firebase'
-import { Grid, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider } from '@material-ui/core'
+import { Grid, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, Input } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { useRouteMatch } from 'react-router-dom'
 import IconButton from '@material-ui/core/IconButton'
@@ -17,6 +17,7 @@ import {
     KeyboardDatePicker,
   } from '@material-ui/pickers';
 import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
+import ConfirmationWindow from './ConfirmationWindow'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -72,23 +73,29 @@ const BookingPage = () => {
     const [error, setError] = useState(false);
     const [bookerObject, setBookerObject] = useState(null)
     const [chosenService, setChosenService] = useState('')
-    const [selectedDate, setSelectedDate] = React.useState(new Date())
+    const [selectedDate, setSelectedDate] = useState(new Date())
+    const [confirmationOpen, setConfirmationOpen] = useState(false);
+    const [confirmationData, setConfirmationData] = useState({})
     const classes = useStyles()
 
     useEffect(() => {
         try {
             setLoading(true)
-            firestore.collection(`booker${pagematch.params.id}`).get()
+            firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
                 .then((response) => {
                     if (response.empty) {
                         setError(true)
                         setLoading(false)
                     }
+                    setBookerObject(response.data())
+                    setLoading(false)
+                    /*
+                    
                     response.forEach(doc => {
                         console.log(doc.data())
                         setBookerObject(doc.data())
                         setLoading(false)
-                    })
+                    })*/
                 })
                 .catch(error => {
                     console.log(error)
@@ -113,23 +120,28 @@ const BookingPage = () => {
     }
 
     const getFreeTimes = () => {
-        console.log(getDay(selectedDate))
+        //console.log(getDay(selectedDate))
         const dayTimes = (getSingleDayTimes(getDay(selectedDate),bookerObject.timeTables))
-        console.log('TIMELENGTH : ' + chosenService.timelength.hours + " " + chosenService.timelength.minutes)
+        //console.log('TIMELENGTH : ' + chosenService.timelength.hours + " " + chosenService.timelength.minutes)
         const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes/60
-        console.log(timeSlot)
+        //console.log(timeSlot)
         var timeObject = []
         for (var x = dayTimes[0]; x<dayTimes[1]; x+=timeSlot ){
-            console.log('x:' + x + ' , x+0.25:' + x+timeSlot)
+            //console.log('x:' + x + ' , x+0.25:' + x+timeSlot)
             const singleTime = {
-                start: x,
-                end: x+timeSlot
+                start: Number(x.toFixed(2)),
+                end: Number((x+timeSlot).toFixed(2))
             }
             
             timeObject.push(singleTime)
         //<div>{x} - {x+0.25}</div>
         }
         return timeObject
+    }
+
+    const popConfirmation = (e) => {
+        setConfirmationData(e)
+        setConfirmationOpen(true)
     }
 
 
@@ -225,14 +237,14 @@ const BookingPage = () => {
                             <div>Valitse sopiva aika (aikoja vapaana: {getFreeTimes().length}</div>
 
                             {getFreeTimes().map(time => (
-                                <Paper>{getFormattedTimes([time.start, time.end])}<Button size='small'>Varaa</Button></Paper>
+                                <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button size='small'  onClick={() => popConfirmation({service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress})}>Varaa</Button></Paper>
                             ))}</div>  }
                             </div>}
 
                         
-
+                            {confirmationOpen ? <ConfirmationWindow setOpen={setConfirmationOpen} open={confirmationOpen} data={confirmationData} setConfirmationData={setConfirmationData}/> : <em/>}
                     </Paper>
-
+                        
                 </div>
                 <div className={classes.footer}>
                     <Typography >Yhteystiedot </Typography>
@@ -252,7 +264,7 @@ const BookingPage = () => {
                         </div>
                         <div className={classes.footerObject}>
                             <Typography color="textSecondary">Avoinna: </Typography>
-                            <Typography>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <div>{getWeekdayTimes(bookerObject.timeTables)}</div>}</Typography>
+                            <Typography>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
                             <Typography>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
                             <Typography>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
                             <Typography color="textSecondary">{}</Typography>

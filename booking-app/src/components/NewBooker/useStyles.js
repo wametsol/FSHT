@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
     },
     inlineIcons: {
         margin: 0
-    }
+    },
 }))
 
 export default useStyles

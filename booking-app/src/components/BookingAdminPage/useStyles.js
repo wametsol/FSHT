@@ -16,6 +16,9 @@ const useStyles = makeStyles((theme) => ({
             color: green[600],
         }
     },
+    green:{
+        color:green[500]
+    },
     adminListObject: {
         display: 'inline',
         margin: 8
@@ -65,6 +68,29 @@ const useStyles = makeStyles((theme) => ({
     sliderOuter: {
         margin: 20,
         border: 'solid 1px'
+    },
+    adminDatepicker: {
+        display: 'flex',
+        //marginLeft: 20,
+        justifyContent: 'center'
+    },
+    datePickerTitle: {
+        margin: 20,
+        marginTop: 16,
+        marginBottom: 8,
+        alignSelf: 'flex-end'
+    },
+    currentDayTitle: {
+        display: 'flex',
+        justifyContent: 'center',
+        backgroundColor: 'lightgrey',
+        padding: 20,
+    },
+    weekBtn:{
+
+    },
+    dayBtn:{
+
     }
 }))
 

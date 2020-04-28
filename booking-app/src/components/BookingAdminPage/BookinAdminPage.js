@@ -6,6 +6,7 @@ import {  useRouteMatch } from 'react-router-dom'
 import ServiceTab from './ServiceTab'
 import UserTab from './UserTab'
 import TimeManagement from './TimeManagement'
+import Bookings from './Bookings'
 
 
 
@@ -16,6 +17,7 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
     const [bookerObject, setBookerObject] = useState(null)
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [bookings, setBookings] = useState(null)
 
     const handleChange = (event, newValue) => {
         setValue(newValue)
@@ -30,13 +32,17 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
                     setLoading(false)
                 }
                 setBookerObject(response.data())
+
+                firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
+                    .then(res => {
+                        if(res.empty){
+                            
+                        }
+                        setBookings(res.data())
+                    })
+
                 setLoading(false)
-                /*
-                response.forEach(doc => {
-                    setBookerObject(doc.data())
-                    setLoading(false)
-                })
-                */
+                
             })
             .catch(error => {
                 console.log(error)
@@ -55,10 +61,13 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
         }
     }, [])
 
+
+    console.log(bookings)
+
     const getTabContent = (tab) => {
         switch (tab) {
             case 0:
-                return <div>Varaukset</div>
+                return <Bookings setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} bookingsObject={bookings} />
             case 1:
                 return <ServiceTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 2:

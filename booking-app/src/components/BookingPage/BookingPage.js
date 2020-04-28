@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import 'date-fns'
-import { format, getDay } from 'date-fns'
+import { format, getDay, addDays, isBefore } from 'date-fns'
 import { auth, firestore } from '../../firebase'
-import { Grid, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, Input } from '@material-ui/core'
+import { Grid, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { useRouteMatch } from 'react-router-dom'
 import IconButton from '@material-ui/core/IconButton'
@@ -15,9 +15,13 @@ import {
     MuiPickersUtilsProvider,
     KeyboardTimePicker,
     KeyboardDatePicker,
-  } from '@material-ui/pickers';
+} from '@material-ui/pickers';
 import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
 import ConfirmationWindow from './ConfirmationWindow'
+
+import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded'
+import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
+import DoubleArrowRoundedIcon from '@material-ui/icons/DoubleArrowRounded'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -46,6 +50,10 @@ const useStyles = makeStyles((theme) => ({
         borderTopRightRadius: 15,
 
     },
+    singleService: {
+        textAlign: 'left',
+        margin: 20
+    },
     footerObject: {
         marginLeft: '5%',
         marginTop: 'auto',
@@ -55,8 +63,14 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         textAlign: 'left!important'
     },
+    selectorLine: {
+        display: 'flex',
+        justifyContent: 'center',
+        backgroundColor: ' #f2f2f2'
+
+    },
     selector: {
-        display: 'inline',
+        margin: 20
     },
     selectEmpty: {
 
@@ -64,7 +78,35 @@ const useStyles = makeStyles((theme) => ({
     formControl: {
         margin: theme.spacing(1),
         minWidth: 250,
-      },
+        alignSelf: 'center',
+        justifyContent: 'center',
+    },
+    datePickerTitle: {
+        margin: 20,
+        marginTop: 16,
+        marginBottom: 8,
+        alignSelf: 'flex-end'
+    },
+    currentDayTitle: {
+        display: 'flex',
+        justifyContent: 'center',
+        backgroundColor: 'lightgrey',
+        padding: 20,
+    },
+    closedInfo: {
+        position: 'relative',
+        alignSelf: 'center',
+        marginTop: '1%',
+        backgroundColor: '#ffebe6',
+        padding: 20
+    },
+    weekBtn:{
+        alignSelf: 'center'
+
+    },
+    dayBtn:{
+        alignSelf: 'center'
+    }
 }));
 
 const BookingPage = () => {
@@ -92,13 +134,13 @@ const BookingPage = () => {
                     setBookerObject(response.data())
 
                     firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
-                    .then(res => {
-                        if(res.empty){
+                        .then(res => {
+                            if (res.empty) {
 
-                        }
-                        setBookings(res.data())
-                        
-                    })
+                            }
+                            setBookings(res.data())
+
+                        })
                     setLoading(false)
                     /*
                     
@@ -114,8 +156,8 @@ const BookingPage = () => {
                     setError(true)
                 })
 
-            
-            
+
+
             console.log(bookerObject)
         } catch (error) {
             console.log(error)
@@ -124,41 +166,44 @@ const BookingPage = () => {
         }
     }, [])
 
-    
+
 
     const handleDateChange = (date) => {
         setSelectedDate(date)
-      }
+    }
 
     const handleSelectChange = (e) => {
         setChosenService(e.target.value)
-        console.log(getSingleDayTimes(getDay(selectedDate),bookerObject.timeTables))
+        console.log(getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
     }
 
     const getFreeTimes = () => {
         const dailyBookings = bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]]
 
-        
-        const dayTimes = (getSingleDayTimes(getDay(selectedDate),bookerObject.timeTables))
-        //console.log('TIMELENGTH : ' + chosenService.timelength.hours + " " + chosenService.timelength.minutes)
-        const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes/60
-        //console.log(timeSlot)
+
+        const dayTimes = (getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
+        const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes / 60
         var timeObject = []
-        for (var x = dayTimes[0]; x<dayTimes[1]; x+=timeSlot ){
-            //console.log('x:' + x + ' , x+0.25:' + x+timeSlot)
+        for (var x = dayTimes[0]; x < dayTimes[1]; x += timeSlot) {
+
             const singleTime = {
                 start: Number(x.toFixed(2)),
-                end: Number((x+timeSlot).toFixed(2)),
-                bookedAlready:false
+                end: Number((x + timeSlot).toFixed(2)),
+                bookedAlready: false
             }
-            for (const b in dailyBookings){
-                if(dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end > singleTime.start ){
-                    singleTime.bookedAlready=true
+
+            // PREVENT TOO LATE END TIME
+            if (singleTime.end > dayTimes[1]) {
+                continue
+            }
+
+            // CHECK IF DAILYBOOKINGS EXIST
+            for (const b in dailyBookings) {
+                if (dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end > singleTime.start) {
+                    singleTime.bookedAlready = true
                 }
             }
-            
             timeObject.push(singleTime)
-        //<div>{x} - {x+0.25}</div>
         }
         return timeObject
     }
@@ -167,7 +212,7 @@ const BookingPage = () => {
         setConfirmationData(e)
         setConfirmationOpen(true)
     }
-
+    // <Typography className={classes.datePickerTitle}> {capitalize(format(selectedDate, "EEEE", { locale: fi }))} {format(selectedDate, 'MM/dd/yyyy')}</Typography>
 
     if (bookerObject) {
         document.title = `${bookerObject.bookerName} ajanvaraus`
@@ -183,6 +228,7 @@ const BookingPage = () => {
                             </Toolbar>
                         </AppBar>
                     </div>
+
                     <Card>
                         <CardMedia className={classes.media} image="https://i1.pickpik.com/photos/80/669/198/hill-lane-forest-motorcycle-preview.jpg" />
                         <CardContent>
@@ -193,82 +239,104 @@ const BookingPage = () => {
                                 Varaa aikasi täältä
                         </Typography>
                         </CardContent>
-                    </Card>
-                    <Paper>
-                        <Grid container spacing={3}>
-                            <Grid item xs={6}>
-                        <div className={classes.selector} >
-                            <FormControl className={classes.formControl}>
-                                <InputLabel id="">
-                                    Palvelu
-                                </InputLabel>
-                                <Select
-                                    value={chosenService}
-                                    label='Palvelu'
-                                    onChange={handleSelectChange}
-                                    className={classes.selectEmpty}
-                                    fullWidth
-                                >
-                                    {bookerObject.services.map(object => (
-                                        <MenuItem key={object.service} value={object}>{object.service}</MenuItem>
-                                    ))}
+                        <Divider />
+                        <div className={classes.currentDayTitle}>
+                            <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'MM/dd/yyyy')} `}>
+                                <span className={classes.weekBtn}>
+                                <Button disabled={isBefore(addDays(selectedDate, -6), new Date)}  onClick={() => setSelectedDate(addDays(selectedDate, -7))} size='small'><DoubleArrowRoundedIcon style={{ transform: 'rotate(180deg)' }} /></Button>
+                                </span>
+                                </Tooltip>
 
-                                </Select>
-                            </FormControl>
-                            {!chosenService.service ? <em/> : <div>
-                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <Tooltip title={`${capitalize(format(addDays(selectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -1), 'MM/dd/yyyy')} `}>
+                                <span className={classes.dayBtn}><Button disabled={isBefore(selectedDate, new Date)}  onClick={() => setSelectedDate(addDays(selectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
+
+                            <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
                                 <KeyboardDatePicker
-          disableToolbar
-          variant="inline"
-          format="MM/dd/yyyy"
-          margin="normal"
-          id="date-picker-inline"
-          label="Päivämäärä"
-          value={selectedDate}
-          onChange={handleDateChange}
-          KeyboardButtonProps={{
-            'aria-label': 'change date',
-          }}
-        />
-        <div>{format(selectedDate, "EEEE" , { locale: fi})} : {getSingleDayTimesText(getDay(selectedDate),bookerObject.timeTables)}</div>
-        </MuiPickersUtilsProvider> 
-                            </div>}
-                            
-                                        
+                                    //disableToolbar
+                                    variant="dialog"
+                                    cancelLabel="Peru"
+                                    format={"EEEE MM/dd/yyyy"}
+
+                                    options={{ locale: fi }}
+                                    margin="normal"
+                                    id="date-picker-inline"
+                                    value={selectedDate}
+                                    onChange={handleDateChange}
+                                    autoOk
+                                    locale={fi}
+                                    disablePast
+                                    inputProps={{
+                                        disabled: true
+                                    }}
+                                    KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                    }}
+                                />
+
+                            </MuiPickersUtilsProvider>
+
+                            <Tooltip title={`${capitalize(format(addDays(selectedDate, 1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, 1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, 1), 'MM/dd/yyyy')} `}>
+                                <span className={classes.dayBtn}><Button  onClick={() => setSelectedDate(addDays(selectedDate, 1))} size='small'><NavigateNextRoundedIcon /></Button></span></Tooltip>
+                            <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'MM/dd/yyyy')} `}>
+                                <span className={classes.weekBtn}><Button  onClick={() => setSelectedDate(addDays(selectedDate, 7))} size='small'><DoubleArrowRoundedIcon /></Button></span></Tooltip>
                         </div>
-                        </Grid>
-                        <Grid item xs={6}>
-                        {!chosenService.service ? <em/> : <div>
-                            <div key={chosenService.service}>
-                                <Typography>Valittuna</Typography>
-                                <Paper variant='outlined' className={classes.singleService} key={chosenService.service}>
-                                <Typography variant='h5'>Palvelun nimi: {chosenService.service}</Typography>
-                                <Typography>Kuvaus: {chosenService.description}</Typography>
-                                <Typography>Hinta: {chosenService.price}€</Typography>
-                                <Typography>Varauksen kesto: {chosenService.timelength.hours}h {chosenService.timelength.minutes}m</Typography>
-                            </Paper>
-                            </div>
+
+
+                        <Divider />
+                    </Card>
+                    {getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables)[0] === getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables)[1] ? <div className={classes.closedInfo}><Typography>Suljettu, valitse toinen päivä</Typography></div> : <div>
+
+                        <Paper>
+                            <Typography>Avoinna: {getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)}</Typography>
+                                    <div className={classes.selectorLine} >
+                                        <div className={classes.selector}>
+                                        <FormControl className={classes.formControl}>
+                                            <InputLabel id="">
+                                                Palvelu
+                                            </InputLabel>
+                                            <Select
+                                                value={chosenService}
+                                                label='Palvelu'
+                                                onChange={handleSelectChange}
+                                                className={classes.selectEmpty}
+                                                fullWidth
+                                            >
+                                                {bookerObject.services.map(object => (
+                                                    <MenuItem key={object.service} value={object}>{object.service}</MenuItem>
+                                                ))}
+
+                                            </Select>
+                                        </FormControl>
+                                        
+                                        {!chosenService.service ? <em /> : <div>
+                                            {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> : <div>Sopivia aikoja vapaana: {getFreeTimes().length}</div>}
+                                        </div>}</div>
+                                    {!chosenService.service ? <em /> : <div>
+                                        <div key={chosenService.service}>
+                                            <div className={classes.singleService} key={chosenService.service}>
+                                                <Typography variant='h5'>{chosenService.service}</Typography>
+                                                <Typography>Kuvaus: {chosenService.description}</Typography>
+                                                <Typography>Hinta: {chosenService.price}€</Typography>
+                                                <Typography>Varauksen kesto: {chosenService.timelength.hours}h {chosenService.timelength.minutes}m</Typography>
+                                            </div>
+                                        </div>
+                                    </div>}
+                                    </div>
+                            {!chosenService.service ? <em /> : <div>
+                                <br />
+                                <Divider />
+                                {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> :
+                                    <div>
+                                        {getFreeTimes().map(time => (
+                                            <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
+                                        ))}</div>}
                             </div>}
-                            </Grid>
-                            </Grid>
 
 
-                        {!chosenService.service ? <em/> : <div>
-                            <br/>
-                            <Divider />
-                            {getFreeTimes().length===0 ? <div>Ei vapaita aikoja</div>:
-                            <div> 
-                            <div>Valitse sopiva aika (aikoja vapaana: {getFreeTimes().length}</div>
+                            {confirmationOpen ? <ConfirmationWindow setOpen={setConfirmationOpen} open={confirmationOpen} data={confirmationData} setConfirmationData={setConfirmationData} /> : <em />}
+                        </Paper>
+                    </div>}
 
-                            {getFreeTimes().map(time => (
-                                <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small'  onClick={() => popConfirmation({service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress})}>{time.bookedAlready? <span>VARATTU</span>: <span>Varaa</span>}</Button></Paper>
-                            ))}</div>  }
-                            </div>}
-
-                        
-                            {confirmationOpen ? <ConfirmationWindow setOpen={setConfirmationOpen} open={confirmationOpen} data={confirmationData} setConfirmationData={setConfirmationData}/> : <em/>}
-                    </Paper>
-                        
                 </div>
                 <div className={classes.footer}>
                     <Typography >Yhteystiedot </Typography>

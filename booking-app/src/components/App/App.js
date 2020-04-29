@@ -101,8 +101,8 @@ const App = () => {
           <Navigation/>
             <HomePage/>
           </Route>
-          <Route exact path ='/*' >
-            <BookingPage/>
+          <Route exact path ='/*' component={BookingPage} >
+            
           </Route>
           
         </Switch>

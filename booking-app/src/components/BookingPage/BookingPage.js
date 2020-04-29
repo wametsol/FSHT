@@ -3,7 +3,7 @@ import 'date-fns'
 import { format, getDay, addDays, isBefore } from 'date-fns'
 import { auth, firestore } from '../../firebase'
 import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
+import useStyles from './useStyles'
 import { useRouteMatch } from 'react-router-dom'
 import IconButton from '@material-ui/core/IconButton'
 import MenuIcon from '@material-ui/icons/Menu'
@@ -26,100 +26,7 @@ import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded'
 import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
 import DoubleArrowRoundedIcon from '@material-ui/icons/DoubleArrowRounded'
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        maxWidth: '50%',
-        margin: 'auto',
-        marginBottom: 'auto',
-        minHeight: '85vh',
-    },
-    menuButton: {
-        marginRight: theme.spacing(2),
-    },
-    bookingTopbar: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    media: {
-        height: 140,
-        margin: 'auto'
-    },
-    footer: {
-        margin: 'auto',
-        backgroundColor: '#03a5fc',
-        minHeight: '15vh',
-        maxWidth: '50%',
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
-
-    },
-    singleService: {
-        textAlign: 'left',
-        margin: 20
-    },
-    footerObject: {
-        marginLeft: '5%',
-        marginTop: 'auto',
-        flexBasis: '33.33%',
-    },
-    footerContent: {
-        display: 'flex',
-        textAlign: 'left!important'
-    },
-    selectorLine: {
-        display: 'flex',
-        justifyContent: 'center',
-        backgroundColor: ' #f2f2f2'
-
-    },
-    selector: {
-        margin: 20
-    },
-    selectEmpty: {
-
-    },
-    formControl: {
-        margin: theme.spacing(1),
-        minWidth: 250,
-        alignSelf: 'center',
-        justifyContent: 'center',
-    },
-    datePickerTitle: {
-        margin: 20,
-        marginTop: 16,
-        marginBottom: 8,
-        alignSelf: 'flex-end'
-    },
-    currentDayTitle: {
-        display: 'flex',
-        justifyContent: 'center',
-        backgroundColor: 'lightgrey',
-        padding: 20,
-    },
-    closedInfo: {
-        position: 'relative',
-        alignSelf: 'center',
-        marginTop: '1%',
-        backgroundColor: '#ffebe6',
-        padding: 20
-    },
-    weekBtn:{
-        alignSelf: 'center'
-
-    },
-    dayBtn:{
-        alignSelf: 'center'
-    },
-    homeButton: {
-        flexGrow: 0,
-        fontSize: 20,
-        '&:hover': {
-            background: 'linear-gradient(#3f51b5 60%, #2e91bf 120%)',
-            borderRadius: 5
-        }
-    }
-}));
+    
 
 const BookingPage = () => {
     const user = auth.currentUser
@@ -189,7 +96,7 @@ const BookingPage = () => {
             case 0:
                 return BookerHomePage()
             case 1:
-                return <ProfilePage/>
+                return <ProfilePage site={bookerObject.bookerAddress} bookingsObject={bookings}/>
             default:
                 return 'Unknown step';
         }
@@ -367,10 +274,11 @@ const BookingPage = () => {
                             <Toolbar className={classes.bookingTopbar} variant="dense">
                                 <Tabs
                                 value={value}
+                                onChange={handleChange}
                                 indicatorColor='primary'
                                 variant='standard'>
-                                    <Tab label={<Button onClick={() => setValue(0)}  className={classes.homeButton} color="inherit" component={Link} to={`/${pagematch.params.id}`}>{bookerObject.bookerName}</Button>}></Tab>
-                                    <Tab label={!user ? <Button  className={classes.menuButton} variant='outlined' color="inherit">Login</Button>: <Button onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</Button>}></Tab>
+                                    <Tab label={<span className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
+                                    <Tab label={!user ? <span  className={classes.menuButton} color="inherit">Login</span>: <span onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>}></Tab>
                                 </Tabs>
                                     
                                 

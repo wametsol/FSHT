@@ -7,6 +7,7 @@ import ServiceTab from './ServiceTab'
 import UserTab from './UserTab'
 import TimeManagement from './TimeManagement'
 import Bookings from './Bookings'
+import InfoTab from './InfoTab'
 
 
 
@@ -73,7 +74,7 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
             case 2:
                 return <TimeManagement setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 3:
-                return <div>Tilastot</div>
+                return <InfoTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 4:
                 return <UserTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             default:
@@ -98,7 +99,7 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
                         <Tab label='Varaukset' />
                         <Tab label='Palvelut' />
                         <Tab label='Ajanhallinta' />
-                        <Tab label='Tilastot' />
+                        <Tab label='Yhteystiedot' />
                         <Tab label='Käyttäjähallinta' />
                     </Tabs>
                     <div>{getTabContent(value)}</div>

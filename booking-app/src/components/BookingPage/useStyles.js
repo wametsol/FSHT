@@ -29,7 +29,6 @@ const useStyles = makeStyles((theme) => ({
     },
     footer: {
         margin: 'auto',
-        backgroundColor: '#03a5fc',
         minHeight: '15vh',
         maxWidth: '50%',
         borderTopLeftRadius: 15,

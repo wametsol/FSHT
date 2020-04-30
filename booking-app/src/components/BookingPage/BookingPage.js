@@ -289,11 +289,11 @@ const BookingPage = () => {
                     
 
                 </div>
-                <div className={classes.footer}>
+                <div className={classes.footer} style={{backgroundColor:`rgb(${bookerObject.siteSettings.footerColor.r},${bookerObject.siteSettings.footerColor.g},${bookerObject.siteSettings.footerColor.b},${bookerObject.siteSettings.footerColor.a})`}}>
                     <Typography >Yhteystiedot </Typography>
                     <div className={classes.footerContent}>
 
-                        <div className={classes.footerObject}>
+                        <div className={classes.footerObject} >
 
                             <Typography color="textSecondary">{bookerObject.publicInformation.name}</Typography>
                             <Typography color="textSecondary"><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>

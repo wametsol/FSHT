@@ -91,7 +91,28 @@ const useStyles = makeStyles((theme) => ({
     },
     dayBtn:{
 
-    }
+    },
+    footer: {
+        margin: 'auto',
+        minHeight: '15vh',
+        maxWidth: '50%',
+        borderTopLeftRadius: 15,
+        borderTopRightRadius: 15,
+
+    },
+    singleService: {
+        textAlign: 'left',
+        margin: 20
+    },
+    footerObject: {
+        marginLeft: '5%',
+        marginTop: 'auto',
+        flexBasis: '33.33%',
+    },
+    footerContent: {
+        display: 'flex',
+        textAlign: 'left!important'
+    },
 }))
 
 export default useStyles

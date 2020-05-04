@@ -5,8 +5,8 @@ const useStyles = makeStyles((theme) => ({
     root: {
         maxWidth: '50%',
         margin: 'auto',
-        marginBottom: 'auto',
-        minHeight: '85vh',
+        marginBottom: '15vh',
+        minHeight: '80vh',
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -14,8 +14,18 @@ const useStyles = makeStyles((theme) => ({
         border: '1px solid',
         borderRadius: 5,
         '&:hover': {
-            background: 'linear-gradient(#3f51b5 60%, #2e91bf 120%)',
+            background: 'rgb(255,255,255,0.5)',
             borderRadius: 10
+        }
+    },
+    homeButton: {
+        flexGrow: 0,
+        fontSize: 20,
+        padding: 5,
+        '&:hover': {
+            background: 'rgb(255,255,255,0.5)',
+            border: '1px',
+            borderRadius: 5
         }
     },
     bookingTopbar: {
@@ -31,8 +41,10 @@ const useStyles = makeStyles((theme) => ({
         margin: 'auto',
         minHeight: '15vh',
         maxWidth: '50%',
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
+        position:'fixed',
+        bottom:0,
+        left: 0,
+        right: 0
 
     },
     singleService: {
@@ -91,14 +103,6 @@ const useStyles = makeStyles((theme) => ({
     },
     dayBtn:{
         alignSelf: 'center'
-    },
-    homeButton: {
-        flexGrow: 0,
-        fontSize: 20,
-        '&:hover': {
-            background: 'linear-gradient(#3f51b5 60%, #2e91bf 120%)',
-            borderRadius: 5
-        }
     },
     heading: {
         fontSize: theme.typography.pxToRem(15),

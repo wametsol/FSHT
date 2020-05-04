@@ -8,6 +8,7 @@ import UserTab from './UserTab'
 import TimeManagement from './TimeManagement'
 import Bookings from './Bookings'
 import InfoTab from './InfoTab'
+import ContactInfoTab from './ContactInfoTab';
 
 
 
@@ -77,6 +78,8 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
                 return <InfoTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 4:
                 return <UserTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
+            case 5:
+                return <ContactInfoTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             default:
                 return 'Unknown step';
         }
@@ -99,8 +102,9 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
                         <Tab label='Varaukset' />
                         <Tab label='Palvelut' />
                         <Tab label='Ajanhallinta' />
-                        <Tab label='Yhteystiedot' />
+                        <Tab label='Näkymät' />
                         <Tab label='Käyttäjähallinta' />
+                        <Tab label='Yhteystiedot' />
                     </Tabs>
                     <div>{getTabContent(value)}</div>
 

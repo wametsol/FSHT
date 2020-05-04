@@ -90,6 +90,9 @@ const BookingPage = () => {
     const handleChange = (event, newValue) => {
         setValue(newValue)
     }
+    const rgbLabeller = (color) => {
+        return `rgb(${color.r},${color.g},${color.b},${color.a})`
+    }
 
     const getTabContent = (tab) => {
         switch (tab) {
@@ -270,15 +273,15 @@ const BookingPage = () => {
             <div >
                 <div className={classes.root}>
                     <div >
-                        <AppBar  position="static">
+                        <AppBar  position="static" style={{ backgroundColor: `rgb(${bookerObject.siteSettings.navColor.r},${bookerObject.siteSettings.navColor.g},${bookerObject.siteSettings.navColor.b},${bookerObject.siteSettings.navColor.a})`}}>
                             <Toolbar className={classes.bookingTopbar} variant="dense">
                                 <Tabs
                                 value={value}
                                 onChange={handleChange}
-                                indicatorColor='primary'
+                                TabIndicatorProps={{style: {background:`rgb(${bookerObject.siteSettings.navText2Color.r},${bookerObject.siteSettings.navText2Color.g},${bookerObject.siteSettings.navText2Color.b},${bookerObject.siteSettings.navText2Color.a})`}}}
                                 variant='standard'>
-                                    <Tab label={<span className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
-                                    <Tab label={!user ? <span  className={classes.menuButton} color="inherit">Login</span>: <span onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>}></Tab>
+                                    <Tab label={<span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
+                                    <Tab label={!user ? <span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}}  className={classes.menuButton} color="inherit">Login</span>: <span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>}></Tab>
                                 </Tabs>
                                     
                                 
@@ -289,28 +292,30 @@ const BookingPage = () => {
                     
 
                 </div>
-                <div className={classes.footer} style={{backgroundColor:`rgb(${bookerObject.siteSettings.footerColor.r},${bookerObject.siteSettings.footerColor.g},${bookerObject.siteSettings.footerColor.b},${bookerObject.siteSettings.footerColor.a})`}}>
-                    <Typography >Yhteystiedot </Typography>
+                <br/>
+                <br/>
+                <div className={classes.footer} style={{backgroundColor:`rgb(${bookerObject.siteSettings.footerColor.r},${bookerObject.siteSettings.footerColor.g},${bookerObject.siteSettings.footerColor.b},${bookerObject.siteSettings.footerColor.a})`, borderTopRightRadius:bookerObject.siteSettings.footerBorderRadius, borderTopLeftRadius:bookerObject.siteSettings.footerBorderRadius}}>
+                    <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor), fontWeight: 600}}>Yhteystiedot </Typography>
                     <div className={classes.footerContent}>
 
                         <div className={classes.footerObject} >
 
-                            <Typography color="textSecondary">{bookerObject.publicInformation.name}</Typography>
-                            <Typography color="textSecondary"><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
-                            <Typography color="textSecondary"><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{bookerObject.publicInformation.name}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
 
                         </div>
                         <div className={classes.footerObject}>
-                            <Typography color="textSecondary">{bookerObject.publicInformation.company}</Typography>
-                            <Typography color="textSecondary">JokuRandomOsoite 123</Typography>
-                            <Typography color="textSecondary">02250, Espoo</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{bookerObject.publicInformation.company}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>JokuRandomOsoite 123</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>02250, Espoo</Typography>
                         </div>
                         <div className={classes.footerObject}>
-                            <Typography color="textSecondary">Avoinna: </Typography>
-                            <Typography>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
-                            <Typography>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
-                            <Typography>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
-                            <Typography color="textSecondary">{}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>Avoinna: </Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{}</Typography>
                         </div>
                     </div>
                 </div>

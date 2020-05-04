@@ -47,6 +47,14 @@ const useStyles = makeStyles((theme) => ({
     column: {
         flexBasis: '33.33%',
     },
+    threeFourthColumn: {
+        flexBasis: '75%',
+    },
+    oneFourthColumn: {
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        alignSelf: 'flex-start'
+    },
     helper: {
         borderLeft: `2px solid ${theme.palette.divider}`,
         padding: theme.spacing(1, 2),
@@ -95,9 +103,7 @@ const useStyles = makeStyles((theme) => ({
     footer: {
         margin: 'auto',
         minHeight: '15vh',
-        maxWidth: '50%',
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
+        maxWidth: '75%',
 
     },
     singleService: {
@@ -112,6 +118,31 @@ const useStyles = makeStyles((theme) => ({
     footerContent: {
         display: 'flex',
         textAlign: 'left!important'
+    },
+    bookingTopbar: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    menuButton: {
+        marginRight: theme.spacing(2),
+        padding: 5,
+        border: '1px solid',
+        borderRadius: 5,
+        '&:hover': {
+            background: 'rgb(255,255,255,0.5)',
+            borderRadius: 10
+        }
+    },
+    homeButton: {
+        flexGrow: 0,
+        fontSize: 20,
+        padding: 5,
+        '&:hover': {
+            background: 'rgb(255,255,255,0.5)',
+            border: '1px',
+            borderRadius: 5
+        }
     },
 }))
 

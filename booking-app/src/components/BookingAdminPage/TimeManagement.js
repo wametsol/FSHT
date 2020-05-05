@@ -1,11 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Slider, Typography, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, CircularProgress } from '@material-ui/core';
+import { Slider, Typography, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, CircularProgress, TextField, capitalize } from '@material-ui/core';
 import useStyles from './useStyles'
-import clsx from 'clsx';
+import clsx from 'clsx'
+
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import AddCircleIcon from '@material-ui/icons/AddCircle'
+import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded'
+import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
+
 import firebase, { firestore } from '../../firebase'
 import { useRouteMatch } from 'react-router-dom'
 import { sameAsBase, isClosed, getFormattedTimes, getWeekdayTimes, valueLabelFormat, valuetext } from './TimeTableServices'
+
+import DateFnsUtils from '@date-io/date-fns'
+import { fi } from 'date-fns/locale'
+import {
+    MuiPickersUtilsProvider,
+    KeyboardTimePicker,
+    KeyboardDatePicker,
+} from '@material-ui/pickers'
+import { format, getDay, addDays, isBefore } from 'date-fns'
 
 
 
@@ -52,7 +66,12 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const classes = useStyles()
     const [value, setValue] = useState(bookerObject.timeTables)
     const [editWeekDays, setEditWeekdays] = useState(true)
+    const [editWeekEnds, setEditWeekends] = useState(true)
     const [loading, setLoading] = useState(false)
+    const [holidayFormOpen, setHolidayFormOpen] = useState(false)
+    const [selectedDate, setSelectedDate] = useState(new Date)
+    const [specialDayTimes, setSpecialDayTimes] = useState([8,16])
+    const [specialDayReason, setSpecialDayReason] = useState('')
     const pagematch = useRouteMatch('/:id')
 
     const handleBase = (event, newValue) => {
@@ -148,12 +167,16 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             }
         })
     }
+    const handleSpecial = (event, newValue) => {
+        setSpecialDayTimes(newValue)
+    }
     
 
     const saveWeekDayEdit = (e) => {
         e.preventDefault()
         try {
-            setEditWeekdays(!editWeekDays)
+            setEditWeekdays(true)
+            setEditWeekends(true)
             setLoading(true)
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({timeTables: value})
                 .then((res) => {
@@ -165,6 +188,21 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             console.log(error)
         }
         
+    }
+
+    
+    const resetSpecialForm = (e) => {
+        e.preventDefault()
+        setSpecialDayTimes([8,16])
+        setHolidayFormOpen(false)
+        setSpecialDayReason('')
+    }
+
+    const addNewSpecialDay = (e) => {
+        e.preventDefault()
+        console.log(selectedDate)
+        console.log(specialDayReason)
+        console.log(specialDayTimes)
     }
 
 
@@ -185,27 +223,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             </ExpansionPanelSummary>
             <ExpansionPanelDetails className={classes.details}>
                 <div className={classes.column} >
-
-                    <Slider
-                        name='Yleinen'
-                        value={value.base}
-                        onChange={handleBase}
-                        valueLabelDisplay="auto"
-                        aria-labelledby="range-slider"
-                        getAriaValueText={valuetext}
-                        valueLabelFormat={valueLabelFormat}
-                        step={0.25}
-                        min={0}
-                        max={24}
-                        type={'number'}
-                        aria-labelledby='input-slider'
-                        width='75%'
-                        disabled
-
-
-                    />
-                    <Typography style={{ textAlign: 'left' }}>Yleinen: {valueLabelFormat(value.base[0])} - {valueLabelFormat(value.base[1])}</Typography>
-
                 </div>
                 <div className={classes.column} >
                 <div style={{ margin: 20, border: 'solid 1px' }}>
@@ -223,9 +240,11 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                             max={24}
                             type={'number'}
                             aria-labelledby='input-slider'
+                            disabled={editWeekEnds}
 
                         />
-                        <Typography>{valueLabelFormat(value.weekEnds.sat[0])} - {valueLabelFormat(value.weekEnds.sat[1])}</Typography>
+                        <Typography >{getFormattedTimes(value.weekEnds.sat)}</Typography>
+                        {editWeekEnds ? <em/> : <div>{isClosed(value.weekEnds.sat) ?  <Button size='small' color='secondary' onClick={() => handleSat(2, [8,16])}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSat(1, [0,0])}>Aseta suljetuksi</Button> }</div>}
                     </div>
                     <div style={{ margin: 20, border: 'solid 1px' }}>
                         <Typography>Sunnuntai: </Typography>
@@ -242,26 +261,34 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                             max={24}
                             type={'number'}
                             aria-labelledby='input-slider'
+                            disabled={editWeekEnds}
 
                         />
-                        <Typography >{valueLabelFormat(value.weekEnds.sun[0])} - {valueLabelFormat(value.weekEnds.sun[1])}</Typography>
+                        <Typography >{getFormattedTimes(value.weekEnds.sun)}</Typography>
+                        {editWeekEnds ? <em/> : <div>{isClosed(value.weekEnds.sun) ?  <Button size='small' color='secondary' onClick={() => handleSun(2, [8,16])}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSun(1, [0,0])}>Aseta suljetuksi</Button> }</div>}
                     </div>
 
 
 
                 </div>
                 <div className={clsx(classes.column, classes.helper)}>
-                    <Typography variant="caption">Viikonloppuisin:</Typography>
-                    <Typography >La: {valueLabelFormat(value.weekEnds.sat[0])} - {valueLabelFormat(value.weekEnds.sat[1])}</Typography>
-                    <Typography >Su: {valueLabelFormat(value.weekEnds.sun[0])} - {valueLabelFormat(value.weekEnds.sun[1])}</Typography>
+                    {isClosed(value.weekEnds.sun) && isClosed(value.weekEnds.sat)? <Typography >Viikonloppuisin: suljettu</Typography> : <div>
+                    <Typography >La: {getFormattedTimes(value.weekEnds.sat)}</Typography>
+                    <Typography >Su: {getFormattedTimes(value.weekEnds.sun)}</Typography>
+                    </div>}
+                    
+                    
                 </div>
             </ExpansionPanelDetails>
             <Divider />
             <ExpansionPanelActions>
-                <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
-                <Button size="small" color="secondary">
-                    Poista
-                                    </Button>
+            {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div>{editWeekEnds? <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' onClick={() => setEditWeekends(!editWeekDays)}>Muokkaa</Button></Tooltip> : <div>
+                    <Tooltip title={`Talleta muokkauksesi `} arrow><Button size='small' variant='outlined' color='primary' onClick={saveWeekDayEdit}>Tallenna</Button></Tooltip>
+                    <Tooltip title={`Peru muokkaukset`} arrow><Button size='small' variant='outlined' color='secondary' onClick={() => {
+                        setValue(bookerObject.timeTables)
+                        setEditWeekends(!editWeekEnds)
+                        }}>Peru</Button></Tooltip>
+                    </div>}</div>}
             </ExpansionPanelActions>
         </ExpansionPanel>
     )
@@ -440,7 +467,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div>{editWeekDays? <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' onClick={() => setEditWeekdays(!editWeekDays)}>Muokkaa</Button></Tooltip> : <div>
                     <Tooltip title={`Talleta muokkauksesi `} arrow><Button size='small' variant='outlined' color='primary' onClick={saveWeekDayEdit}>Tallenna</Button></Tooltip>
                     <Tooltip title={`Peru muokkaukset`} arrow><Button size='small' variant='outlined' color='secondary' onClick={() => {
-                        setValue(initialTimetable)
+                        setValue(bookerObject.timeTables)
                         setEditWeekdays(!editWeekDays)
                         }}>Peru</Button></Tooltip>
                     </div>}</div>}
@@ -464,6 +491,90 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 </div>
 
             </ExpansionPanelSummary>
+            <div >
+                {holidayFormOpen? <div className={classes.holidayAddForm}>
+                    <div className={classes.halfDiv}>
+                        <div>
+                    <Tooltip title={`${capitalize(format(addDays(selectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -1), 'MM/dd/yyyy')} `}>
+                                    <span className={classes.dayBtn}><Button className={classes.dayBtn} disabled={isBefore(selectedDate, new Date)}  onClick={() => setSelectedDate(addDays(selectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
+                    <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
+                                    <KeyboardDatePicker
+                                        //disableToolbar
+                                        variant="dialog"
+                                        cancelLabel="Peru"
+                                        format={"EEEE dd/MM/yyyy"}
+    
+                                        options={{ locale: fi }}
+                                        margin="normal"
+                                        id="date-picker-inline"
+                                        value={selectedDate}
+                                        onChange={(date) => setSelectedDate(date)}
+                                        autoOk
+                                        locale={fi}
+                                        disablePast
+                                        inputProps={{
+                                            disabled: true,
+                                            size: 'small',
+                                            className: classes.dateInput
+                                            
+                                        }}
+                                        KeyboardButtonProps={{
+                                            'aria-label': 'change date',
+                                        }}
+                                    />
+    
+                                </MuiPickersUtilsProvider>
+                                <Tooltip title={`${capitalize(format(addDays(selectedDate, 1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, 1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, 1), 'dd/MM/yyyy')} `}>
+                                    <span className={classes.dayBtn}><Button className={classes.dayBtn}  onClick={() => setSelectedDate(addDays(selectedDate, 1))} size='small'><NavigateNextRoundedIcon /></Button></span></Tooltip>
+                                    
+                    </div>
+                    <br/>
+                    <TextField
+                    className={classes.specialTextfield}
+                    id="reason"
+                    label="Syy tai nimike"
+                    variant="outlined"
+                    onChange={({ target }) => setSpecialDayReason(target.value)}
+                    helperText="Esimerkiksi 'Helatorstai' tai 'Inventaario'" />
+                    </div>
+                    <br/>
+                    <div className={classes.halfDiv} >
+                    <div style={{ marginLeft: 20, marginRight:20, marginTop:10  }}>
+                    <Typography>Aseta ajat </Typography>
+                    
+                        
+                    <Slider
+                            name='Erikoispäivä'
+                            value={specialDayTimes}
+                            onChange={handleSpecial}
+                            valueLabelDisplay="auto"
+                            aria-labelledby="range-slider"
+                            getAriaValueText={valuetext}
+                            valueLabelFormat={valueLabelFormat}
+                            step={0.25}
+                            min={0}
+                            max={24}
+                            type={'number'}
+                            aria-labelledby='input-slider'
+                            marks={marks}
+                            //disabled={editWeekDays}
+                        />           
+                    </div>
+                    <Typography>Näkymä:</Typography>
+                    <Typography style={{fontWeight:600}}>Aukiolo: {getFormattedTimes(specialDayTimes)} {isClosed(specialDayTimes) ?  <Button size='small' color='secondary' onClick={() => handleSpecial(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSpecial(1, [0,0])}>Aseta suljetuksi</Button> }</Typography>
+                    
+                    <div style={{margin:10, float:'right'}}>
+                    <Button onClick={addNewSpecialDay} variant='outlined'>Lisää</Button>
+                    <Button onClick={resetSpecialForm} variant='outlined'>Peru</Button>
+                    </div>
+                    </div>
+                        
+                </div>: <div style={{marginLeft: '15%'}}><Tooltip title='Lisää uusi poikkeuspäivä'><Button onClick={() => setHolidayFormOpen(true)}><AddCircleIcon style={{color:'green'}}/></Button></Tooltip></div>
+
+                }
+            
+            </div>
+            
             <ExpansionPanelDetails className={classes.details}>
                 <div className={classes.column} >
 

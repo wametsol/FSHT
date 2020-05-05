@@ -64,7 +64,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
                     const bookings = doc.data()[`${format(data.date, `dd:MM:yyyy`)}`]
                     console.log('HURRAA ON')
                     console.log(bookings)
-                    if ((bookings.filter(booking => booking.times.start === data.times.start)).length === 0) {
+                    if ((bookings.filter(booking => booking.times.start === data.times.start && booking.active===true)).length === 0) {
 
                         firestore.collection(`booker${data.target}`).doc('bookings').update({ [`${format(data.date, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
 

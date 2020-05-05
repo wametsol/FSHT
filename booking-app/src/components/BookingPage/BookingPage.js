@@ -18,7 +18,7 @@ import {
     KeyboardTimePicker,
     KeyboardDatePicker,
 } from '@material-ui/pickers';
-import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
+import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
 import ProfilePage from './ProfilePage'
 import ConfirmationWindow from './ConfirmationWindow'
 
@@ -138,7 +138,7 @@ const BookingPage = () => {
 
             // CHECK IF DAILYBOOKINGS EXIST
             for (const b in dailyBookings) {
-                if (dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end > singleTime.start) {
+                if (dailyBookings[b].active===true && dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end > singleTime.start) {
                     singleTime.bookedAlready = true
                 }
             }
@@ -168,13 +168,13 @@ const BookingPage = () => {
                             </CardContent>
                             <Divider />
                             <div className={classes.currentDayTitle}>
-                                <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'MM/dd/yyyy')} `}>
+                                <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'dd/MM/yyyy')} `}>
                                     <span className={classes.weekBtn}>
                                     <Button disabled={isBefore(addDays(selectedDate, -6), new Date)}  onClick={() => setSelectedDate(addDays(selectedDate, -7))} size='small'><DoubleArrowRoundedIcon style={{ transform: 'rotate(180deg)' }} /></Button>
                                     </span>
                                     </Tooltip>
     
-                                <Tooltip title={`${capitalize(format(addDays(selectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -1), 'MM/dd/yyyy')} `}>
+                                <Tooltip title={`${capitalize(format(addDays(selectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -1), 'dd/MM/yyyy')} `}>
                                     <span className={classes.dayBtn}><Button disabled={isBefore(selectedDate, new Date)}  onClick={() => setSelectedDate(addDays(selectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
     
                                 <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
@@ -202,9 +202,9 @@ const BookingPage = () => {
     
                                 </MuiPickersUtilsProvider>
     
-                                <Tooltip title={`${capitalize(format(addDays(selectedDate, 1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, 1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, 1), 'MM/dd/yyyy')} `}>
+                                <Tooltip title={`${capitalize(format(addDays(selectedDate, 1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, 1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, 1), 'dd/MM/yyyy')} `}>
                                     <span className={classes.dayBtn}><Button  onClick={() => setSelectedDate(addDays(selectedDate, 1))} size='small'><NavigateNextRoundedIcon /></Button></span></Tooltip>
-                                <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'MM/dd/yyyy')} `}>
+                                <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'dd/MM/yyyy')} `}>
                                     <span className={classes.weekBtn}><Button  onClick={() => setSelectedDate(addDays(selectedDate, 7))} size='small'><DoubleArrowRoundedIcon /></Button></span></Tooltip>
                             </div>
     
@@ -294,6 +294,7 @@ const BookingPage = () => {
                 </div>
                 <br/>
                 <br/>
+                {bookerObject.siteSettings.footerOn? <span>
                 <div className={classes.footer} style={{backgroundColor:`rgb(${bookerObject.siteSettings.footerColor.r},${bookerObject.siteSettings.footerColor.g},${bookerObject.siteSettings.footerColor.b},${bookerObject.siteSettings.footerColor.a})`, borderTopRightRadius:bookerObject.siteSettings.footerBorderRadius, borderTopLeftRadius:bookerObject.siteSettings.footerBorderRadius}}>
                     <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor), fontWeight: 600}}>Yhteystiedot </Typography>
                     <div className={classes.footerContent}>
@@ -307,18 +308,22 @@ const BookingPage = () => {
                         </div>
                         <div className={classes.footerObject}>
                             <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{bookerObject.publicInformation.company}</Typography>
-                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>JokuRandomOsoite 123</Typography>
-                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>02250, Espoo</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>Y-tunnus:{bookerObject.publicInformation.companyID}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{bookerObject.publicInformation.address}</Typography>
+                            <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{bookerObject.publicInformation.postnumber}, {bookerObject.publicInformation.city}</Typography>
                         </div>
                         <div className={classes.footerObject}>
                             <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>Avoinna: </Typography>
                             <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
+                            {isClosed(bookerObject.timeTables.weekEnds.sat) && isClosed(bookerObject.timeTables.weekEnds.sun)? <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}} >Viikonloppuisin: suljettu</Typography> : <div>
                             <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
                             <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
+                            </div>}
                             <Typography style={{color:rgbLabeller(bookerObject.siteSettings.footerTextColor)}}>{}</Typography>
                         </div>
                     </div>
                 </div>
+                </span>: <em/>}
             
             </div>
         )

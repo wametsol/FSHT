@@ -134,7 +134,7 @@ const ProfilePage = ({site, bookingsObject}) => {
         <div>
             <Typography>Omat varauksesi</Typography>
             
-            {!userData ? <div>{!loading ? <div></div> : <div>LATAA</div>}</div> : <div>
+            {!userData ? <div>{!loading ? <div></div> : <CircularProgress />}</div> : <div>
                 <Typography>{userData.name}</Typography>
                 <ExpansionPanel>
                 <ExpansionPanelSummary

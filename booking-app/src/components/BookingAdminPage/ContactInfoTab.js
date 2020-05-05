@@ -89,7 +89,7 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 {edit ? <div>
                     <div>
                     <Typography variant='h5'>Järjestelmäsi </Typography>
-                    <TextField className={classes.basicText} id="systemName" value={systName} label="Nimi" variant="outlined" onChange={({ target }) => setSystName(target.value)} />
+                    <TextField disabled className={classes.basicText} id="systemName" value={systName} label="Nimi" variant="outlined" onChange={({ target }) => setSystName(target.value)} />
                 </div>
                 <br />
                     <Typography variant='h5'>Yhteystiedot</Typography>
@@ -116,26 +116,31 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     <Typography variant='h5'>Yrityksen tiedot</Typography>
                     <TextField className={classes.basicText} value={publicCompany} id="contactCompany" label="Yritys" variant="outlined" onChange={({ target }) => setPublicCompany(target.value)} />
                     <TextField className={classes.basicText} value={publicCompanyID} id="contactCompanyID" label="Y-tunnus" variant="outlined" onChange={({ target }) => setPublicCompanyID(target.value)} />
+                    <br/>
                     <TextField className={classes.basicText} value={publicAddress} id="contactAddress" label="Osoite" variant="outlined" onChange={({ target }) => setPublicyAddress(target.value)} />
                     <TextField className={classes.basicText} value={publicPostNumber} id="contactPostnumber" label="Postinumero" variant="outlined" onChange={({ target }) => setPublicPostNumber(target.value)} />
                     <TextField className={classes.basicText} value={publicCity} id="contactCity" label="Kaupunki" variant="outlined" onChange={({ target }) => setPublicCity(target.value)} />
                 </div> : <div>
                 <div>
                     <Typography variant='h5'>Järjestelmäsi </Typography>
-                    <Typography>Nimi: {systName}</Typography>
+                    <Typography>Nimi: <span style={{fontWeight:600}}>{systName}</span></Typography>
                 </div>
                 <br />
                         <Typography variant='h5'>Yhteystiedot</Typography>
-                        <Typography>Nimi: {publicName}</Typography>
-                        <Typography>Sähköposti: {publicEmail}</Typography>
-                        <Typography>Puhelin: {publicPhone}</Typography>
+                        <div style={{margin:'auto', maxWidth: '30%' , border:'solid 1px', textAlign: 'left'}}>
+                        <Typography>Nimi: <span style={{fontWeight:600}}>{publicName}</span></Typography>
+                        <Typography>Sähköposti: <span style={{fontWeight:600}}>{publicEmail}</span></Typography>
+                        <Typography>Puhelin: <span style={{fontWeight:600}}>{publicPhone}</span></Typography>
+                        </div>
                         <br />
                         <Typography variant='h5'>Yrityksen tiedot</Typography>
-                        <Typography>Yrityksen nimi: {publicCompany}</Typography>
-                        <Typography>Y-tunnus: {publicCompanyID}</Typography>
-                        <Typography>Osoite: {publicAddress}</Typography>
-                        <Typography>Postinumero: {publicPostNumber}</Typography>
-                        <Typography>Toimipaikka: {publicCity}</Typography>
+                        <div style={{margin:'auto', maxWidth: '30%' , border:'solid 1px', textAlign: 'left'}}>
+                        <Typography>Yrityksen nimi: <span style={{fontWeight:600}}>{publicCompany}</span></Typography>
+                        <Typography>Y-tunnus: <span style={{fontWeight:600}}>{publicCompanyID}</span></Typography>
+                        <Typography>Osoite: <span style={{fontWeight:600}}>{publicAddress}</span></Typography>
+                        <Typography>Postinumero: <span style={{fontWeight:600}}>{publicPostNumber}</span></Typography>
+                        <Typography>Toimipaikka: <span style={{fontWeight:600}}>{publicCity}</span></Typography>
+                        </div>
                     </div>}
 
 

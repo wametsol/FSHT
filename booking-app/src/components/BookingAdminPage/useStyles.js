@@ -94,11 +94,11 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: 'lightgrey',
         padding: 20,
     },
-    weekBtn:{
-
+    dateInput:{
+        textAlign: 'center',
     },
     dayBtn:{
-
+        marginTop: '15px'
     },
     footer: {
         margin: 'auto',
@@ -144,6 +144,26 @@ const useStyles = makeStyles((theme) => ({
             borderRadius: 5
         }
     },
+    basicText: {
+        margin: 8,
+        width: '30%'
+    },
+    holidayAddForm:{
+        marginLeft:'15%',
+        marginRight:'15%',
+        backgroundColor: 'rgb(255,213,158,0.5)',
+        display: 'flex',
+        //flexDirection: 'column',
+        alignItems: 'center',
+    },
+    halfDiv: {
+        flexBasis: '50%',
+        alignSelf: 'flex-start'
+    },
+    specialTextfield: {
+        marginTop: 15,
+        marginBottom: 15
+    }
 }))
 
 export default useStyles

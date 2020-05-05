@@ -3,7 +3,7 @@ import { green } from '@material-ui/core/colors'
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        maxWidth: '50%',
+        maxWidth: '60%',
         margin: 'auto',
         marginBottom: '15vh',
         minHeight: '80vh',
@@ -34,13 +34,13 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'space-between',
     },
     media: {
-        height: 140,
+        height: '25vh',
         margin: 'auto'
     },
     footer: {
         margin: 'auto',
         minHeight: '15vh',
-        maxWidth: '50%',
+        maxWidth: '60%',
         position:'fixed',
         bottom:0,
         left: 0,

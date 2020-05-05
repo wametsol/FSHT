@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChromePicker } from 'react-color'
 import firebase, { firestore } from '../../firebase'
-import { Typography, CircularProgress, TextField,AppBar, Toolbar, Tabs, Tab, Button, Slider, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider } from '@material-ui/core';
+import { Typography, CircularProgress, TextField, AppBar, Toolbar, Tabs, Tab, Button, Slider, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Checkbox } from '@material-ui/core';
 import { useRouteMatch } from 'react-router-dom'
 import clsx from 'clsx';
 
@@ -51,6 +51,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
     const [navTabValue, setNavTabValue] = useState(0)
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
+    const [footerON, setFooterON] = useState(bookerObject.siteSettings.footerOn)
     const classes = useStyles()
 
     const sameAsInitialFooterStyle = () => {
@@ -62,6 +63,9 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
             return false
         }
         if (initialSettings.footerBorderRadius !== footerBorderRadius) {
+            return false
+        }
+        if (initialSettings.footerOn !== footerON){
             return false
         }
         return true
@@ -86,7 +90,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
         return true
     }
 
-    
+
 
     const changeBorderRadius = (e, newValue) => {
         console.log(e)
@@ -157,6 +161,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
             b: navText2Color.b
         }
         newSettings.footerBorderRadius = footerBorderRadius
+        newSettings.footerOn = footerON
         try {
             setLoading(true)
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ 'siteSettings': newSettings })
@@ -166,7 +171,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                     setTimeout(() => {
                         setLoading(false)
                     }, 1000);
-                    
+
                 })
 
         } catch (error) {
@@ -191,45 +196,53 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                 <div className={classes.column}>
                     <Typography className={classes.secondaryHeading}>Säädä alapalkin asetuksia</Typography>
                 </div>
+                <div className={classes.column}>
+                    <Typography className={classes.secondaryHeading}>{footerON ? <span style={{ color: 'green' }}>Käytössä</span> : <span style={{ color: 'red' }}>Ei käytössä</span>}</Typography>
+                </div>
 
             </ExpansionPanelSummary>
+            <Typography style={{ textAlign: 'left', marginLeft: '20%' }}>Alapalkki käytössä:<Checkbox color='primary' checked={footerON} onChange={() => setFooterON(!footerON)} /></Typography>
+
             <Typography className={classes.secondaryHeading}>Tässä näkyvien tietojen päivittäminen tapahtuu niitä koskevilta välilehdiltä</Typography>
             <div>
-            <div style={{ margin: 20 }}>
-                        <div className={classes.footer} style={{ backgroundColor: `rgb(${footerColor.r},${footerColor.g},${footerColor.b},${footerColor.a})`, borderTopLeftRadius: footerBorderRadius, borderTopRightRadius: footerBorderRadius }}>
-                            <Typography style={{color:rgbLabeller(footerTextColor), fontWeight: 600}} >Yhteystiedot </Typography>
-                            <div className={classes.footerContent}>
+                <div style={{ margin: 20 }}>
+                    <div className={classes.footer} style={{ backgroundColor: `rgb(${footerColor.r},${footerColor.g},${footerColor.b},${footerColor.a})`, borderTopLeftRadius: footerBorderRadius, borderTopRightRadius: footerBorderRadius }}>
+                        <Typography style={{ color: rgbLabeller(footerTextColor), fontWeight: 600 }} >Yhteystiedot </Typography>
+                        <div className={classes.footerContent}>
 
-                                <div className={classes.footerObject}>
+                            <div className={classes.footerObject}>
 
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>{bookerObject.publicInformation.name}</Typography>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.name}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
 
-                                </div>
-                                <div className={classes.footerObject}>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>{bookerObject.publicInformation.company}</Typography>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>JokuRandomOsoite 123</Typography>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>02250, Espoo</Typography>
-                                </div>
-                                <div className={classes.footerObject}>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>Avoinna: </Typography>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
-                                    <Typography style={{color:rgbLabeller(footerTextColor)}}>{}</Typography>
-                                </div>
+                            </div>
+                            <div className={classes.footerObject}>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.company}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>JokuRandomOsoite 123</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>02250, Espoo</Typography>
+                            </div>
+                            <div className={classes.footerObject}>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>Avoinna: </Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{}</Typography>
                             </div>
                         </div>
                     </div>
+                </div>
             </div>
-            <ExpansionPanelDetails className={classes.details}>
+            {footerON?  <ExpansionPanelDetails className={classes.details}>
+               
                 <div className={classes.oneFourthColumn} >
+                    
 
-                    <ColorPicker title='Alapalkin pohjaväri' initialColor={bookerObject.siteSettings.footerColor} changeColor={changeFooterColor} color={footerColor} />
+                    <ColorPicker title='Alapalkin pohjaväri' initialColor={bookerObject.siteSettings.footerColor} changeColor={changeFooterColor} color={footerColor}/>
                     <br />
                     <Typography>Säädä kulmien pyöreyttä</Typography>
                     <Slider
+                        disabled={!footerON}
                         name='Pyöreys'
                         value={footerBorderRadius}
                         onChange={changeBorderRadius}
@@ -246,13 +259,13 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
 
                 </div>
                 <div className={classes.oneFourthColumn}>
-                <ColorPicker title='Alapalkin tekstiväri' initialColor={bookerObject.siteSettings.footerTextColor} changeColor={changeFooterTextColor} color={footerTextColor} />
+                    <ColorPicker title='Alapalkin tekstiväri' initialColor={bookerObject.siteSettings.footerTextColor} changeColor={changeFooterTextColor} color={footerTextColor} disabled={!footerON} />
                 </div>
-            </ExpansionPanelDetails>
+            </ExpansionPanelDetails> : <em/>}
             <Divider />
             <ExpansionPanelActions>
-                {!loading? <div><Button disabled={sameAsInitialFooterStyle()} color='secondary' onClick={resetFooterStyling}>Peru muutokset</Button>
-                <Button disabled={sameAsInitialFooterStyle()} color='primary' onClick={changeSiteSettings}>Hyväksy muutos</Button></div> : <CircularProgress/>}
+                {!loading ? <div><Button disabled={sameAsInitialFooterStyle()} color='secondary' onClick={resetFooterStyling}>Peru muutokset</Button>
+                    <Button disabled={sameAsInitialFooterStyle()} color='primary' onClick={changeSiteSettings}>Hyväksy muutos</Button></div> : <CircularProgress />}
             </ExpansionPanelActions>
         </ExpansionPanel>
     )
@@ -273,23 +286,23 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
 
             </ExpansionPanelSummary>
             <div>
-                <Divider/>
-            <div style={{maxWidth:'75%', margin:'auto'}}>
-                <AppBar  position="static" style={{ backgroundColor: `rgb(${navColor.r},${navColor.g},${navColor.b},${navColor.a})`}}>
-                            <Toolbar className={classes.bookingTopbar} variant="dense" >
-                                <Tabs
+                <Divider />
+                <div style={{ maxWidth: '75%', margin: 'auto' }}>
+                    <AppBar position="static" style={{ backgroundColor: `rgb(${navColor.r},${navColor.g},${navColor.b},${navColor.a})` }}>
+                        <Toolbar className={classes.bookingTopbar} variant="dense" >
+                            <Tabs
                                 value={navTabValue}
-                                TabIndicatorProps={{style: {background:`rgb(${navText2Color.r},${navText2Color.g},${navText2Color.b},${navText2Color.a})`}}}
+                                TabIndicatorProps={{ style: { background: `rgb(${navText2Color.r},${navText2Color.g},${navText2Color.b},${navText2Color.a})` } }}
                                 variant='standard'>
-                                    <Tab label={<span className={classes.homeButton} onClick={() => setNavTabValue(0)} style={{  color:`rgb(${navTextColor.r},${navTextColor.g},${navTextColor.b},${navTextColor.a})`}} >{bookerObject.bookerName}</span>}></Tab>
-                                    <Tab label={<span className={classes.menuButton} onClick={() => setNavTabValue(1)} variant='outlined' style={{  color:`rgb(${navTextColor.r},${navTextColor.g},${navTextColor.b},${navTextColor.a})`}} >Varaukset</span>}></Tab>
-                                </Tabs>
-                                    
-                                
-                            </Toolbar>
-                        </AppBar>
+                                <Tab label={<span className={classes.homeButton} onClick={() => setNavTabValue(0)} style={{ color: `rgb(${navTextColor.r},${navTextColor.g},${navTextColor.b},${navTextColor.a})` }} >{bookerObject.bookerName}</span>}></Tab>
+                                <Tab label={<span className={classes.menuButton} onClick={() => setNavTabValue(1)} variant='outlined' style={{ color: `rgb(${navTextColor.r},${navTextColor.g},${navTextColor.b},${navTextColor.a})` }} >Varaukset</span>}></Tab>
+                            </Tabs>
+
+
+                        </Toolbar>
+                    </AppBar>
                 </div>
-                </div>
+            </div>
             <ExpansionPanelDetails className={classes.details}>
                 <div className={classes.oneFourthColumn} >
 
@@ -314,16 +327,16 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
 
                 </div>
                 <div className={classes.oneFourthColumn}>
-                <ColorPicker title='Painikkeiden tekstiväri' initialColor={bookerObject.siteSettings.navTextColor} changeColor={changeNavTextColor} color={navTextColor} />
+                    <ColorPicker title='Painikkeiden tekstiväri' initialColor={bookerObject.siteSettings.navTextColor} changeColor={changeNavTextColor} color={navTextColor} />
                 </div>
                 <div className={classes.oneFourthColumn}>
-                <ColorPicker title='Painikkeiden korostusväri' initialColor={bookerObject.siteSettings.navText2Color} changeColor={changeNavText2Color} color={navText2Color} />
+                    <ColorPicker title='Painikkeiden korostusväri' initialColor={bookerObject.siteSettings.navText2Color} changeColor={changeNavText2Color} color={navText2Color} />
                 </div>
             </ExpansionPanelDetails>
             <Divider />
             <ExpansionPanelActions>
-            {!loading? <div><Button disabled={sameAsInitialNavStyle()} color='secondary' onClick={resetNavStyling}>Peru muutokset</Button>
-                <Button disabled={sameAsInitialNavStyle()} color='primary' onClick={changeSiteSettings}>Hyväksy muutos</Button></div> : <CircularProgress/>}
+                {!loading ? <div><Button disabled={sameAsInitialNavStyle()} color='secondary' onClick={resetNavStyling}>Peru muutokset</Button>
+                    <Button disabled={sameAsInitialNavStyle()} color='primary' onClick={changeSiteSettings}>Hyväksy muutos</Button></div> : <CircularProgress />}
             </ExpansionPanelActions>
         </ExpansionPanel>
     )

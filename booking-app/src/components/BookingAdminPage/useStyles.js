@@ -163,6 +163,18 @@ const useStyles = makeStyles((theme) => ({
     specialTextfield: {
         marginTop: 15,
         marginBottom: 15
+    },
+    specialDays: {
+        display: 'flex',
+        margin: 20
+    },
+    specialDay: {
+        flexBasis: '25%',
+        margin: 'auto'
+
+    },
+    specialText: {
+        width: '50%',
     }
 }))
 

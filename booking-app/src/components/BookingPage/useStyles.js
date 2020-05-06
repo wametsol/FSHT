@@ -97,6 +97,26 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: '#ffebe6',
         padding: 20
     },
+    specialInfo: {
+        position: 'relative',
+        alignSelf: 'center',
+        marginTop: '1%',
+        backgroundColor: '#ffe4a1',
+        padding: 20
+    },
+    specialTimeBox: {
+        padding: 5,
+        flexBasis: '40%',
+        maxWidth: '400px',
+        border: '1px solid lightgrey',
+        borderRadius: 4
+    },
+    titleBox: {
+        flexBasis: '60%'
+    },
+    cardTitleBox: {
+        display:'flex'
+    },
     weekBtn:{
         alignSelf: 'center'
 

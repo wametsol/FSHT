@@ -175,6 +175,17 @@ const useStyles = makeStyles((theme) => ({
     },
     specialText: {
         width: '50%',
+    },
+    floatingErrorBox: {
+        alignSelf: 'center',
+        position: 'fixed',
+        width: '74%',
+        height: '20%',
+        left: '13%',
+        textAlign: 'center',
+        backgroundColor: 'grey',
+        opacity: 0.8,
+        borderRadius: 5,
     }
 }))
 

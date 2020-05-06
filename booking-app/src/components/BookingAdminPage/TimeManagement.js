@@ -19,7 +19,7 @@ import {
     KeyboardTimePicker,
     KeyboardDatePicker,
 } from '@material-ui/pickers'
-import { format, getDay, addDays, isBefore } from 'date-fns'
+import { format, getDay, addDays, isBefore, parseISO } from 'date-fns'
 
 
 
@@ -75,6 +75,11 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const pagematch = useRouteMatch('/:id')
 
     const specialDayKeys = Object.keys(bookerObject.specialDays)
+    
+    //SORT SPECIALDAYS TO ASC ORDER
+    specialDayKeys.sort((a,b) => parseISO(`${a.substring(6,10)}-${a.substring(3,5)}-${a.substring(0,2)}`) - parseISO(`${b.substring(6,10)}-${b.substring(3,5)}-${b.substring(0,2)}`))
+    
+    
 
     const handleBase = (event, newValue) => {
         console.log(newValue)
@@ -210,7 +215,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         try {
             setLoading(true)
             const specialDayObject = {
-                date: format(selectedDate, `dd:MM:yyyy`),
+                date: format(selectedDate, 'dd/MM/yyyy'),
                 times: specialDayTimes,
                 reason: specialDayReason
             }
@@ -633,11 +638,11 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                             />
                         </div>
                         <Typography>Näkymä:</Typography>
-                        <Typography style={{ fontWeight: 600 }}>Aukiolo: {getFormattedTimes(specialDayTimes)} {isClosed(specialDayTimes) ? <Button size='small' color='secondary' onClick={() => handleSpecial(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSpecial(1, [0, 0])}>Aseta suljetuksi</Button>}</Typography>
+                                <Typography style={{ fontWeight: 600 }}>  {specialDayReason.length===0? <span>Syy tai nimi</span>: <span>{specialDayReason}</span>}, {format(selectedDate, 'dd.MM.')} : {getFormattedTimes(specialDayTimes)} {isClosed(specialDayTimes) ? <Button size='small' color='secondary' onClick={() => handleSpecial(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSpecial(1, [0, 0])}>Aseta suljetuksi</Button>}</Typography>
 
                         <div style={{ margin: 10, float: 'right' }}>
-                            <Button onClick={addNewSpecialDay} variant='outlined'>Lisää</Button>
-                            <Button onClick={resetSpecialForm} variant='outlined'>Peru</Button>
+                                {specialDayReason.length===0? <Tooltip title='Täytä kaikki tiedot ensiksi'><Button disabled>Lisää</Button></Tooltip> : <Button onClick={addNewSpecialDay} style={{backgroundColor: 'green', color: 'white'}} variant='contained'>Lisää</Button> }
+                            <Button onClick={resetSpecialForm} color='secondary' variant='contained'>Peru</Button>
                         </div>
                     </div>
 
@@ -660,6 +665,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     <div className={classes.specialDays}>
 
                         <div className={classes.specialDay}>
+                            {console.log(bookerObject.specialDays[specialKey].date)}
                             <Typography className={classes.specialText}>{bookerObject.specialDays[specialKey].date}</Typography>
                         </div>
                         <div className={classes.specialDay}>
@@ -679,24 +685,9 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             <Divider />
             <ExpansionPanelDetails className={classes.details}>
 
-
-
-
-
-
-
-
-
-
-
-
             </ExpansionPanelDetails>
 
             <ExpansionPanelActions>
-                <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
-                <Button size="small" color="secondary">
-                    Poista
-                                    </Button>
             </ExpansionPanelActions>
         </ExpansionPanel>
     )

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import 'date-fns'
-import { format, getDay, addDays, isBefore } from 'date-fns'
+import { format, getDay, addDays, isBefore, parseISO } from 'date-fns'
 import { auth, firestore } from '../../firebase'
 import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip } from '@material-ui/core'
 import useStyles from './useStyles'
@@ -41,6 +41,7 @@ const BookingPage = () => {
     const [confirmationData, setConfirmationData] = useState({})
     const [value, setValue] = useState(0)
     const classes = useStyles()
+    
 
     useEffect(() => {
         try {
@@ -86,7 +87,7 @@ const BookingPage = () => {
             setError(true)
         }
     }, [])
-
+    
     const handleChange = (event, newValue) => {
         setValue(newValue)
     }
@@ -115,12 +116,26 @@ const BookingPage = () => {
         setChosenService(e.target.value)
         console.log(getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
     }
+    const dayHasSpecialTimes = () => {
+        if(!bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]]){
+            return false
+        } else {
+           return true
+        }
+    }
 
     const getFreeTimes = () => {
         const dailyBookings = bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]]
-
-
-        const dayTimes = (getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
+        
+        var dayTimes
+        // CHECK IF DAY IS IN SPECIAL DAYS
+        if(dayHasSpecialTimes()){
+            dayTimes = bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times
+        } else {
+            dayTimes = (getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
+        }
+        console.log(bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
+        
         const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes / 60
         var timeObject = []
         for (var x = dayTimes[0]; x < dayTimes[1]; x += timeSlot) {
@@ -151,6 +166,56 @@ const BookingPage = () => {
         setConfirmationData(e)
         setConfirmationOpen(true)
     }
+    const incomingSpecialTimes = () => {
+
+        var specialTimes = []
+
+        Object.keys(bookerObject.specialDays).map(key => {
+            const specDate = bookerObject.specialDays[key].date
+            console.log(isBefore(selectedDate, parseISO(`${specDate.substring(6,10)}-${specDate.substring(3,5)}-${specDate.substring(0,2)}`)))
+            if(isBefore(addDays(selectedDate, -1), parseISO(`${specDate.substring(6,10)}-${specDate.substring(3,5)}-${specDate.substring(0,2)}`))){
+                specialTimes.push(bookerObject.specialDays[key])
+            }
+        })
+
+
+        
+        if(specialTimes.length===0){
+            return (
+                                <div >
+                                <Typography gutterBottom variant="h5" component="h2">
+                                    {bookerObject.bookerName} ajanvaraus
+                            </Typography>
+                                <Typography variant="body2" color="textSecondary" component="p">
+                                    Varaa aikasi täältä
+                            </Typography>
+                            </div>
+            )
+        }
+        specialTimes.sort((a,b) => parseISO(`${a.date.substring(6,10)}-${a.date.substring(3,5)}-${a.date.substring(0,2)}`) - parseISO(`${b.date.substring(6,10)}-${b.date.substring(3,5)}-${b.date.substring(0,2)}`))
+        return (
+            <div className={classes.cardTitleBox}>
+
+                                <div className={classes.titleBox}>
+                                <Typography gutterBottom variant="h5" component="h2">
+                                    {bookerObject.bookerName} ajanvaraus
+                            </Typography>
+                                <Typography variant="body2" color="textSecondary" component="p">
+                                    Varaa aikasi täältä
+                            </Typography>
+                            </div>
+            <div>
+                <Typography>Lähestyvät poikkeusaikataulut: </Typography>
+                {specialTimes.map(time => (
+                    <div className={classes.specialTimeBox}>
+                    <Typography>{time.reason}, {time.date} : <span style={{fontWeight:600}}>{getFormattedTimes(time.times)}</span></Typography>
+                </div>
+                ))}
+            </div>
+            </div>
+        )
+    }
+
     // <Typography className={classes.datePickerTitle}> {capitalize(format(selectedDate, "EEEE", { locale: fi }))} {format(selectedDate, 'MM/dd/yyyy')}</Typography>
 
     
@@ -159,12 +224,9 @@ const BookingPage = () => {
             <Card>
                             <CardMedia className={classes.media} image="https://i1.pickpik.com/photos/80/669/198/hill-lane-forest-motorcycle-preview.jpg" />
                             <CardContent>
-                                <Typography gutterBottom variant="h5" component="h2">
-                                    {bookerObject.bookerName} ajanvaraus
-                            </Typography>
-                                <Typography variant="body2" color="textSecondary" component="p">
-                                    Varaa aikasi täältä
-                            </Typography>
+                                
+                            {incomingSpecialTimes()}
+                            
                             </CardContent>
                             <Divider />
                             <div className={classes.currentDayTitle}>
@@ -211,10 +273,13 @@ const BookingPage = () => {
     
                             <Divider />
                         </Card>
-                        {getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables)[0] === getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables)[1] ? <div className={classes.closedInfo}><Typography>Suljettu, valitse toinen päivä</Typography></div> : <div>
-    
+                        {/*dayHasSpecialTimes()? (bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times[0] === bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times[1]) ? <div className={classes.closedInfo}><Typography>Suljettu, valitse toinen päivä</Typography></div> : <div className={classes.closedInfo}><Typography>Käytössä poikkeusaikataulu</Typography></div> :
+                         <em/>*/}
+                         {dayHasSpecialTimes()? <div className={classes.specialInfo}><Typography>{bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].reason}, käytössä poikkeusaikataulu</Typography> </div>: <em/>}
+                        {(getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables)[0] === getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables)[1]) || (dayHasSpecialTimes() && (bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times[0] === bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times[1]))  ? <div className={classes.closedInfo}><Typography>Suljettu, valitse toinen päivä</Typography></div> : <div>
+                        
                             <Paper>
-                                <Typography>Avoinna: {getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)}</Typography>
+                                <Typography>Avoinna: <span style={{fontWeight:600}}>{dayHasSpecialTimes()? getFormattedTimes(bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times) : getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)}</span></Typography>
                                         <div className={classes.selectorLine} >
                                             <div className={classes.selector}>
                                             <FormControl className={classes.formControl}>
@@ -268,6 +333,7 @@ const BookingPage = () => {
 
 
     if (bookerObject) {
+        
         document.title = `${bookerObject.bookerName} ajanvaraus`
         return (
             <div >

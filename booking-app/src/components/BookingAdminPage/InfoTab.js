@@ -205,6 +205,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
 
             <Typography className={classes.secondaryHeading}>Tässä näkyvien tietojen päivittäminen tapahtuu niitä koskevilta välilehdiltä</Typography>
             <div>
+                
                 <div style={{ margin: 20 }}>
                     <div className={classes.footer} style={{ backgroundColor: `rgb(${footerColor.r},${footerColor.g},${footerColor.b},${footerColor.a})`, borderTopLeftRadius: footerBorderRadius, borderTopRightRadius: footerBorderRadius }}>
                         <Typography style={{ color: rgbLabeller(footerTextColor), fontWeight: 600 }} >Yhteystiedot </Typography>
@@ -219,9 +220,11 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                             </div>
                             <div className={classes.footerObject}>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.company}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>JokuRandomOsoite 123</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>02250, Espoo</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>Y-tunnus: {bookerObject.publicInformation.companyID}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.address}</Typography>
+                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.postnumber}, {bookerObject.publicInformation.city}</Typography>
                             </div>
+                            {footerON? <em/> : <div className={classes.floatingErrorBox}>Alapalkki ei käytössä</div>}
                             <div className={classes.footerObject}>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>Avoinna: </Typography>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>

@@ -10,9 +10,11 @@ Luodaan järjestelmä jossa rekisteröitynyt käyttäjä voi luoda julkisen ajan
 ---
 
 ### SOVELLUS
-Sovellus löytyy osoitteesta: 
+Sovellus löytyy osoitteesta: https://ajanvaraus.web.app/ (Päivitetään ajoittain)
 
-Käyttöohjeet:
+Käyttöohjeet: Kirjautunut käyttäjä voi luoda itselleen ajanvaraussivuston, joka tulee näkyviin valittuun osoitteeseen.
+
+(Esim. https://ajanvaraus.web.app/esimerkki)
 
 ---
 

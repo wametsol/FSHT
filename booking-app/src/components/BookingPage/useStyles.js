@@ -118,10 +118,12 @@ const useStyles = makeStyles((theme) => ({
         display:'flex'
     },
     weekBtn:{
+        marginTop: '10px',
         alignSelf: 'center'
 
     },
     dayBtn:{
+        marginTop: '10px',
         alignSelf: 'center'
     },
     heading: {

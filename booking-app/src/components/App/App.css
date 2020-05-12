@@ -28,6 +28,12 @@
   color: #61dafb;
 }
 
+/* The css below is added to prevent a glitch which adds padding to right when modal popup is open  */
+body:not(.modal-open) {
+  padding-right: 0 !important;
+  overflow: auto !important;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

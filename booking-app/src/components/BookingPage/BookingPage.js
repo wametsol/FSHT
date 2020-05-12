@@ -244,7 +244,7 @@ const BookingPage = () => {
                                         //disableToolbar
                                         variant="dialog"
                                         cancelLabel="Peru"
-                                        format={"EEEE MM/dd/yyyy"}
+                                        format={"EEEE dd.MM.yyyy"}
     
                                         options={{ locale: fi }}
                                         margin="normal"

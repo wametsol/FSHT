@@ -11,9 +11,35 @@ const useStyles = makeStyles((theme) => ({
 
     },
     addButton: {
+        minWidth: 0,
+        marginTop: '5px',
         color: green[500],
         '&:hover': {
             color: green[600],
+        }
+    },
+    cancelButton: {
+        minWidth: 0,
+        marginTop: '5px',
+        color: 'red',
+        '&:hover': {
+            color: 'darkred',
+        }
+    },
+    addServiceButton: {
+        minWidth: 0,
+        marginTop: '15px',
+        color: green[500],
+        '&:hover': {
+            color: green[600],
+        }
+    },
+    cancelServiceButton: {
+        minWidth: 0,
+        marginTop: '15px',
+        color: 'red',
+        '&:hover': {
+            color: 'darkred',
         }
     },
     green:{
@@ -98,7 +124,10 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
     },
     dayBtn:{
-        marginTop: '15px'
+        marginTop: '10px'
+    },
+    weekBtn:{
+        marginTop: '10px'
     },
     footer: {
         margin: 'auto',
@@ -186,6 +215,20 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: 'grey',
         opacity: 0.8,
         borderRadius: 5,
+    },
+    addServiceForm: {
+        margin: '20px',
+        backgroundColor: '#fffdf7',
+        padding: '20px',
+        borderRadius: '5px',
+        border: 'solid 1px lightgrey'
+    },
+    priceInput: {
+        marginTop: '0px !important',
+        marginBottom: '0px !important'
+    },
+    serviceHoursInput: {
+        minWidth: '50px !important'
     }
 }))
 

@@ -7,6 +7,13 @@ const useStyles = makeStyles((theme) => ({
         margin: 'auto',
         marginBottom: '15vh',
         minHeight: '80vh',
+        [theme.breakpoints.down('sm')]:{
+            maxWidth: '90%',
+        },
+        [theme.breakpoints.down('xs')]:{
+            maxWidth: '100%',
+        }
+
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -44,7 +51,13 @@ const useStyles = makeStyles((theme) => ({
         position:'fixed',
         bottom:0,
         left: 0,
-        right: 0
+        right: 0,
+        [theme.breakpoints.down('sm')]:{
+            maxWidth: '90%',
+        },
+        [theme.breakpoints.down('xs')]:{
+            maxWidth: '100%',
+        }
 
     },
     singleService: {
@@ -161,6 +174,9 @@ const useStyles = makeStyles((theme) => ({
     errorMessage: {
         color: 'red'
     },
+    pastIcon:{
+        color: 'orange'
+    }
 }))
 
 export default useStyles

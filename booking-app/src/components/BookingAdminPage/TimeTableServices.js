@@ -17,6 +17,8 @@ export const getFormattedTimes = (times) => {
     }
 }
 
+
+
 export const isClosed = (times) => {
     if(times[0]===times[1]){
         return true

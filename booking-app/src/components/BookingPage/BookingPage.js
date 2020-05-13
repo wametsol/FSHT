@@ -100,7 +100,7 @@ const BookingPage = () => {
             case 0:
                 return BookerHomePage()
             case 1:
-                return <ProfilePage site={bookerObject.bookerAddress} bookingsObject={bookings}/>
+                return <ProfilePage site={bookerObject.bookerAddress} bookingsObject={bookings} services={bookerObject.services}/>
             default:
                 return 'Unknown step';
         }
@@ -336,8 +336,8 @@ const BookingPage = () => {
         
         document.title = `${bookerObject.bookerName} ajanvaraus`
         return (
-            <div >
-                <div className={classes.root}>
+            <div className={classes.root}>
+                <div >
                     <div >
                         <AppBar  position="static" style={{ backgroundColor: `rgb(${bookerObject.siteSettings.navColor.r},${bookerObject.siteSettings.navColor.g},${bookerObject.siteSettings.navColor.b},${bookerObject.siteSettings.navColor.a})`}}>
                             <Toolbar className={classes.bookingTopbar} variant="dense">

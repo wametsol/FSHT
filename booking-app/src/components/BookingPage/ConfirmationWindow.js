@@ -68,7 +68,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
 
                         firestore.collection(`booker${data.target}`).doc('bookings').update({ [`${format(data.date, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
 
-                            firestore.collection('userCollection').doc(user.email).update({ bookings: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
+                            firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
                                 .then((res) => {
                                     setSuccess(true)
                             setLoading(false)
@@ -97,7 +97,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
                 } else {
                     console.log('EI OO, TEHÄÄN!')
                     firestore.collection(`booker${data.target}`).doc('bookings').update({ [`${format(data.date, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
-                        firestore.collection('userCollection').doc(user.email).update({ bookings: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
+                        firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
                                 .then((res) => {
                                     console.log(res)
                                     setSuccess(true)

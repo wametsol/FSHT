@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import 'date-fns'
 import { format, getDay, addDays, isBefore, parseISO } from 'date-fns'
 import { auth, firestore } from '../../firebase'
-import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip } from '@material-ui/core'
+import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip, Slide, Snackbar } from '@material-ui/core'
 import useStyles from './useStyles'
 import { useRouteMatch } from 'react-router-dom'
 import IconButton from '@material-ui/core/IconButton'
@@ -19,17 +19,22 @@ import {
     KeyboardDatePicker,
 } from '@material-ui/pickers';
 import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
-import ProfilePage from './ProfilePage'
+
+import UserBookingPage from './UserBookingPage'
 import ConfirmationWindow from './ConfirmationWindow'
+import ProfilePage from './ProfilePage'
 
 import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded'
 import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
 import DoubleArrowRoundedIcon from '@material-ui/icons/DoubleArrowRounded'
 
+import Notification from '../Notification/Notification'
+import { Alert } from '@material-ui/lab'
     
 
 const BookingPage = () => {
     const user = auth.currentUser
+    const [userData, setUserData] = useState(null)
     const pagematch = useRouteMatch('/:id')
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -41,7 +46,11 @@ const BookingPage = () => {
     const [confirmationData, setConfirmationData] = useState({})
     const [value, setValue] = useState(0)
     const classes = useStyles()
+    const [errorMessage, setErrorMessage] = useState(null)
+    const [successMessage, setSuccessMessage] = useState(null)
     
+    
+
 
     useEffect(() => {
         try {
@@ -87,6 +96,76 @@ const BookingPage = () => {
             setError(true)
         }
     }, [])
+    useEffect(() => {
+        fetchUserData()
+    }, [])
+
+    const fetchUserData = () => {
+        try {
+            setLoading(true)
+            firestore.collection('userCollection').doc(`${user.email}`).get()
+                .then(response => {
+                    if (response.empty) {
+                        setError(true)
+                        setLoading(false)
+                    }
+                    console.log(response)
+                    console.log(response.data().bookings)
+                    setUserData(response.data())
+                    setLoading(false)
+                    console.log(userData)
+                })
+                .catch(error => {
+                    console.log(error)
+                    setLoading(false)
+                    setError(true)
+                })
+
+
+
+
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            setError(true)
+        }
+    }
+
+    const notification = () =>  (
+        <div>
+        <Snackbar 
+        open={successMessage !== null}
+        TransitionComponent={Slide}
+        anchorOrigin={{vertical:'top', horizontal:'center'}}
+        >
+            <Alert severity='success'>
+                {successMessage}
+            </Alert>
+        </Snackbar>
+        <Snackbar 
+        open={errorMessage !== null}
+        TransitionComponent={Slide}
+        anchorOrigin={{vertical:'top', horizontal:'center'}}
+        >
+            <Alert severity='error'>
+                {errorMessage}
+            </Alert>
+        </Snackbar>
+        </div>
+      )
+
+    const successMessageSetter = (message) => {
+        setSuccessMessage(message)
+        setTimeout(() => {
+          setSuccessMessage(null)
+        }, 5000);
+      }
+      const errorMessageSetter = (message) => {
+        setErrorMessage(message)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000);
+      }
     
     const handleChange = (event, newValue) => {
         setValue(newValue)
@@ -100,7 +179,9 @@ const BookingPage = () => {
             case 0:
                 return BookerHomePage()
             case 1:
-                return <ProfilePage site={bookerObject.bookerAddress} bookingsObject={bookings} services={bookerObject.services}/>
+                return <UserBookingPage site={bookerObject.bookerAddress} bookingsObject={bookings} services={bookerObject.services} userData={userData}/>
+            case 2:
+                return <ProfilePage userData={userData} fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter}/>
             default:
                 return 'Unknown step';
         }
@@ -337,6 +418,7 @@ const BookingPage = () => {
         document.title = `${bookerObject.bookerName} ajanvaraus`
         return (
             <div className={classes.root}>
+                {notification()}
                 <div >
                     <div >
                         <AppBar  position="static" style={{ backgroundColor: `rgb(${bookerObject.siteSettings.navColor.r},${bookerObject.siteSettings.navColor.g},${bookerObject.siteSettings.navColor.b},${bookerObject.siteSettings.navColor.a})`}}>
@@ -348,6 +430,7 @@ const BookingPage = () => {
                                 variant='standard'>
                                     <Tab label={<span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
                                     <Tab label={!user ? <span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}}  className={classes.menuButton} color="inherit">Login</span>: <span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>}></Tab>
+                                    {!user? <em/> : <Tab label={<span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} onClick={() => setValue(2)} className={classes.menuButton} variant='outlined' color="inherit" >Profiili</span>}></Tab>}
                                 </Tabs>
                                     
                                 

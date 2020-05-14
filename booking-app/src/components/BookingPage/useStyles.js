@@ -176,7 +176,29 @@ const useStyles = makeStyles((theme) => ({
     },
     pastIcon:{
         color: 'orange'
-    }
+    },
+    profileBox:{
+        flexBasis: '50%',
+        backgroundColor: 'white',
+        textAlign: 'left',
+        margin: 20,
+        padding: 10
+    },
+    upperBox: {
+        display: 'flex',
+        backgroundColor: '#fffbf0'
+    },
+    lowerBox: {
+        padding: 20,
+        backgroundColor: '#fffbf0'
+    },
+    innerBox: {
+        minHeight: 150
+    },
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff',
+      },
 }))
 
 export default useStyles

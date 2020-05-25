@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, firestore } from '../../firebase'
-import { Tabs, Tab, Paper, CircularProgress } from '@material-ui/core';
-import {  useRouteMatch } from 'react-router-dom'
+import { Tabs, Tab, Paper, CircularProgress, Typography, Tooltip, Button } from '@material-ui/core';
+import { useRouteMatch } from 'react-router-dom'
 
 import ServiceTab from './ServiceTab'
 import UserTab from './UserTab'
@@ -10,9 +10,10 @@ import Bookings from './Bookings'
 import InfoTab from './InfoTab'
 import ContactInfoTab from './ContactInfoTab';
 
+import useStyles from './useStyles'
 
 
-const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
+const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
     const pagematch = useRouteMatch('/:id')
     const [value, setValue] = useState(0)
     const user = auth.currentUser
@@ -20,7 +21,7 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [bookings, setBookings] = useState(null)
-
+    const classes = useStyles()
     const handleChange = (event, newValue) => {
         setValue(newValue)
     }
@@ -37,14 +38,14 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
 
                 firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
                     .then(res => {
-                        if(res.empty){
-                            
+                        if (res.empty) {
+
                         }
                         setBookings(res.data())
                     })
 
                 setLoading(false)
-                
+
             })
             .catch(error => {
                 console.log(error)
@@ -63,8 +64,31 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
         }
     }, [])
 
+    const updatePublicVisibility = (e) => {
+        e.preventDefault()
+
+        try {
+            console.log('Asetetaan julkisuus: ', !bookerObject.siteSettings.visibleToPublic)
+            setLoading(true)
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ 'siteSettings.visibleToPublic': !bookerObject.siteSettings.visibleToPublic})
+                .then((res) => {
+                    fetchData()
+                    setLoading(false)
+                    setSuccessMessage(bookerObject.siteSettings.visibleToPublic?  'Sivusto piilotettiin asiakkailta': 'Sivusto julkaistiin asiakkaille')
+                })
+
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            setError(true)
+        }
+
+
+    }
+
 
     console.log(bookings)
+    console.log(bookerObject)
 
     const getTabContent = (tab) => {
         switch (tab) {
@@ -84,7 +108,7 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
                 return 'Unknown step';
         }
     }
-    
+
     return (
         <div>
             {!bookerObject ? <div>
@@ -92,6 +116,17 @@ const BookingAdminPage = ({setSuccessMessage, setErrorMessage}) => {
                 {error ? <div>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <div>Sivustoja ei löydy</div>}
             </div>
                 : (<Paper>
+                    <div className={classes.visibilityBar}>
+                        <div className={classes.innerVisibilityBox}>
+                            {bookerObject.siteSettings.visibleToPublic ?
+                                <Typography>Sivustosi on julkinen <Tooltip title='Piilottamalla sivuston, vain sinä ja muut adminit voivat nähdä sivuston'><Button onClick={updatePublicVisibility} variant='contained' className={classes.hideVisibilityBtn}>Piilota</Button></Tooltip> </Typography>
+                                :
+                                <Typography>Sivustosi ei ole julkinen <Tooltip title='Julkaisemalla sivuston, avautuu sivusto kaikille käyttäjille'><Button onClick={updatePublicVisibility} variant='contained' className={classes.publishVisibilityBtn}>Julkaise</Button></Tooltip> </Typography>
+                            }
+
+                        </div>
+
+                    </div>
                     <Tabs
                         value={value}
                         onChange={handleChange}

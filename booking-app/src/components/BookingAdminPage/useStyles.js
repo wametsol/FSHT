@@ -229,6 +229,31 @@ const useStyles = makeStyles((theme) => ({
     },
     serviceHoursInput: {
         minWidth: '50px !important'
+    },
+    visibilityBar: {
+        minHeight: '40px',
+        backgroundColor: 'seashell',
+        alignItems: 'center',
+        padding: '10px'
+    },
+    innerVisibilityBox: {
+        display: 'inline-flex'
+    },
+    hideVisibilityBtn: {
+        padding: '2px !important',
+        marginLeft: '5px',
+        backgroundColor: '#ffe6e6',
+        '&:hover': {
+            backgroundColor: '#ffb3b3',
+        }
+    },
+    publishVisibilityBtn: {
+        padding: '2px !important',
+        marginLeft: '5px',
+        backgroundColor: green[100],
+        '&:hover': {
+            backgroundColor: green[300],
+        }
     }
 }))
 

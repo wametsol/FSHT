@@ -158,7 +158,11 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
                 </MuiPickersUtilsProvider>
                 <div className={classes.datePickerTitle}>
-                    <Typography>Ilmoittamasi aukioloajat valitulle päivälle: <b>{getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)}</b></Typography>
+                    {!!bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]?
+                    <Typography>Valittuna päivänä käytössä poikkeuksellinen aukiolo, {bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].reason}: <b>{getFormattedTimes(bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times)}</b> </Typography>
+                    :
+                    <Typography>Ilmoittamasi aukioloajat valitulle päivälle: <b>{getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)}</b></Typography>}
+                    
                 </div>
             </div>
             <Divider />

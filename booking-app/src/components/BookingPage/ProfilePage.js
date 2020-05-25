@@ -43,6 +43,7 @@ import SaveIcon from '@material-ui/icons/Save'
 
 const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessage }) => {
     const user = auth.currentUser
+    console.log(userData)
     const [howToContact, setHowToContact] = useState(userData.contactPreferences)
     const [editPreferences, setEditPreferences] = useState(true)
     const [editInformation, setEditInformation] = useState(true)

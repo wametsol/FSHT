@@ -23,6 +23,7 @@ const NewBooker = () => {
 
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
+    const [error, setError] = useState(false)
 
     const [activeStep, setActiveStep] = React.useState(0)
     const [completed, setCompleted] = React.useState([false, false, false])
@@ -48,6 +49,11 @@ const NewBooker = () => {
 
     const addressClassname = clsx({
         [classes.addressSuccess]: success,
+        [classes.addressError]: error,
+    })
+
+    const systemInput = clsx({
+        [classes.addressSuccess]: systName.length > 3,
     })
 
     const getSteps = () => {
@@ -123,12 +129,17 @@ const NewBooker = () => {
     }
 
 
-    // Doesn't re render, needs fixing.
     const resetOne = () => {
         const newReseted = completed
         newReseted[activeStep] = false
         setCompleted(newReseted)
         setActiveStep(0)
+
+        if(activeStep==0){
+            setSystName('')
+            setWebAddress('')
+            setSuccess(false)
+        }
     }
 
 
@@ -138,16 +149,26 @@ const NewBooker = () => {
         try {
             if (!loading) {
                 setSuccess(false)
+                setError(false)
                 setLoading(true)
+                console.log('Checking: ', webAddress)
+                firestore.collection(`booker${webAddress}`).get().then( (response) => {
+                    if(response.empty){
+                        setTimeout(() => {
+                            setSuccess(true)
+                            setLoading(false)
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            setError(true)
+                            setLoading(false)
+                        }, 1000);
+                    }
+                })
             }
-            setTimeout(() => {
-                setSuccess(true)
-                setLoading(false)
-            }, 5000);
         } catch (exception) {
             console.log(exception)
         }
-        setLoading(true)
 
     }
     const isReady = () => {
@@ -212,16 +233,21 @@ const NewBooker = () => {
                 margin="dense"
                 variant='outlined'
                 onChange={({target}) => setSystName(target.value)}
+                InputProps={{
+                    className: systemInput
+                }}
+                
             />
             <TextField
                 id="address"
                 label="Sivustosi osoite"
                 style={{ margin: 8, width: '75%' }}
                 placeholder="omasivustosi"
-                helperText="Sivusto josta ajanvarausjärjestelmäsi löytyy luomisen jälkeen"
+                helperText={error? <Typography variant='caption' style={{color: 'red'}}>Tunnus ei ole sopiva tai se on jo käytössä</Typography>: success? <Typography variant='caption' className={classes.success}>Tämä tunnus on vapaana</Typography> :'Sivusto josta ajanvarausjärjestelmäsi löytyy luomisen jälkeen. Et pysty muuttamaan sivustosi osoitetta myöhemmin.'}
                 margin="dense"
                 className={classes.addresInput}
                 onChange={({target}) => {
+                    setError(false)
                     setSuccess(false)
                     setWebAddress(target.value)
                 }}
@@ -383,7 +409,7 @@ const NewBooker = () => {
                                         Kohta {activeStep + 1} on jo täytetty. <Button size='small' color='secondary' onClick={resetOne}>Nollaa</Button>
                                     </Typography>
                                 ) : (<Typography>Kun olet valmis kohdan {activeStep + 1}: ''{getSteps()[activeStep]}'' kanssa, paina
-                                    <Button variant="contained" color="primary" style={{ margin: 8 }} onClick={handleComplete}>
+                                    <Button disabled={(loading || (activeStep==0 && !success || systName.length < 4))} variant="contained" color="primary" style={{ margin: 8 }} onClick={handleComplete}>
                                         {isReady() ? 'Lopetus' : 'Valmis'}
                                     </Button></Typography>
                                     ))}

@@ -30,6 +30,7 @@ import DoubleArrowRoundedIcon from '@material-ui/icons/DoubleArrowRounded'
 
 import Notification from '../Notification/Notification'
 import { Alert } from '@material-ui/lab'
+import LoginTab from './LoginTab'
     
 
 const BookingPage = () => {
@@ -48,7 +49,6 @@ const BookingPage = () => {
     const classes = useStyles()
     const [errorMessage, setErrorMessage] = useState(null)
     const [successMessage, setSuccessMessage] = useState(null)
-    
     
 
 
@@ -98,9 +98,10 @@ const BookingPage = () => {
     }, [])
     useEffect(() => {
         fetchUserData()
-    }, [])
+    }, [user])
 
     const fetchUserData = () => {
+        console.log(user)
         try {
             setLoading(true)
             firestore.collection('userCollection').doc(`${user.email}`).get()
@@ -128,6 +129,22 @@ const BookingPage = () => {
             console.log(error)
             setLoading(false)
             setError(true)
+        }
+    }
+
+    console.log(userData)
+
+    const signOut = (e) => {
+        e.preventDefault()
+        try {
+            auth.signOut()
+            .then((res) => {
+                console.log(res)
+                setValue(0)
+                fetchUserData()
+            })
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -179,7 +196,7 @@ const BookingPage = () => {
             case 0:
                 return BookerHomePage()
             case 1:
-                return <UserBookingPage site={bookerObject.bookerAddress} bookingsObject={bookings} services={bookerObject.services} userData={userData}/>
+                return !!user? <UserBookingPage site={bookerObject.bookerAddress} bookingsObject={bookings} services={bookerObject.services} userData={userData}/> : <LoginTab fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter}/>
             case 2:
                 return <ProfilePage userData={userData} fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter}/>
             default:
@@ -412,12 +429,15 @@ const BookingPage = () => {
         </div>
     )
 
-
-    if (bookerObject) {
+    
+    if (bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && bookerObject.admins.filter(a => a.email === user.email).length>0))) {
+        console.log(bookerObject.admins)
+        console.log(user)
         
         document.title = `${bookerObject.bookerName} ajanvaraus`
         return (
             <div className={classes.root}>
+                {(!bookerObject.siteSettings.visibleToPublic)? <div className={classes.notPublicInfo}><Typography variant='h6'>Sivusto ei näy julkisesti, se näkyy vain sivuston ylläpitäjille. Voit julkaista sivuston hallintapaneelista.</Typography></div>: <em/> }
                 {notification()}
                 <div >
                     <div >
@@ -428,10 +448,18 @@ const BookingPage = () => {
                                 onChange={handleChange}
                                 TabIndicatorProps={{style: {background:`rgb(${bookerObject.siteSettings.navText2Color.r},${bookerObject.siteSettings.navText2Color.g},${bookerObject.siteSettings.navText2Color.b},${bookerObject.siteSettings.navText2Color.a})`}}}
                                 variant='standard'>
-                                    <Tab label={<span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
-                                    <Tab label={!user ? <span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}}  className={classes.menuButton} color="inherit">Login</span>: <span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>}></Tab>
-                                    {!user? <em/> : <Tab label={<span style={{  color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} onClick={() => setValue(2)} className={classes.menuButton} variant='outlined' color="inherit" >Profiili</span>}></Tab>}
+                                    <Tab label={<span style={{ color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
+                                    {!user?
+                                    <Tab label={<span style={{ color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} onClick={() => setValue(1)} className={classes.menuButton} color="inherit">Login</span>} />
+                                    :
+                                    <Tab label={<span style={{ color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>}/>}
+                                    {!user? <em/> 
+                                    :
+                                    <Tab label={<span style={{ color:`rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})`}} onClick={() => setValue(2)} className={classes.menuButton} variant='outlined' color="inherit" >Profiili</span>}></Tab>}
                                 </Tabs>
+                                {!user? <em/>
+                                :
+                                <Button variant='outlined' onClick={signOut}>Logout</Button>}
                                     
                                 
                             </Toolbar>
@@ -481,7 +509,9 @@ const BookingPage = () => {
 
     return (
         <div>
-            {loading ? <CircularProgress size={25} /> : <em />}
+            {loading ? <CircularProgress size={25} /> : <div>
+                <Typography>
+                    Sivuston osoite on virheellinen, tai sivuston ylläpitäjä on asettanut sivuston piilotetuksi</Typography></div>}
             {error ? <div>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <em />}
         </div>
     )

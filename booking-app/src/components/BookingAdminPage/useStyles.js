@@ -42,8 +42,8 @@ const useStyles = makeStyles((theme) => ({
             color: 'darkred',
         }
     },
-    green:{
-        color:green[500]
+    green: {
+        color: green[500]
     },
     adminListObject: {
         display: 'inline',
@@ -72,6 +72,9 @@ const useStyles = makeStyles((theme) => ({
     },
     column: {
         flexBasis: '33.33%',
+    },
+    halfColumn: {
+        flexBasis: '50%'
     },
     threeFourthColumn: {
         flexBasis: '75%',
@@ -120,13 +123,13 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: 'lightgrey',
         padding: 20,
     },
-    dateInput:{
+    dateInput: {
         textAlign: 'center',
     },
-    dayBtn:{
+    dayBtn: {
         marginTop: '10px'
     },
-    weekBtn:{
+    weekBtn: {
         marginTop: '10px'
     },
     footer: {
@@ -173,13 +176,41 @@ const useStyles = makeStyles((theme) => ({
             borderRadius: 5
         }
     },
+    BGbookingTopbar: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        maxHeight: '36px!important',
+        minHeight: '36px!important',
+    },
+    BGmenuButton: {
+        marginRight: theme.spacing(2),
+        padding: 2,
+        fontSize: 10,
+        border: '0.5px solid',
+        borderRadius: 5,
+        '&:hover': {
+            background: 'rgb(255,255,255,0.5)',
+            borderRadius: 7
+        }
+    },
+    BGhomeButton: {
+        flexGrow: 0,
+        fontSize: 13,
+        padding: 2,
+        '&:hover': {
+            background: 'rgb(255,255,255,0.5)',
+            border: '1px',
+            borderRadius: 5
+        }
+    },
     basicText: {
         margin: 8,
         width: '30%'
     },
-    holidayAddForm:{
-        marginLeft:'15%',
-        marginRight:'15%',
+    holidayAddForm: {
+        marginLeft: '15%',
+        marginRight: '15%',
         backgroundColor: 'rgb(255,213,158,0.5)',
         display: 'flex',
         //flexDirection: 'column',
@@ -254,7 +285,11 @@ const useStyles = makeStyles((theme) => ({
         '&:hover': {
             backgroundColor: green[300],
         }
-    }
+    },
+    media: {
+        height: '12.5vh',
+        margin: 'auto'
+    },
 }))
 
 export default useStyles

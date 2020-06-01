@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import 'date-fns'
-import { format, getDay, addDays, isBefore, parseISO } from 'date-fns'
+import { format, getDay, addDays, isBefore, parseISO, isAfter } from 'date-fns'
 import { auth, firestore } from '../../firebase'
 import {
     Tabs, Tab,
@@ -23,7 +23,7 @@ import {
     KeyboardTimePicker,
     KeyboardDatePicker,
 } from '@material-ui/pickers';
-import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
+import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText, valueLabelFormat } from '../BookingAdminPage/TimeTableServices'
 import UserBookingPage from './UserBookingPage'
 import ConfirmationWindow from './ConfirmationWindow'
 
@@ -171,13 +171,14 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
                     <Table className={classes.table}>
                         <TableHead>
                             <TableRow>
-                                <TableCell align='center' colSpan={4} style={{ fontWeight: 'bold', fontSize: '20px' }} >
+                                <TableCell align='center' colSpan={5} style={{ fontWeight: 'bold', fontSize: '20px' }} >
                                     Oma historiasi
                             </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell style={{ fontWeight: 'bold' }}>Järjestelmä</TableCell>
                                 <TableCell align='right' style={{ fontWeight: 'bold' }}>Voimassa</TableCell>
+                                <TableCell align='right' style={{ fontWeight: 'bold' }}>Menneet</TableCell>
                                 <TableCell align='right' style={{ fontWeight: 'bold' }}>Peruutukset</TableCell>
                                 <TableCell align='right' style={{ fontWeight: 'bold' }}>Varauksia yhteensä</TableCell>
                             </TableRow>
@@ -185,7 +186,8 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
                         {Object.keys(userData.bookings).map((bookingsKey) => (
                             <TableRow>
                                 <TableCell>{capitalize(bookingsKey)}</TableCell>
-                                <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active).length}</TableCell>
+                                <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && !isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
+                                <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
                                 <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => !booking.active).length}</TableCell>
                                 <TableCell align='right'>{userData.bookings[`${bookingsKey}`].length}</TableCell>
                             </TableRow>

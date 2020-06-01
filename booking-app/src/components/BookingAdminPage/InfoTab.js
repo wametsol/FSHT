@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChromePicker } from 'react-color'
-import firebase, { firestore } from '../../firebase'
-import { Typography, CircularProgress, TextField, AppBar, Toolbar, Tabs, Tab, Button, Slider, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Checkbox } from '@material-ui/core';
+import firebase, { firestore, storage, auth } from '../../firebase'
+import { Typography, CircularProgress, TextField, AppBar, Toolbar, Tabs, Tab, Button, Slider, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Checkbox, Card, CardMedia, CardContent, Tooltip, Box } from '@material-ui/core';
 import { useRouteMatch } from 'react-router-dom'
 import clsx from 'clsx';
 
@@ -39,6 +39,27 @@ const marks = [
     },
 
 ]
+function CircularProgressWithLabel(props) {
+    return (
+        <Box position="relative" display="inline-flex">
+            <CircularProgress variant="static" {...props} />
+            <Box
+                top={0}
+                left={0}
+                bottom={0}
+                right={0}
+                position="absolute"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+            >
+                <Typography variant="caption" component="div" color="textSecondary">{`${Math.round(
+                    props.value,
+                )}%`}</Typography>
+            </Box>
+        </Box>
+    );
+}
 
 const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }) => {
     const pagematch = useRouteMatch('/:id')
@@ -52,7 +73,11 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const [footerON, setFooterON] = useState(bookerObject.siteSettings.footerOn)
+    const [uploadProgress, setUploadProgress] = useState(null)
+    const [imageUpload, setImageUpload] = useState(null)
     const classes = useStyles()
+
+
 
     const sameAsInitialFooterStyle = () => {
         const initialSettings = bookerObject.siteSettings
@@ -65,7 +90,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
         if (initialSettings.footerBorderRadius !== footerBorderRadius) {
             return false
         }
-        if (initialSettings.footerOn !== footerON){
+        if (initialSettings.footerOn !== footerON) {
             return false
         }
         return true
@@ -179,6 +204,52 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
         }
     }
 
+    const handleUpload = (e) => {
+        e.preventDefault()
+
+        try {
+            console.log('Uploading: ', imageUpload.name, ' to server, hold on')
+            setLoading(true)
+            var metadata = {
+                contentType: 'image/jpeg',
+                customMetadata: {
+                    'uploader': auth.currentUser.displayName
+                }
+            }
+            let uploadTask = storage.ref(`booker${pagematch.params.id}/images/background.jpg`).put(imageUpload, metadata)
+
+            uploadTask.on('state_changed', (snapshot) => {
+                let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                console.log(snapshot)
+                console.log(snapshot.bytesTransferred, ' / ', snapshot.totalBytes)
+                console.log('Progress: ', progress)
+                setUploadProgress(progress)
+            }, (error) => {
+                console.log(error)
+                setErrorMessage('Kuvan lataamisessa tapahtui virhe')
+            }, () => {
+                console.log('FINISHED')
+
+                storage.ref(`booker${pagematch.params.id}/images/background.jpg`).getDownloadURL()
+                    .then(bgImageUrl => {
+                        firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ 'images.background': bgImageUrl })
+                            .then(res => {
+                                fetchData()
+                                setImageUpload(null)
+                                setLoading(false)
+                                setSuccessMessage('Kuvan lataaminen palvelimelle onnistui')
+                            })
+                    })
+
+            })
+        } catch (error) {
+            console.log(error)
+        }
+
+
+
+    }
+
     const rgbLabeller = (color) => {
         return `rgb(${color.r},${color.g},${color.b},${color.a})`
     }
@@ -205,7 +276,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
 
             <Typography className={classes.secondaryHeading}>Tässä näkyvien tietojen päivittäminen tapahtuu niitä koskevilta välilehdiltä</Typography>
             <div>
-                
+
                 <div style={{ margin: 20 }}>
                     <div className={classes.footer} style={{ backgroundColor: `rgb(${footerColor.r},${footerColor.g},${footerColor.b},${footerColor.a})`, borderTopLeftRadius: footerBorderRadius, borderTopRightRadius: footerBorderRadius }}>
                         <Typography style={{ color: rgbLabeller(footerTextColor), fontWeight: 600 }} >Yhteystiedot </Typography>
@@ -224,7 +295,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.address}</Typography>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.postnumber}, {bookerObject.publicInformation.city}</Typography>
                             </div>
-                            {footerON? <em/> : <div className={classes.floatingErrorBox}>Alapalkki ei käytössä</div>}
+                            {footerON ? <em /> : <div className={classes.floatingErrorBox}>Alapalkki ei käytössä</div>}
                             <div className={classes.footerObject}>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>Avoinna: </Typography>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
@@ -236,12 +307,12 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                     </div>
                 </div>
             </div>
-            {footerON?  <ExpansionPanelDetails className={classes.details}>
-               
-                <div className={classes.oneFourthColumn} >
-                    
+            {footerON ? <ExpansionPanelDetails className={classes.details}>
 
-                    <ColorPicker title='Alapalkin pohjaväri' initialColor={bookerObject.siteSettings.footerColor} changeColor={changeFooterColor} color={footerColor}/>
+                <div className={classes.oneFourthColumn} >
+
+
+                    <ColorPicker title='Alapalkin pohjaväri' initialColor={bookerObject.siteSettings.footerColor} changeColor={changeFooterColor} color={footerColor} />
                     <br />
                     <Typography>Säädä kulmien pyöreyttä</Typography>
                     <Slider
@@ -264,7 +335,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                 <div className={classes.oneFourthColumn}>
                     <ColorPicker title='Alapalkin tekstiväri' initialColor={bookerObject.siteSettings.footerTextColor} changeColor={changeFooterTextColor} color={footerTextColor} disabled={!footerON} />
                 </div>
-            </ExpansionPanelDetails> : <em/>}
+            </ExpansionPanelDetails> : <em />}
             <Divider />
             <ExpansionPanelActions>
                 {!loading ? <div><Button disabled={sameAsInitialFooterStyle()} color='secondary' onClick={resetFooterStyling}>Peru muutokset</Button>
@@ -344,66 +415,91 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
         </ExpansionPanel>
     )
 
+    const backgroundPanel = () => (
+        <ExpansionPanel >
+            <ExpansionPanelSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1c-content"
+                id="panel1c-header"
+            >
+                <div className={classes.column}>
+                    <Typography className={classes.heading}>Taustakuva</Typography>
+                </div>
+                <div className={classes.column}>
+                    <Typography className={classes.secondaryHeading}>Muokkaa taustakuvaa</Typography>
+                </div>
+
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails className={classes.details}>
+                <div className={classes.halfColumn} >
+                    {console.log(imageUpload)}
+                    <input
+                        accept='image/*'
+                        id='uploadImage'
+                        type='file'
+                        hidden
+                        onChange={({ target }) => setImageUpload(target.files[0])}
+                    />
+                    <label htmlFor='uploadImage'>
+                        <Button variant='contained' component='span'>Lataa kuva</Button>
+                    </label>
+
+                    {imageUpload ? <Typography>{imageUpload.name}</Typography> : <em />}
+                </div>
+                <div className={classes.halfColumn} >
+                    <Typography>Näkymä</Typography>
+                    <div style={{ maxWidth: '75%', margin: 'auto' }}>
+                        <AppBar position="static" style={{ backgroundColor: `rgb(${navColor.r},${navColor.g},${navColor.b},${navColor.a})` }}>
+                            <Toolbar className={classes.BGbookingTopbar} >
+                                <Tabs
+                                    value={navTabValue}
+                                    TabIndicatorProps={{ style: { background: `rgb(${navText2Color.r},${navText2Color.g},${navText2Color.b},${navText2Color.a})`, marginBottom: 6 } }}
+                                    variant='standard'>
+                                    <Tab label={<span className={classes.BGhomeButton} onClick={() => setNavTabValue(0)} style={{ color: `rgb(${navTextColor.r},${navTextColor.g},${navTextColor.b},${navTextColor.a})` }} >{bookerObject.bookerName}</span>}></Tab>
+                                    <Tab label={<span className={classes.BGmenuButton} onClick={() => setNavTabValue(1)} variant='outlined' style={{ color: `rgb(${navTextColor.r},${navTextColor.g},${navTextColor.b},${navTextColor.a})` }} >Varaukset</span>}></Tab>
+                                </Tabs>
+
+
+                            </Toolbar>
+                        </AppBar>
+                        <Card>
+                            {imageUpload ? <CardMedia className={classes.media} image={URL.createObjectURL(imageUpload)} /> : <CardMedia className={classes.media} image={bookerObject.images.background} />}
+                            <CardContent style={{ padding: 4 }}>
+                                <div >
+                                    <Typography gutterBottom variant="h6" component="h5" style={{ fontSize: 15 }}>
+                                        {bookerObject.bookerName} ajanvaraus
+                            </Typography>
+                                    <Typography variant="body2" color="textSecondary" component="p" style={{ fontSize: 10 }}>
+                                        Varaa aikasi täältä
+                            </Typography>
+                                </div>
+
+                            </CardContent>
+
+
+                            <Divider />
+                        </Card>
+                    </div>
+                </div>
+            </ExpansionPanelDetails>
+            <Divider />
+            <ExpansionPanelActions>
+                {!loading ? <div><Button disabled={!imageUpload} color='secondary' onClick={() => setImageUpload(null)} >Peru</Button>
+                    <Tooltip title='Päivittää sivuston taustakuvan. HUOM! tämä poistaa sivuston vanhan kuvan palvelimelta'><Button disabled disabled={!imageUpload} color='primary' onClick={handleUpload} >Päivitä taustakuva</Button></Tooltip></div > : <div style={{ marginRight: '40%' }}>{uploadProgress ? <Typography >Kuvaa ladataan palvelimelle: <CircularProgressWithLabel value={uploadProgress} /></Typography> : <em />}</div>}
+            </ExpansionPanelActions>
+        </ExpansionPanel>
+    )
+
 
 
     console.log(bookerObject)
     return (
         <div>
-            <Typography variant="h5">Sivuston info</Typography>
+            <Typography variant="h5">Sivuston näkymät</Typography>
             {navPanel()}
             {footerPanel()}
+            {backgroundPanel()}
         </div>
     )
 }
-
-/*
-<Typography>Nykyinen näkymä</Typography>
-            <div style={{margin: 20}}>
-            <div className={classes.footer} style={{backgroundColor:`rgb(${footerColor.r},${footerColor.g},${footerColor.b},${footerColor.a})`}}>
-                    <Typography >Yhteystiedot </Typography>
-                    <div className={classes.footerContent}>
-
-                        <div className={classes.footerObject}>
-
-                            <Typography color="textSecondary">{bookerObject.publicInformation.name}</Typography>
-                            <Typography color="textSecondary"><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
-                            <Typography color="textSecondary"><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
-
-                        </div>
-                        <div className={classes.footerObject}>
-                            <Typography color="textSecondary">{bookerObject.publicInformation.company}</Typography>
-                            <Typography color="textSecondary">JokuRandomOsoite 123</Typography>
-                            <Typography color="textSecondary">02250, Espoo</Typography>
-                        </div>
-                        <div className={classes.footerObject}>
-                            <Typography color="textSecondary">Avoinna: </Typography>
-                            <Typography>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
-                            <Typography>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
-                            <Typography>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
-                            <Typography color="textSecondary">{}</Typography>
-                        </div>
-                    </div>
-                </div>
-                
-                
-                <ColorPicker initialColor={bookerObject.siteSettings.footerColor} changeColor={changeColor} color={footerColor} acceptChangeColor={changeFooterColor} resetColor={resetFooterColor}/>
-                </div>
-
-
-
-<Divider/>
-                
-                <Typography>Muuta tietoja</Typography>
-                <div>
-                <Typography>Väri:</Typography>
-                <TextField></TextField>
-                </div>
-                <Button onClick={() => setFooterColor(bookerObject.siteSettings.footerColor)}>Peru muutokset</Button>
-                <Button onClick={changeFooterColor}>Hyväksy muutos</Button>
-<ChromePicker
-                title='Infobar'
-                color={footerColor}
-                onChange={changeColor} 
-                />
-*/
 export default InfoTab

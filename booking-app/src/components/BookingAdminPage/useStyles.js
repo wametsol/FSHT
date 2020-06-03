@@ -1,5 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles'
 import { green } from '@material-ui/core/colors'
+import SwitchBase from '@material-ui/core/internal/SwitchBase'
 
 const useStyles = makeStyles((theme) => ({
     singleService: {
@@ -290,6 +291,35 @@ const useStyles = makeStyles((theme) => ({
         height: '12.5vh',
         margin: 'auto'
     },
+    switchBase: {
+        color: 'lightblue',
+        '&$checked': {
+            color: 'pink',
+        },
+        '&$checked + $track': {
+            backgroundColor: 'pink',
+            color: 'pink'
+            
+        },
+        '& + $track': {
+            backgroundColor: 'lightblue',
+            color: 'lightblue'
+        }
+    },
+    checked: {
+    },
+    track: {
+    },
+    humanBox: {
+        borderRadius: 5,
+        padding: 7,
+        color: 'white',
+        fontWeight: 'bold'
+    },
+    serviceListPaper: {
+        minWidth: 230,
+        minHeight: 250
+    }
 }))
 
 export default useStyles

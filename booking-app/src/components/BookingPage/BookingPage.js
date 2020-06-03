@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react'
 import 'date-fns'
 import { format, getDay, addDays, isBefore, parseISO } from 'date-fns'
 import { auth, firestore } from '../../firebase'
-import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip, Slide, Snackbar } from '@material-ui/core'
+import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip, Slide, Snackbar, IconButton, Drawer, Icon } from '@material-ui/core'
 import useStyles from './useStyles'
 import { useRouteMatch } from 'react-router-dom'
-import IconButton from '@material-ui/core/IconButton'
 import MenuIcon from '@material-ui/icons/Menu'
 import CallIcon from '@material-ui/icons/Call'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
@@ -27,6 +26,7 @@ import ProfilePage from './ProfilePage'
 import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded'
 import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
 import DoubleArrowRoundedIcon from '@material-ui/icons/DoubleArrowRounded'
+import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 
 import Notification from '../Notification/Notification'
 import { Alert } from '@material-ui/lab'
@@ -49,6 +49,7 @@ const BookingPage = () => {
     const classes = useStyles()
     const [errorMessage, setErrorMessage] = useState(null)
     const [successMessage, setSuccessMessage] = useState(null)
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
 
 
@@ -190,6 +191,12 @@ const BookingPage = () => {
     const rgbLabeller = (color) => {
         return `rgb(${color.r},${color.g},${color.b},${color.a})`
     }
+    const handleMenu = () => {
+        setMobileMenuOpen(true)
+    }
+    const handleMenuClose = () => {
+        setMobileMenuOpen(false)
+    }
 
     const getTabContent = (tab) => {
         switch (tab) {
@@ -314,7 +321,49 @@ const BookingPage = () => {
         )
     }
 
-    // <Typography className={classes.datePickerTitle}> {capitalize(format(selectedDate, "EEEE", { locale: fi }))} {format(selectedDate, 'MM/dd/yyyy')}</Typography>
+    const prevDayButtons = () => (
+        <span><Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'dd/MM/yyyy')} `}>
+            <span className={classes.weekBtn}>
+                <Button disabled={isBefore(addDays(selectedDate, -6), new Date())} onClick={() => setSelectedDate(addDays(selectedDate, -7))} size='small'><DoubleArrowRoundedIcon style={{ transform: 'rotate(180deg)' }} /></Button>
+            </span>
+        </Tooltip>
+
+            <Tooltip title={`${capitalize(format(addDays(selectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -1), 'dd/MM/yyyy')} `}>
+                <span className={classes.dayBtn}><Button disabled={isBefore(selectedDate, new Date())} onClick={() => setSelectedDate(addDays(selectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip></span>
+    )
+    const nextDayButtons = () => (
+        <span>
+            <Tooltip title={`${capitalize(format(addDays(selectedDate, 1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, 1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, 1), 'dd/MM/yyyy')} `}>
+                <span className={classes.dayBtn}><Button onClick={() => setSelectedDate(addDays(selectedDate, 1))} size='small'><NavigateNextRoundedIcon /></Button></span></Tooltip>
+            <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'dd/MM/yyyy')} `}>
+                <span className={classes.weekBtn}><Button onClick={() => setSelectedDate(addDays(selectedDate, 7))} size='small'><DoubleArrowRoundedIcon /></Button></span></Tooltip></span>
+    )
+    const daySelector = () => (
+        <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
+            <KeyboardDatePicker
+                //disableToolbar
+                variant="dialog"
+                cancelLabel="Peru"
+                format={"EEEE dd.MM.yyyy"}
+
+                options={{ locale: fi }}
+                margin="normal"
+                id="date-picker-inline"
+                value={selectedDate}
+                onChange={handleDateChange}
+                autoOk
+                locale={fi}
+                disablePast
+                inputProps={{
+                    disabled: true
+                }}
+                KeyboardButtonProps={{
+                    'aria-label': 'change date',
+                }}
+            />
+
+        </MuiPickersUtilsProvider>
+    )
 
 
     const BookerHomePage = () => (
@@ -327,45 +376,24 @@ const BookingPage = () => {
 
                 </CardContent>
                 <Divider />
+                {console.log(window.innerWidth)}
+                {console.log(window.innerWidth < 600)}
+
                 <div className={classes.currentDayTitle}>
-                    <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'dd/MM/yyyy')} `}>
-                        <span className={classes.weekBtn}>
-                            <Button disabled={isBefore(addDays(selectedDate, -6), new Date)} onClick={() => setSelectedDate(addDays(selectedDate, -7))} size='small'><DoubleArrowRoundedIcon style={{ transform: 'rotate(180deg)' }} /></Button>
+                    {window.innerWidth > 600 ?
+                        <span>
+                            {prevDayButtons()}
+                            {daySelector()}
+                            {nextDayButtons()}
                         </span>
-                    </Tooltip>
+                        :
+                        <span>
+                            {daySelector()}
+                            <br />
+                            {prevDayButtons()}
+                            {nextDayButtons()}
+                        </span>}
 
-                    <Tooltip title={`${capitalize(format(addDays(selectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -1), 'dd/MM/yyyy')} `}>
-                        <span className={classes.dayBtn}><Button disabled={isBefore(selectedDate, new Date)} onClick={() => setSelectedDate(addDays(selectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
-
-                    <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
-                        <KeyboardDatePicker
-                            //disableToolbar
-                            variant="dialog"
-                            cancelLabel="Peru"
-                            format={"EEEE dd.MM.yyyy"}
-
-                            options={{ locale: fi }}
-                            margin="normal"
-                            id="date-picker-inline"
-                            value={selectedDate}
-                            onChange={handleDateChange}
-                            autoOk
-                            locale={fi}
-                            disablePast
-                            inputProps={{
-                                disabled: true
-                            }}
-                            KeyboardButtonProps={{
-                                'aria-label': 'change date',
-                            }}
-                        />
-
-                    </MuiPickersUtilsProvider>
-
-                    <Tooltip title={`${capitalize(format(addDays(selectedDate, 1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, 1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, 1), 'dd/MM/yyyy')} `}>
-                        <span className={classes.dayBtn}><Button onClick={() => setSelectedDate(addDays(selectedDate, 1))} size='small'><NavigateNextRoundedIcon /></Button></span></Tooltip>
-                    <Tooltip title={`${capitalize(format(selectedDate, "EEEE", { locale: fi }).substring(0, format(selectedDate, "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -7), 'dd/MM/yyyy')} `}>
-                        <span className={classes.weekBtn}><Button onClick={() => setSelectedDate(addDays(selectedDate, 7))} size='small'><DoubleArrowRoundedIcon /></Button></span></Tooltip>
                 </div>
 
 
@@ -402,18 +430,17 @@ const BookingPage = () => {
                                 {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> : <div>Sopivia aikoja vapaana: {getFreeTimes().length}</div>}
                             </div>}</div>
                         {!chosenService.service ? <em /> : <div>
-                            <div key={chosenService.service}>
+                            <div key={chosenService.service} className={classes.singleServiceBox}>
                                 <div className={classes.singleService} key={chosenService.service}>
                                     <Typography variant='h5'>{chosenService.service}</Typography>
                                     <Typography>Kuvaus: {chosenService.description}</Typography>
-                                    <Typography>Hinta: {chosenService.price}€</Typography>
-                                    <Typography>Varauksen kesto: {chosenService.timelength.hours}h {chosenService.timelength.minutes}m</Typography>
+                                    <Typography>{chosenService.price != 0 ? <span>Hinta: {chosenService.price}€</span> : <span>Varaus on maksuton</span>}</Typography>
+                                    <Typography>Varauksen kesto: {chosenService.timelength.hours != 0 ? <span>{chosenService.timelength.hours}h</span> : <em />} {chosenService.timelength.minutes != 0 ? <span>{chosenService.timelength.minutes}min</span> : <em />}</Typography>
                                 </div>
                             </div>
                         </div>}
                     </div>
-                    {!chosenService.service ? <em /> : <div>
-                        <br />
+                    {!chosenService.service ? <em /> : <div className={classes.freeTimesBox}>
                         <Divider />
                         {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> :
                             <div>
@@ -441,29 +468,65 @@ const BookingPage = () => {
                 {notification()}
                 <div >
                     <div >
-                        <AppBar position="static" style={{ backgroundColor: `rgb(${bookerObject.siteSettings.navColor.r},${bookerObject.siteSettings.navColor.g},${bookerObject.siteSettings.navColor.b},${bookerObject.siteSettings.navColor.a})` }}>
-                            <Toolbar className={classes.bookingTopbar} variant="dense">
-                                <Tabs
-                                    value={value}
-                                    onChange={handleChange}
-                                    TabIndicatorProps={{ style: { background: `rgb(${bookerObject.siteSettings.navText2Color.r},${bookerObject.siteSettings.navText2Color.g},${bookerObject.siteSettings.navText2Color.b},${bookerObject.siteSettings.navText2Color.a})` } }}
-                                    variant='standard'>
-                                    <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
-                                    {!user ?
-                                        <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(1)} className={classes.menuButton} color="inherit">Login</span>} />
-                                        :
-                                        <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>} />}
-                                    {!user ? <em />
-                                        :
-                                        <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(2)} className={classes.menuButton} variant='outlined' color="inherit" >Profiili</span>}></Tab>}
-                                </Tabs>
-                                {!user ? <em />
+                        
+                            <AppBar position="static" style={{ backgroundColor: `rgb(${bookerObject.siteSettings.navColor.r},${bookerObject.siteSettings.navColor.g},${bookerObject.siteSettings.navColor.b},${bookerObject.siteSettings.navColor.a})` }}>
+                                
+                                {window.innerWidth > 600 ?
+                                <Toolbar className={classes.bookingTopbar} variant="dense">
+                                    <span style={{ display: 'contents' }}>
+                                        <Tabs
+                                            value={value}
+                                            onChange={handleChange}
+                                            TabIndicatorProps={{ style: { background: `rgb(${bookerObject.siteSettings.navText2Color.r},${bookerObject.siteSettings.navText2Color.g},${bookerObject.siteSettings.navText2Color.b},${bookerObject.siteSettings.navText2Color.a})` } }}
+                                            variant='standard'>
+                                            <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
+                                            {!user ?
+                                                <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(1)} className={classes.menuButton} color="inherit">Kirjaudu</span>} />
+                                                :
+                                                <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>} />}
+                                            {!user ? <em />
+                                                :
+                                                <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(2)} className={classes.menuButton} variant='outlined' color="inherit" >Profiili</span>}></Tab>}
+                                        </Tabs>
+                                        {!user ? <em />
+                                            :
+                                            <Button variant='outlined' onClick={signOut}>Logout</Button>}
+
+
+                                    </span></Toolbar>
                                     :
-                                    <Button variant='outlined' onClick={signOut}>Logout</Button>}
-
-
-                            </Toolbar>
-                        </AppBar>
+                                    <Toolbar className={classes.bookingTopbar} variant="dense">
+                                                <Button onClick={() => setValue(0)}>
+                                                    <span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >{bookerObject.bookerName}</span>
+                                                </Button>
+                                                <IconButton
+                                                    edge='start'
+                                                    onClick={handleMenu}
+                                                    style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >
+                                                    <MenuIcon />
+                                                </IconButton>
+                                            <Drawer
+                                                anchor='top'
+                                                variant='temporary'
+                                                open={mobileMenuOpen}
+                                                onClose={handleMenuClose}>
+                                                <IconButton style={{padding: 0}} onClick={() => handleMenuClose()}><KeyboardArrowUpIcon/></IconButton>
+                                                <Button onClick={() => {
+                                                    setValue(0)
+                                                    handleMenuClose()
+                                                }}>Etusivu</Button>
+                                                <Button onClick={() => {
+                                                    setValue(1)
+                                                    handleMenuClose()
+                                                }}>Varaukset</Button>
+                                                <Button onClick={() => {
+                                                    setValue(2)
+                                                    handleMenuClose()
+                                                }}>Profiili</Button>
+                                            </Drawer>
+                                            </Toolbar>}
+                            </AppBar>
+                            
                     </div>
                     <div>{getTabContent(value)}</div>
 

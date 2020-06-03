@@ -144,236 +144,453 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
 
     const activeTab = () => (
         <div>
-            {activeBookings().map(booking => (
-                <ExpansionPanel key={booking.id} className={classes.expanded} >
-                    <ExpansionPanelSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1c-content"
-                        id="panel1c-header"
-                    >
-                        <div className={classes.column}>
-                            <Typography className={classes.heading}>{booking.service}</Typography>
-                        </div>
-                        <div className={classes.column}>
-                            {booking.bookingDate}
-                        </div>
-                        <div className={classes.column}>
-                            <Typography className={classes.secondaryHeading}>{getFormattedTimes([booking.times.start, booking.times.end])} </Typography>
-                        </div>
-                        <div className={classes.column}>
-                            {validCancelTime(booking) ? <Typography className={classes.heading}>Peruutusaika umpeutunut {<CheckIcon className={classes.green} />} </Typography> : <Typography className={classes.heading}>Peruttavissa {<CheckIcon className={classes.green} />}</Typography>}
-                        </div>
+            {window.innerWidth > 600 ?
+                <span>
+                    {activeBookings().map(booking => (
+                        <ExpansionPanel key={booking.id} className={classes.expanded} >
+                            <ExpansionPanelSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1c-content"
+                                id="panel1c-header"
+                            >
+                                <div className={classes.column}>
+                                    <Typography className={classes.heading}>{booking.service}</Typography>
+                                </div>
+                                <div className={classes.column}>
+                                    {booking.bookingDate}
+                                </div>
+                                <div className={classes.column}>
+                                    <Typography className={classes.secondaryHeading}>{getFormattedTimes([booking.times.start, booking.times.end])} </Typography>
+                                </div>
+                                <div className={classes.column}>
+                                    {validCancelTime(booking) ? <Typography className={classes.heading}>Peruutusaika umpeutunut {<CheckIcon className={classes.green} />} </Typography> : <Typography className={classes.heading}>Peruttavissa {<CheckIcon className={classes.green} />}</Typography>}
+                                </div>
 
 
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails className={classes.details}>
+                            </ExpansionPanelSummary>
+                            <ExpansionPanelDetails className={classes.details}>
 
-                        <div className={classes.column} style={{ textAlign: 'left' }}>
-                            <Typography>Varaaja: {booking.user.name}</Typography>
-                            <Typography>Email: {booking.user.email}</Typography>
-                        </div>
-                        <div className={classes.column} />
-                        <div className={classes.column} />
-                        <div className={clsx(classes.column, classes.helper)}>
-                            <Typography variant="caption">
-                                Varattu: {booking.whenBooked}
-                                {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
-                                    <br /> Syy: {booking.cancelled.reason}
-                                </span> : <span>
-                                        <br />
-                                        {validCancelTime(booking) ?
-                                            <div>
-                                                Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
-                                            </div>
-                                            :
-                                            <div>
-                                                Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
+                                <div className={classes.column} style={{ textAlign: 'left' }}>
+                                    <Typography>Varaaja: {booking.user.name}</Typography>
+                                    <Typography>Email: {booking.user.email}</Typography>
+                                </div>
+                                <div className={classes.column} />
+                                <div className={classes.column} />
+                                <div className={clsx(classes.column, classes.helper)}>
+                                    <Typography variant="caption">
+                                        Varattu: {booking.whenBooked}
+                                        {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
+                                            <br /> Syy: {booking.cancelled.reason}
+                                        </span> : <span>
+                                                <br />
+                                                {validCancelTime(booking) ?
+                                                    <div>
+                                                        Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
+                                                    </div>
+                                                    :
+                                                    <div>
+                                                        Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
                                     </div>
 
+                                                }
+                                            </span>}
+                                    </Typography>
+                                </div>
+                            </ExpansionPanelDetails>
+                            <Divider />
+
+                            <ExpansionPanelActions>
+                                {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
+                                    <span>
+                                        {validCancelTime(booking) ?
+                                            <span>
+                                                <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
+                                            </span>
+                                            :
+                                            <span>
+                                                <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
+                                                <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
+                                            </span>
+
                                         }
+
                                     </span>}
-                            </Typography>
-                        </div>
-                    </ExpansionPanelDetails>
-                    <Divider />
+                            </ExpansionPanelActions>
+                            <Divider />
+                        </ExpansionPanel>
+                    ))}</span> : <span>
+                    {activeBookings().map(booking => (
+                        <ExpansionPanel key={booking.id} className={classes.expanded} >
+                            <ExpansionPanelSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1c-content"
+                                id="panel1c-header"
+                            >
+                                <div className={classes.column}>
+                                    {booking.bookingDate}
+                                </div>
+                                <div className={classes.column}>
+                                    {validCancelTime(booking) ? <Typography className={classes.heading}>Peruutusaika umpeutunut {<CheckIcon className={classes.green} />} </Typography> : <Typography className={classes.heading}>Peruttavissa {<CheckIcon className={classes.green} />}</Typography>}
+                                </div>
 
-                    <ExpansionPanelActions>
-                        {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
-                            <span>
-                                {validCancelTime(booking) ?
+
+                            </ExpansionPanelSummary>
+                            <ExpansionPanelDetails className={classes.details}>
+
+                                <div className={classes.column} style={{ textAlign: 'left' }}>
+                                    <Typography>Varaaja: {booking.user.name}</Typography>
+                                    <Typography>Email: {booking.user.email}</Typography>
+                                </div>
+                                <div className={classes.column} />
+                                <div className={classes.column} />
+                                <div className={clsx(classes.column, classes.helper)}>
+                                    <Typography variant="caption">
+                                        Varattu: {booking.whenBooked}
+                                        {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
+                                            <br /> Syy: {booking.cancelled.reason}
+                                        </span> : <span>
+                                                <br />
+                                                {validCancelTime(booking) ?
+                                                    <div>
+                                                        Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
+                                                    </div>
+                                                    :
+                                                    <div>
+                                                        Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
+                                    </div>
+
+                                                }
+                                            </span>}
+                                    </Typography>
+                                </div>
+                            </ExpansionPanelDetails>
+                            <Divider />
+
+                            <ExpansionPanelActions>
+                                {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
                                     <span>
-                                        <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
-                                    </span>
-                                    :
-                                    <span>
-                                        <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
-                                        <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
-                                    </span>
+                                        {validCancelTime(booking) ?
+                                            <span>
+                                                <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
+                                            </span>
+                                            :
+                                            <span>
+                                                <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
+                                                <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
+                                            </span>
 
-                                }
+                                        }
 
-                            </span>}
-                    </ExpansionPanelActions>
-                    <Divider />
-                </ExpansionPanel>
-            ))}</div>
+                                    </span>}
+                            </ExpansionPanelActions>
+                            <Divider />
+                        </ExpansionPanel>
+                    ))}
+                </span>}
+
+        </div>
     )
 
 
 
     const pastTab = () => (
         <div>
-            {pastBookings().map(booking => (
+            {window.innerWidth > 600 ?
+                <span>
+                    {pastBookings().map(booking => (
 
-                <ExpansionPanel key={booking.id}>
-                    <ExpansionPanelSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1c-content"
-                        id="panel1c-header"
-                    >
-                        <div className={classes.column}>
-                            <Typography className={classes.heading}>{booking.service}</Typography>
-                        </div>
-                        <div className={classes.column}>
-                            {booking.bookingDate}
-                        </div>
-                        <div className={classes.column}>
-                            <Typography className={classes.secondaryHeading}>{getFormattedTimes([booking.times.start, booking.times.end])} </Typography>
-                        </div>
-                        <div className={classes.column}>
-                            {!booking.active ? <Typography className={classes.heading}>PERUTTU {<BlockIcon className={classes.errorMessage} />}</Typography> : <Typography className={classes.heading}>KÄYTETTY{<DoneAllIcon className={classes.pastIcon} />}</Typography>}
-                        </div>
+                        <ExpansionPanel key={booking.id}>
+                            <ExpansionPanelSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1c-content"
+                                id="panel1c-header"
+                            >
+                                <div className={classes.column}>
+                                    <Typography className={classes.heading}>{booking.service}</Typography>
+                                </div>
+                                <div className={classes.column}>
+                                    {booking.bookingDate}
+                                </div>
+                                <div className={classes.column}>
+                                    <Typography className={classes.secondaryHeading}>{getFormattedTimes([booking.times.start, booking.times.end])} </Typography>
+                                </div>
+                                <div className={classes.column}>
+                                    {!booking.active ? <Typography className={classes.heading}>PERUTTU {<BlockIcon className={classes.errorMessage} />}</Typography> : <Typography className={classes.heading}>KÄYTETTY{<DoneAllIcon className={classes.pastIcon} />}</Typography>}
+                                </div>
 
 
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails className={classes.details}>
+                            </ExpansionPanelSummary>
+                            <ExpansionPanelDetails className={classes.details}>
 
-                        <div className={classes.column} style={{ textAlign: 'left' }}>
-                            <Typography>Varaaja: {booking.user.name}</Typography>
-                            <Typography>Email: {booking.user.email}</Typography>
-                        </div>
-                        <div className={classes.column} />
-                        <div className={classes.column} />
-                        <div className={clsx(classes.column, classes.helper)}>
-                            <Typography variant="caption">
-                                Varattu: {booking.whenBooked}
-                                {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
-                                    <br /> Syy: {booking.cancelled.reason}
-                                </span> : <span>
-                                        <br />
+                                <div className={classes.column} style={{ textAlign: 'left' }}>
+                                    <Typography>Varaaja: {booking.user.name}</Typography>
+                                    <Typography>Email: {booking.user.email}</Typography>
+                                </div>
+                                <div className={classes.column} />
+                                <div className={classes.column} />
+                                <div className={clsx(classes.column, classes.helper)}>
+                                    <Typography variant="caption">
+                                        Varattu: {booking.whenBooked}
+                                        {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
+                                            <br /> Syy: {booking.cancelled.reason}
+                                        </span> : <span>
+                                                <br />
+                                                {validCancelTime(booking) ?
+                                                    <div>
+                                                        Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
+                                                    </div>
+                                                    :
+                                                    <div>
+                                                        Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
+                                            </div>
+
+                                                }
+                                            </span>}
+                                    </Typography>
+                                </div>
+                            </ExpansionPanelDetails>
+                            <Divider />
+
+                            <ExpansionPanelActions>
+                                {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
+                                    <span>
                                         {validCancelTime(booking) ?
-                                            <div>
-                                                Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
-                                            </div>
+                                            <span>
+                                                <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
+                                            </span>
                                             :
-                                            <div>
-                                                Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
-                                            </div>
+                                            <span>
+                                                <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
+                                                <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
+                                            </span>
 
                                         }
+
                                     </span>}
-                            </Typography>
-                        </div>
-                    </ExpansionPanelDetails>
-                    <Divider />
+                            </ExpansionPanelActions>
+                            <Divider />
+                        </ExpansionPanel>
+                    ))}
+                </span> :
+                <span>
+                    {pastBookings().map(booking => (
 
-                    <ExpansionPanelActions>
-                        {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
-                            <span>
-                                {validCancelTime(booking) ?
+                        <ExpansionPanel key={booking.id}>
+                            <ExpansionPanelSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1c-content"
+                                id="panel1c-header"
+                            >
+
+                                <div className={classes.column}>
+                                    {booking.bookingDate}
+                                </div>
+                                <div className={classes.column}>
+                                    {!booking.active ? <Typography className={classes.heading}>{<BlockIcon className={classes.errorMessage} />}</Typography> : <Typography className={classes.heading}>{<DoneAllIcon className={classes.pastIcon} />}</Typography>}
+                                </div>
+
+
+                            </ExpansionPanelSummary>
+                            <ExpansionPanelDetails className={classes.details}>
+
+                                <div className={classes.column} style={{ textAlign: 'left' }}>
+                                    <Typography>Varaaja: {booking.user.name}</Typography>
+                                    <Typography>Email: {booking.user.email}</Typography>
+                                </div>
+                                <div className={classes.column} />
+                                <div className={classes.column} />
+                                <div className={clsx(classes.column, classes.helper)}>
+                                    <Typography variant="caption">
+                                        Varattu: {booking.whenBooked}
+                                        {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
+                                            <br /> Syy: {booking.cancelled.reason}
+                                        </span> : <span>
+                                                <br />
+                                                {validCancelTime(booking) ?
+                                                    <div>
+                                                        Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
+                                                    </div>
+                                                    :
+                                                    <div>
+                                                        Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
+                            </div>
+
+                                                }
+                                            </span>}
+                                    </Typography>
+                                </div>
+                            </ExpansionPanelDetails>
+                            <Divider />
+
+                            <ExpansionPanelActions>
+                                {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
                                     <span>
-                                        <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
-                                    </span>
-                                    :
-                                    <span>
-                                        <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
-                                        <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
-                                    </span>
+                                        {validCancelTime(booking) ?
+                                            <span>
+                                                <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
+                                            </span>
+                                            :
+                                            <span>
+                                                <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
+                                                <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
+                                            </span>
 
-                                }
+                                        }
 
-                            </span>}
-                    </ExpansionPanelActions>
-                    <Divider />
-                </ExpansionPanel>
-            ))}
+                                    </span>}
+                            </ExpansionPanelActions>
+                            <Divider />
+                        </ExpansionPanel>
+                    ))}
+                </span>
+            }
         </div>
     )
     const cancelTab = () => (
         <div>
-            {cancelledBookings().map(booking => (
-                <ExpansionPanel key={booking.id} className={classes.expanded} >
-                    <ExpansionPanelSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1c-content"
-                        id="panel1c-header"
-                    >
-                        <div className={classes.column}>
-                            <Typography className={classes.heading}>{booking.service}</Typography>
-                        </div>
-                        <div className={classes.column}>
-                            {booking.bookingDate}
-                        </div>
-                        <div className={classes.column}>
-                            <Typography className={classes.secondaryHeading}>{getFormattedTimes([booking.times.start, booking.times.end])} </Typography>
-                        </div>
-                        <div className={classes.column}>
-                            {!booking.active ? <Typography className={classes.heading}>PERUTTU {<BlockIcon className={classes.errorMessage} />}</Typography> : <Typography className={classes.heading}>AKTIIVINEN {<CheckIcon className={classes.green} />}</Typography>}
-                        </div>
+            {window.innerWidth > 600 ?
+                <span>
+                    {cancelledBookings().map(booking => (
+                        <ExpansionPanel key={booking.id} className={classes.expanded} >
+                            <ExpansionPanelSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1c-content"
+                                id="panel1c-header"
+                            >
+                                <div className={classes.column}>
+                                    <Typography className={classes.heading}>{booking.service}</Typography>
+                                </div>
+                                <div className={classes.column}>
+                                    {booking.bookingDate}
+                                </div>
+                                <div className={classes.column}>
+                                    <Typography className={classes.secondaryHeading}>{getFormattedTimes([booking.times.start, booking.times.end])} </Typography>
+                                </div>
+                                <div className={classes.column}>
+                                    {!booking.active ? <Typography className={classes.heading}>PERUTTU {<BlockIcon className={classes.errorMessage} />}</Typography> : <Typography className={classes.heading}>AKTIIVINEN {<CheckIcon className={classes.green} />}</Typography>}
+                                </div>
 
 
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails className={classes.details}>
+                            </ExpansionPanelSummary>
+                            <ExpansionPanelDetails className={classes.details}>
 
-                        <div className={classes.column} style={{ textAlign: 'left' }}>
-                            <Typography>Varaaja: {booking.user.name}</Typography>
-                            <Typography>Email: {booking.user.email}</Typography>
-                        </div>
-                        <div className={classes.column} />
-                        <div className={classes.column} />
-                        <div className={clsx(classes.column, classes.helper)}>
-                            <Typography variant="caption">
-                                Varattu: {booking.whenBooked}
-                                {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
-                                    <br /> Syy: {booking.cancelled.reason}
-                                </span> : <span>
-                                        <br />
+                                <div className={classes.column} style={{ textAlign: 'left' }}>
+                                    <Typography>Varaaja: {booking.user.name}</Typography>
+                                    <Typography>Email: {booking.user.email}</Typography>
+                                </div>
+                                <div className={classes.column} />
+                                <div className={classes.column} />
+                                <div className={clsx(classes.column, classes.helper)}>
+                                    <Typography variant="caption">
+                                        Varattu: {booking.whenBooked}
+                                        {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
+                                            <br /> Syy: {booking.cancelled.reason}
+                                        </span> : <span>
+                                                <br />
+                                                {validCancelTime(booking) ?
+                                                    <div>
+                                                        Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
+                                                    </div>
+                                                    :
+                                                    <div>
+                                                        Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
+                                            </div>
+
+                                                }
+                                            </span>}
+                                    </Typography>
+                                </div>
+                            </ExpansionPanelDetails>
+                            <Divider />
+
+                            <ExpansionPanelActions>
+                                {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
+                                    <span>
                                         {validCancelTime(booking) ?
-                                            <div>
-                                                Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
-                                            </div>
+                                            <span>
+                                                <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
+                                            </span>
                                             :
-                                            <div>
-                                                Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
-                                            </div>
+                                            <span>
+                                                <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
+                                                <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
+                                            </span>
 
                                         }
+
                                     </span>}
-                            </Typography>
-                        </div>
-                    </ExpansionPanelDetails>
-                    <Divider />
+                            </ExpansionPanelActions>
+                            <Divider />
+                        </ExpansionPanel>
+                    ))}</span> : <span>
+                    {cancelledBookings().map(booking => (
+                        <ExpansionPanel key={booking.id} className={classes.expanded} >
+                            <ExpansionPanelSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1c-content"
+                                id="panel1c-header"
+                            >
+                                <div className={classes.column}>
+                                    {booking.bookingDate}
+                                </div>
+                                <div className={classes.column}>
+                                    {!booking.active ? <Typography className={classes.heading}>{<BlockIcon className={classes.errorMessage} />}</Typography> : <Typography className={classes.heading}>{<CheckIcon className={classes.green} />}</Typography>}
+                                </div>
 
-                    <ExpansionPanelActions>
-                        {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
-                            <span>
-                                {validCancelTime(booking) ?
+
+                            </ExpansionPanelSummary>
+                            <ExpansionPanelDetails className={classes.details}>
+
+                                <div className={classes.column} style={{ textAlign: 'left' }}>
+                                    <Typography>Varaaja: {booking.user.name}</Typography>
+                                    <Typography>Email: {booking.user.email}</Typography>
+                                </div>
+                                <div className={classes.column} />
+                                <div className={classes.column} />
+                                <div className={clsx(classes.column, classes.helper)}>
+                                    <Typography variant="caption">
+                                        Varattu: {booking.whenBooked}
+                                        {!booking.active ? <span> <br />Peruttu:  {booking.cancelled.date}
+                                            <br /> Syy: {booking.cancelled.reason}
+                                        </span> : <span>
+                                                <br />
+                                                {validCancelTime(booking) ?
+                                                    <div>
+                                                        Peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}
+                                                    </div>
+                                                    :
+                                                    <div>
+                                                        Peruttavissa {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')} mennessä
+                                            </div>
+
+                                                }
+                                            </span>}
+                                    </Typography>
+                                </div>
+                            </ExpansionPanelDetails>
+                            <Divider />
+
+                            <ExpansionPanelActions>
+                                {!booking.active ? <Typography style={{ justifyContent: 'center' }}>Varaus on peruttu. Epäselvissä tilanteissa ota suoraan yhteyttä toimipisteeseen.</Typography> :
                                     <span>
-                                        <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
-                                    </span>
-                                    :
-                                    <span>
-                                        <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
-                                        <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
-                                    </span>
+                                        {validCancelTime(booking) ?
+                                            <span>
+                                                <Typography>Varausta ei voida peruuttaa, sillä peruutusaika umpeutui {format(lastCancelTime(booking), 'dd.MM.yyyy HH.mm')}. Ota tarvittaessa yhteyttä suoraan toimipisteeseen </Typography>
+                                            </span>
+                                            :
+                                            <span>
+                                                <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
+                                                <Tooltip title={`Peru henkilön ${booking.user.name} varaus ${getFormattedTimes([booking.times.start, booking.times.end])}`} arrow><Button size="small" color="secondary" onClick={() => cancelBooking(booking)} >Peruuta varaus</Button></Tooltip>
+                                            </span>
 
-                                }
+                                        }
 
-                            </span>}
-                    </ExpansionPanelActions>
-                    <Divider />
-                </ExpansionPanel>
-            ))}
+                                    </span>}
+                            </ExpansionPanelActions>
+                            <Divider />
+                        </ExpansionPanel>
+                    ))}
+                </span>}
         </div>
     )
 
@@ -399,25 +616,40 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
                     <Tab label={'Perutut'}></Tab>
                 </Tabs>
 
-                <ExpansionPanel>
-                    <ExpansionPanelSummary
-                        disabled
-                        style={{ marginRight: '5%' }}
-                    >
-                        <div className={classes.column}>
-                            <Typography className={classes.heading}>Palvelu</Typography>
-                        </div>
-                        <div className={classes.column}>
-                            <Typography className={classes.heading}>Päivämäärä</Typography>
-                        </div>
-                        <div className={classes.column}>
-                            <Typography className={classes.heading}>Aika</Typography>
-                        </div>
-                        <div className={classes.column}>
-                            <Typography className={classes.heading}>Tila</Typography>
-                        </div>
-                    </ExpansionPanelSummary>
-                </ExpansionPanel>
+
+                {window.innerWidth > 600 ?
+                    <ExpansionPanel>
+                        <ExpansionPanelSummary
+                            disabled
+                            style={{ marginRight: '5%' }}
+                        ><div className={classes.column}>
+                                <Typography className={classes.heading}>Palvelu</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>Päivämäärä</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>Aika</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>Tila</Typography>
+                            </div>
+                        </ExpansionPanelSummary>
+                    </ExpansionPanel>
+                    : <ExpansionPanel>
+                        <ExpansionPanelSummary
+                            disabled
+                            style={{ marginRight: '12%' }}
+                        >
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>Päivämäärä</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>Tila</Typography>
+                            </div>
+                        </ExpansionPanelSummary>
+                    </ExpansionPanel>}
+
                 <Divider />
                 <div>{getTabContent(value)}</div>
             </div>}

@@ -11,6 +11,7 @@ import InfoTab from './InfoTab'
 import ContactInfoTab from './ContactInfoTab';
 
 import useStyles from './useStyles'
+import Resources from './Resources';
 
 
 const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
@@ -97,12 +98,14 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
             case 1:
                 return <ServiceTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 2:
-                return <TimeManagement setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
+                return <Resources setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData}/>
             case 3:
-                return <InfoTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
+                return <TimeManagement setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 4:
-                return <UserTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
+                return <InfoTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 5:
+                return <UserTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
+            case 6:
                 return <ContactInfoTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             default:
                 return 'Unknown step';
@@ -136,6 +139,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                     >
                         <Tab label='Varaukset' />
                         <Tab label='Palvelut' />
+                        <Tab label='Resurssit'/>
                         <Tab label='Ajanhallinta' />
                         <Tab label='Näkymät' />
                         <Tab label='Käyttäjähallinta' />

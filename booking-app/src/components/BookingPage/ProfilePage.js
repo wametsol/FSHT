@@ -137,10 +137,10 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
                         </div>
 
                     }
-
-                    {editInformation ? <Tooltip title='Muokkaa'><Button onClick={() => setEditInformation(false)} style={{ float: 'right' }} variant='contained' size='small'><EditIcon /></Button></Tooltip> : <Tooltip title='Peru muutokset'><Button onClick={() => { setEditInformation(true); setProfile({ name: userData.name, email: userData.email, phone: userData.phone }) }} style={{ float: 'right' }} variant='contained' size='small'><CloseIcon /></Button></Tooltip>}
-                    {(profile.email !== userData.email || profile.phone !== userData.phone || profile.name !== userData.name) ? <Tooltip title='Talleta'><Button onClick={() => { setEditInformation(true); saveProfileEdit() }} style={{ float: 'right' }} size='small' variant='contained'><SaveIcon /></Button></Tooltip> :
-                        <span> </span>}
+                    <div className={classes.profileButtonBox}>
+                    {editInformation ? <Tooltip title='Muokkaa'><Button onClick={() => setEditInformation(false)} className={classes.profileButtons} variant='contained' size='small'><EditIcon /></Button></Tooltip> : <Tooltip title='Peru muutokset'><Button onClick={() => { setEditInformation(true); setProfile({ name: userData.name, email: userData.email, phone: userData.phone }) }} className={classes.profileButtons} variant='contained' size='small'><CloseIcon /></Button></Tooltip>}
+                    {(profile.email !== userData.email || profile.phone !== userData.phone || profile.name !== userData.name) ? <Tooltip title='Talleta'><Button onClick={() => { setEditInformation(true); saveProfileEdit() }} className={classes.profileButtons} size='small' variant='contained'><SaveIcon /></Button></Tooltip> :
+                        <span> </span>}</div>
                 </div>
                 <div className={classes.profileBox}>
                     <Typography style={{ textAlign: 'center' }}>Yhteydenottotapa <Tooltip title='Varauksiisi liittyvissä asioissa otetaan yhteyttä valintasi mukaan. Sinun on valittava vähintään yksi yhteydenottotapa'><HelpIcon fontSize='small' /></Tooltip></Typography>
@@ -159,43 +159,50 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
                             {[howToContact.email, howToContact.phone].filter((v) => v).length === 0 ? <FormHelperText style={{ textAlign: 'center' }}>Valitse vähintään yksi</FormHelperText> : <em />}
                         </FormControl>
                     </div>
-                    {editPreferences ? <Tooltip title='Muokkaa'><Button onClick={() => setEditPreferences(false)} style={{ float: 'right' }} variant='contained' size='small'><EditIcon /></Button></Tooltip> : <Tooltip title='Peru muutokset'><Button onClick={() => { setEditPreferences(true); setHowToContact(userData.contactPreferences) }} style={{ float: 'right' }} variant='contained' size='small'><CloseIcon /></Button></Tooltip>}
-                    {(howToContact.email !== userData.contactPreferences.email || howToContact.phone !== userData.contactPreferences.phone) && [howToContact.email, howToContact.phone].filter((v) => v).length !== 0 ? <Tooltip title='Talleta'><Button onClick={() => { setEditPreferences(true); saveContactPreferenceEdit() }} style={{ float: 'right' }} size='small' variant='contained'><SaveIcon /></Button></Tooltip> :
-                        <span> </span>}
+                    <div className={classes.profileButtonBox}>
+                    {editPreferences ? <Tooltip title='Muokkaa'><Button onClick={() => setEditPreferences(false)} className={classes.profileButtons} variant='contained' size='small'><EditIcon /></Button></Tooltip> : <Tooltip title='Peru muutokset'><Button onClick={() => { setEditPreferences(true); setHowToContact(userData.contactPreferences) }} className={classes.profileButtons} variant='contained' size='small'><CloseIcon /></Button></Tooltip>}
+                    {(howToContact.email !== userData.contactPreferences.email || howToContact.phone !== userData.contactPreferences.phone) && [howToContact.email, howToContact.phone].filter((v) => v).length !== 0 ? <Tooltip title='Talleta'><Button onClick={() => { setEditPreferences(true); saveContactPreferenceEdit() }} className={classes.profileButtons} size='small' variant='contained'><SaveIcon /></Button></Tooltip> :
+                        <span> </span>}</div>
 
                 </div>
             </div>
             <Divider />
-            <div className={classes.lowerBox}>
-                <TableContainer component={Paper}>
-                    <Table className={classes.table}>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell align='center' colSpan={5} style={{ fontWeight: 'bold', fontSize: '20px' }} >
-                                    Oma historiasi
-                            </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell style={{ fontWeight: 'bold' }}>Järjestelmä</TableCell>
-                                <TableCell align='right' style={{ fontWeight: 'bold' }}>Voimassa</TableCell>
-                                <TableCell align='right' style={{ fontWeight: 'bold' }}>Menneet</TableCell>
-                                <TableCell align='right' style={{ fontWeight: 'bold' }}>Peruutukset</TableCell>
-                                <TableCell align='right' style={{ fontWeight: 'bold' }}>Varauksia yhteensä</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        {Object.keys(userData.bookings).map((bookingsKey) => (
-                            <TableRow>
-                                <TableCell>{capitalize(bookingsKey)}</TableCell>
-                                <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && !isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
-                                <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
-                                <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => !booking.active).length}</TableCell>
-                                <TableCell align='right'>{userData.bookings[`${bookingsKey}`].length}</TableCell>
-                            </TableRow>
-
-                        ))}
-                    </Table>
-                </TableContainer>
-            </div>
+            {window.innerWidth > 600 ?
+                        <div className={classes.lowerBox}>
+                        <TableContainer component={Paper}>
+                            <Table className={classes.table}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell align='center' colSpan={5} style={{ fontWeight: 'bold', fontSize: '20px' }} >
+                                            Oma historiasi
+                                    </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell style={{ fontWeight: 'bold' }}>Järjestelmä</TableCell>
+                                        <TableCell align='right' style={{ fontWeight: 'bold' }}>Voimassa</TableCell>
+                                        <TableCell align='right' style={{ fontWeight: 'bold' }}>Menneet</TableCell>
+                                        <TableCell align='right' style={{ fontWeight: 'bold' }}>Peruutukset</TableCell>
+                                        <TableCell align='right' style={{ fontWeight: 'bold' }}>Varauksia yhteensä</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                {Object.keys(userData.bookings).map((bookingsKey) => (
+                                    <TableRow>
+                                        <TableCell>{capitalize(bookingsKey)}</TableCell>
+                                        <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && !isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
+                                        <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
+                                        <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => !booking.active).length}</TableCell>
+                                        <TableCell align='right'>{userData.bookings[`${bookingsKey}`].length}</TableCell>
+                                    </TableRow>
+        
+                                ))}
+                            </Table>
+                        </TableContainer>
+                    </div>
+                        :
+                        <span>
+                            
+                        </span>}
+            
 
         </div>
     )

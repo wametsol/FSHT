@@ -57,12 +57,26 @@ const useStyles = makeStyles((theme) => ({
         },
         [theme.breakpoints.down('xs')]:{
             maxWidth: '100%',
+            position: 'static',
+            padding: 2
         }
 
     },
     singleService: {
         textAlign: 'left',
-        margin: 20
+        margin: 20,
+        [theme.breakpoints.down('sm')]:{
+            maxWidth: '90%',
+        },
+    },
+    singleServiceBox: {
+        [theme.breakpoints.down('xs')]:{
+            marginLeft: '5vh',
+            marginRight: '5vh'
+        },
+    },
+    freeTimesBox: {
+        marginTop: 10
     },
     footerObject: {
         marginLeft: '5%',
@@ -76,7 +90,11 @@ const useStyles = makeStyles((theme) => ({
     selectorLine: {
         display: 'flex',
         justifyContent: 'center',
-        backgroundColor: ' #f2f2f2'
+        backgroundColor: ' #f2f2f2',
+        [theme.breakpoints.down('xs')]:{
+            display: 'inline-block',
+            minWidth: '100%'
+        }
 
     },
     selector: {
@@ -156,6 +174,9 @@ const useStyles = makeStyles((theme) => ({
     },
     column: {
         flexBasis: '25%',
+        [theme.breakpoints.down('xs')]:{
+            flexBasis: '50%',
+        }
     },
     helper: {
         borderLeft: `2px solid ${theme.palette.divider}`,
@@ -186,7 +207,10 @@ const useStyles = makeStyles((theme) => ({
     },
     upperBox: {
         display: 'flex',
-        backgroundColor: '#fffbf0'
+        backgroundColor: '#fffbf0',
+        [theme.breakpoints.down('xs')]:{
+            display: 'contents',
+        }
     },
     lowerBox: {
         padding: 20,
@@ -203,6 +227,9 @@ const useStyles = makeStyles((theme) => ({
         padding: '20px',
         backgroundColor: 'ivory'
     },
+    profileButtonBox: {
+        textAlign: 'right'
+    }
 }))
 
 export default useStyles

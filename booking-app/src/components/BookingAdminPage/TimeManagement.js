@@ -73,11 +73,17 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const [specialDayTimes, setSpecialDayTimes] = useState([8, 16])
     const [specialDayReason, setSpecialDayReason] = useState('')
     const pagematch = useRouteMatch('/:id')
+    const [specialDayKeys, setSpecialDayKeys] = useState([])
 
-    const specialDayKeys = Object.keys(bookerObject.specialDays)
+    if(!!bookerObject.specialDays){
+        setSpecialDayKeys(Object.keys(bookerObject.specialDays))
+    }
+    
     
     //SORT SPECIALDAYS TO ASC ORDER
+    if (!!specialDayKeys){
     specialDayKeys.sort((a,b) => parseISO(`${a.substring(6,10)}-${a.substring(3,5)}-${a.substring(0,2)}`) - parseISO(`${b.substring(6,10)}-${b.substring(3,5)}-${b.substring(0,2)}`))
+    }
     
     
 

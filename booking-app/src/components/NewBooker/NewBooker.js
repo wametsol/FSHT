@@ -325,22 +325,62 @@ const NewBooker = () => {
                 },
                 services: bookerServices,
                 admins: [user.email],
-                timeTables: initialTimetable
+                timeTables: initialTimetable,
+                siteSettings: {
+                    color: '',
+                    footerBorderRadius: 0,
+                    footerOn: true,
+                    footerColor:{
+                        a:1,
+                        r:255,
+                        g:255,
+                        b:255
+                    },
+                    footerTextColor:{
+                        a:1,
+                        b:10,
+                        g:152,
+                        r:205
+                    },
+                    navColor:{
+                        a:0.59,
+                        r:1,
+                        g:158,
+                        b:201
+                    },
+                    navTextColor:{
+                        a:0.59,
+                        r:1,
+                        g:158,
+                        b:201
+                    },
+                    navText2Color:{
+                        a:0.59,
+                        r:1,
+                        g:158,
+                        b:201
+                    },
+                    visibleToPublic: true,
+                    images:{
+                        background: 'https://firebasestorage.googleapis.com/v0/b/ajanvaraus-fs20.appspot.com/o/bookerkeilaamo%2Fimages%2Fbackground.jpg?alt=media&token=f2c3863b-b57f-4d63-9806-a0416da334fd'
+                    }
+                }
             }
-            let setDoc = firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
+            firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
                 
 
                 firestore.collection('userCollection').doc(user.email).update({bookers: firebase.firestore.FieldValue.arrayUnion({address: webAddress, name: systName})})
                 .then((res) => {
                     console.log(res)
-                })
-                setTimeout(() => {
-                    setLoading(false)
                     setTimeout(() => {
-                        history.push(`/${webAddress}/admin`)
-                    }, 2000)
-                    }, 3000)   
-            })
+                        setLoading(false)
+                        setTimeout(() => {
+                            history.push(`/${webAddress}/admin`)
+                        }, 2000)
+                        }, 3000)   
+                })
+                })
+                
         } catch (error) {
             setLoading(false)
             console.log(error)

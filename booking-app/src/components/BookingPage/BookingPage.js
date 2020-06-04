@@ -50,6 +50,7 @@ const BookingPage = () => {
     const [errorMessage, setErrorMessage] = useState(null)
     const [successMessage, setSuccessMessage] = useState(null)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [chosenWorker, setChosenWorker] = useState(null)
 
 
 
@@ -64,6 +65,7 @@ const BookingPage = () => {
                     }
                     console.log(response.data)
                     setBookerObject(response.data())
+                    document.title = `${response.data().bookerName} ajanvaraus`
 
                     firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
                         .then(res => {
@@ -438,16 +440,32 @@ const BookingPage = () => {
                                     <Typography>Varauksen kesto: {chosenService.timelength.hours != 0 ? <span>{chosenService.timelength.hours}h</span> : <em />} {chosenService.timelength.minutes != 0 ? <span>{chosenService.timelength.minutes}min</span> : <em />}</Typography>
                                 </div>
                             </div>
+                            
                         </div>}
                     </div>
+                    
                     {!chosenService.service ? <em /> : <div className={classes.freeTimesBox}>
+                        {console.log(bookerObject.resources)}
+                        {console.log(bookerObject.resources.filter(r => r.human && r.services.filter(a => a.service === chosenService.service)))}
+                        <Typography>Sopivat työntekijät</Typography>
+                        <div className={classes.workerBox} >
+
+                        
+                    {bookerObject.resources.filter(r => r.human && r.services.filter(a => a.service === chosenService.service).length>0).map(person => (
+                        <div className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
+                            
+                        <Typography>{person.name}</Typography>
+                        </div>
+                    ))}</div>
                         <Divider />
+                        {!!chosenWorker? <div>
                         {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> :
                             <div>
                                 {getFreeTimes().map(time => (
-                                    <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
-                                ))}</div>}
+                                    <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress, worker: chosenWorker })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
+                                ))}</div>}</div>: <em/>}
                     </div>}
+                    
 
 
                     {confirmationOpen ? <ConfirmationWindow setOpen={setConfirmationOpen} open={confirmationOpen} data={confirmationData} setConfirmationData={setConfirmationData} /> : <em />}
@@ -456,14 +474,18 @@ const BookingPage = () => {
         </div>
     )
 
+    
+    
 
-    if (bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && bookerObject.admins.filter(a => a.email === user.email).length > 0))) {
-        console.log(bookerObject.admins)
-        console.log(user)
-
-        document.title = `${bookerObject.bookerName} ajanvaraus`
+        
         return (
             <div className={classes.root}>
+                {console.log(bookerObject)}
+                {console.log(user)}
+                {console.log((bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!userData && bookerObject.admins.filter(a => a.email === userData.email).length > 0))))}
+                {(bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && bookerObject.admins.filter(a => a.email === user.email).length > 0)))?
+                <div>
+                    
                 {(!bookerObject.siteSettings.visibleToPublic) ? <div className={classes.notPublicInfo}><Typography variant='h6'>Sivusto ei näy julkisesti, se näkyy vain sivuston ylläpitäjille. Voit julkaista sivuston hallintapaneelista.</Typography></div> : <em />}
                 {notification()}
                 <div >
@@ -566,19 +588,17 @@ const BookingPage = () => {
                 </span> : <em />}
 
             </div>
-        )
-    }
-
-
-    return (
-        <div>
+            :
+            <div>
             {loading ? <CircularProgress size={25} /> : <div>
                 <Typography>
                     Sivuston osoite on virheellinen, tai sivuston ylläpitäjä on asettanut sivuston piilotetuksi</Typography></div>}
             {error ? <div>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <em />}
-        </div>
-    )
-}
+        </div>}
+            </div>
+        )
+    }
+
 
 
 

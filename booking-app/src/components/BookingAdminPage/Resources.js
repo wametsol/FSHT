@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import firebase, { auth, firestore } from '../../firebase'
 import {
     Typography, CircularProgress, TextField, Button, Tooltip, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Chip, Divider, Switch, InputAdornment, FormControl, FormLabel, FormHelperText, MenuItem, InputLabel, Select,
-    Grid, List, ListItem, ListItemIcon, ListItemText, Checkbox, Paper
+    Grid, List, ListItem, ListItemIcon, ListItemText, Checkbox, Paper, Tab, Tabs, RadioGroup, FormControlLabel, Radio
 } from '@material-ui/core';
 import { useRouteMatch } from 'react-router-dom'
 import clsx from 'clsx';
@@ -14,7 +14,7 @@ import CancelIcon from '@material-ui/icons/Cancel'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import AddIcon from '@material-ui/icons/Add'
 import RemoveIcon from '@material-ui/icons/Remove'
-
+import { getNumberArray } from './TimeTableServices'
 
 
 const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }) => {
@@ -28,48 +28,66 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
     const [isHuman, setIsHuman] = useState(false)
     const [serviceList, setServiceList] = useState(bookerObject.services)
     const [resourceServiceList, setResourceServiceList] = useState([])
-    const [checked, setChecked] = useState([])
+    const [resName, setResName] = useState('')
+    const [resDesc, setResDesc] = useState('')
+    const [humanGender, setHumanGender] = useState(null)
+    const [identicalResources, setIdenticalResources] = useState(1)
+    const [tabValue, setTabValue] = useState(0)
 
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue)
+    }
+    const handleGenderChange = (event) => {
+        setHumanGender(event.target.value)
+        console.log(event.target.value)
+    }
 
-
-    const addNewAdmin = (e) => {
+    const addNewResource = (e) => {
         e.preventDefault()
         try {
             setError(false)
             setLoading(true)
-            firestore.collection('userCollection').doc(newAdmin).get()
+
+            let resourceObject
+            
+            if(isHuman){
+                resourceObject = {
+                    human : isHuman,
+                    name: resName,
+                    description: resDesc,
+                    services: resourceServiceList,
+                    gender: humanGender
+                }
+            } else {
+                resourceObject = {
+                    human : isHuman,
+                    name: resName,
+                    description: resDesc,
+                    services: resourceServiceList,
+                    amountOfResources: identicalResources 
+                }
+            }
+            
+            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('baseInformation').update({ resources: firebase.firestore.FieldValue.arrayUnion(resourceObject) })
                 .then(response => {
-                    if (response.empty || bookerObject.admins.filter(a => a.email === newAdmin).length > 0) {
-                        setLoading(false)
-                        setErrorMessage('Antamallasi osoitteella ei löytynyt käyttäjää')
-                    } else {
-                        const adminObject = {
-                            email: response.data().email,
-                            name: response.data().name
-                        }
-                        firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ admins: firebase.firestore.FieldValue.arrayUnion(adminObject) })
-                            .then(res => {
-                                console.log(res)
-                                setNewAdmin('')
+                                resetForm()
                                 fetchData()
                                 setLoading(false)
-                                setSuccessMessage(`Käyttäjä ${adminObject.name} lisätty adminksi`)
+                                setSuccessMessage(`Resurssi ${resourceObject.name} lisätty`)
                             })
-                    }
-                })
         } catch (error) {
             console.log(error)
             setLoading(false)
             setError(true)
         }
     }
-    const removeAdmin = (admin) => {
-        console.log(admin)
+    const removeResource = (resource) => {
+        console.log(resource)
 
         try {
             setError(false)
             setLoading(true)
-            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ admins: firebase.firestore.FieldValue.arrayRemove(admin) })
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ resources: firebase.firestore.FieldValue.arrayRemove(resource) })
                 .then(res => {
                     console.log(res)
                     fetchData()
@@ -81,6 +99,17 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
             setLoading(false)
             setError(true)
         }
+    }
+
+    const resetForm = () => {
+        setIsHuman(false)
+        setServiceList(bookerObject.services)
+        setResourceServiceList([])
+        setResName('')
+        setResDesc('')
+        setHumanGender(null)
+        setIdenticalResources(1)
+        setAddFormOpen(false)
     }
 
     const addService = (index) => {
@@ -140,6 +169,117 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
         </Paper>
     )
 
+    const getTabContent = (tab) => {
+        switch (tab) {
+            case 0:
+                return humanTab()
+            case 1:
+                return nonHumanTab()
+            default:
+                return 'Unknown step';
+        }
+    }
+
+    const getGenderInfo = (gender) => {
+        if (gender === 'male') return 'Mies'
+        if (gender === 'female') return 'Nainen'
+        if (gender === 'other') return 'Muu / ei ilmoitettu'
+    }
+
+    const humanTab = () => (
+        <div>
+        {bookerObject.resources.filter(a => a.human).map(resource => (
+            <div key={resource.name} >
+                <div className={classes.root}>
+                    <ExpansionPanel >
+                        <ExpansionPanelSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1c-content"
+                            id="panel1c-header"
+                        >
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>{resource.name}</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.secondaryHeading}>{resource.description}</Typography>
+                            </div>
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails className={classes.details}>
+                            <div className={classes.column} />
+                            <div className={classes.column}>
+                                Sukupuoli: {getGenderInfo(resource.gender)}
+                                
+                            </div>
+                            <div className={clsx(classes.column, classes.helper)}>
+                                <Typography variant="caption">
+                                    Henkilön tarjoamat palvelut
+                               <br />
+                               {resource.services.map(singleService => (
+                                    <Chip label={singleService.service} onDelete={() => { }} />
+                                ))}
+                                </Typography>
+                            </div>
+                        </ExpansionPanelDetails>
+                        <Divider />
+                        <ExpansionPanelActions>
+                            <Tooltip title={`Poista resurssi ${resource.name} `} arrow><span><Button size='small' className={classes.removeAdmin} onClick={() => removeResource(resource)}><CancelIcon /></Button></span></Tooltip>
+                            <Button variant='contained' size="small" color="primary">
+                                Muokkaa
+                            </Button>
+                        </ExpansionPanelActions>
+                    </ExpansionPanel>
+                </div>
+            </div>
+        ))}</div>
+    )
+    
+    const nonHumanTab = () => (
+        <div>
+        {bookerObject.resources.filter(a => !a.human).map(resource => (
+            <div key={resource.name} >
+                <div className={classes.root}>
+                    <ExpansionPanel >
+                        <ExpansionPanelSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1c-content"
+                            id="panel1c-header"
+                        >
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>{resource.name}, {resource.amountOfResources}kpl</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.secondaryHeading}>{resource.description}</Typography>
+                            </div>
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails className={classes.details}>
+                            <div className={classes.column} />
+                            <div className={classes.column}>
+                                
+                                
+                            </div>
+                            <div className={clsx(classes.column, classes.helper)}>
+                                <Typography variant="caption">
+                                    Resurssia voidaan käyttää seuraaviin palveluihin
+                               <br />
+                               {resource.services.map(singleService => (
+                                    <Chip label={singleService.service} onDelete={() => { }} />
+                                ))}
+                                </Typography>
+                            </div>
+                        </ExpansionPanelDetails>
+                        <Divider />
+                        <ExpansionPanelActions>
+                            <Tooltip title={`Poista resurssi ${resource.name} `} arrow><span><Button size='small' className={classes.removeAdmin} onClick={() => removeResource(resource)}><CancelIcon /></Button></span></Tooltip>
+                            <Button variant='contained' size="small" color="primary">
+                                Muokkaa
+                            </Button>
+                        </ExpansionPanelActions>
+                    </ExpansionPanel>
+                </div>
+            </div>
+        ))}</div>
+    )
+
     return (
         <div>
             <Typography variant='h5'>Varausjärjestelmän resurssit</Typography>
@@ -149,7 +289,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
 
                 <div className={classes.addServiceForm}>
                     <form>
-                        <Typography>Resurssin tyyppi: <Switch
+                        <Typography style={{display:'inline'}}>Resurssin tyyppi: <Switch
                             classes={{
                                 switchBase: classes.switchBase,
                                 checked: classes.checked,
@@ -158,16 +298,42 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                             }}
                             checked={isHuman}
                             onChange={() => setIsHuman(!isHuman)}
-                        ></Switch>
-                            {isHuman ? <span style={{ backgroundColor: 'pink' }} className={classes.humanBox}>Henkilö</span> : <span style={{ backgroundColor: 'lightblue' }} className={classes.humanBox}>Laite</span>}</Typography>
+                        ></Switch> </Typography>
+                            {isHuman ? <span><span style={{ backgroundColor: 'pink' }} className={classes.humanBox}>Henkilö</span>
+                            <br/>
+                            Sukupuoli 
+                            <span >
+                            <RadioGroup row style={{justifyContent: 'center'}} value={humanGender} onChange={handleGenderChange}>
+                                <FormControlLabel value='male' control={<Radio/>} label='Mies'/>
+                                <FormControlLabel value='female' control={<Radio/>} label='Nainen'/>
+                                <FormControlLabel value='other' control={<Radio/>} label='Muu/ei ilmoitettu' />
+                            </RadioGroup>
+                            </span>
+                            </span> : <span><span style={{ backgroundColor: 'lightblue' }} className={classes.humanBox}>Laite</span>
+                            <br/>
+                            <FormControl>
+                            <div style={{display:'inline'}}>Identtisten resurssien määrä <Select
+                            MenuProps={{ style: { maxHeight: '300px' } }}
+                            onChange={({ target }) => setIdenticalResources(target.value)}
+                            value={identicalResources}>
+                            {getNumberArray(25, 1).filter(number => number != 0).map(number => (
+                                                <MenuItem value={number}>{number}kpl</MenuItem>
+                                            ))}
+                            </Select> </div>
+                            <FormHelperText>Esimerkiksi Rata 5kpl, joita voidaan varata samanaikaisesti. Järjestelmä erottelee identtiset resurssit numeroilla (Rata 1, Rata 2 jne.)</FormHelperText>
+                            </FormControl>
+                            </span>}
+                            <br/>
                         <TextField
                             id="resource"
                             label="Resurssin nimi"
                             style={{ margin: 4 }}
-                            helperText="Tämä tulee resurssin nimeksi. Esimerkiksi 'Rata 3' tai 'Teppo Työntekijä'"
+                            helperText="Tämä tulee resurssin nimeksi. Esimerkiksi 'Huone' tai 'Teppo Työntekijä'"
                             margin="dense"
                             variant='outlined'
                             disabled={loading}
+                            value={resName}
+                            onChange={({ target }) => setResName(target.value)}
                             InputProps={{
                                 style: { backgroundColor: 'white' },
                             }}
@@ -180,6 +346,8 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                             margin="dense"
                             variant='outlined'
                             disabled={loading}
+                            value={resDesc}
+                            onChange={({ target }) => setResDesc(target.value)}
                             InputProps={{
                                 style: { backgroundColor: 'white' },
                             }}
@@ -197,55 +365,26 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
 
 
 
-                        {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div style={{ display: 'inline' }}><Tooltip title='Lisää uusi palvelu'><Button className={classes.addServiceButton} ><AddCircleIcon /></Button></Tooltip><Tooltip title='Peru'><Button className={classes.cancelServiceButton} onClick={() => {
-
+                        {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div style={{ display: 'inline' }}><Tooltip title='Lisää uusi palvelu'><Button className={classes.addServiceButton} onClick={addNewResource} ><AddCircleIcon /></Button></Tooltip><Tooltip title='Peru'><Button className={classes.cancelServiceButton} onClick={() => {
+                            resetForm()
                             setAddFormOpen(false)
                         }}><CancelIcon /></Button></Tooltip></div>}
                         {error ? <div className={classes.errorMessage}>Tietojen antamisessa tapahtui virhe, tarkasta kentät</div> : <em />}
                     </form>
                 </div>
             }
-            {bookerObject.admins.map(admin => (
-                <div key={admin.email} >
-                    <div className={classes.root}>
-                        <ExpansionPanel >
-                            <ExpansionPanelSummary
-                                expandIcon={<ExpandMoreIcon />}
-                                aria-controls="panel1c-content"
-                                id="panel1c-header"
-                            >
-                                <div className={classes.column}>
-                                    <Typography className={classes.heading}>{admin.name}</Typography>
-                                </div>
-                                <div className={classes.column}>
-                                    <Typography className={classes.secondaryHeading}>{admin.email}</Typography>
-                                </div>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.details}>
-                                <div className={classes.column} />
-                                <div className={classes.column}>
-                                    {admin.email === bookerObject.bookerCreator ? <div><Chip label="Owner" onDelete={() => { }} /></div> : <em />}
-                                    <Chip label="Admin" onDelete={() => { }} />
-                                    <Chip label="Booker" onDelete={() => { }} />
-                                </div>
-                                <div className={clsx(classes.column, classes.helper)}>
-                                    <Typography variant="caption">
-                                        Lisää tietoa
-                                   <br />
-                                    </Typography>
-                                </div>
-                            </ExpansionPanelDetails>
-                            <Divider />
-                            <ExpansionPanelActions>
-                                <Tooltip title={`Poista henkilön ${admin.name} adminoikeudet `} arrow><span><Button disabled={admin.email === bookerObject.bookerCreator} size='small' className={classes.removeAdmin} onClick={() => removeAdmin(admin)}><CancelIcon /></Button></span></Tooltip>
-                                <Button size="small" color="primary">
-                                    Save
-                                </Button>
-                            </ExpansionPanelActions>
-                        </ExpansionPanel>
-                    </div>
-                </div>
-            ))}
+            <Tabs
+            centered
+            variant='fullWidth'
+            value={tabValue}
+            onChange={handleTabChange}
+            TabIndicatorProps={{ style: { background: `pink`} }}
+            textColor='green'>
+                <Tab label='Henkilöt'/>
+                <Tab label='Laitteet'/>
+            </Tabs>
+            {getTabContent(tabValue)}
+            
         </div>
     )
 }

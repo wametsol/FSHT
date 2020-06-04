@@ -324,8 +324,16 @@ const NewBooker = () => {
                     phone: publicPhone
                 },
                 services: bookerServices,
-                admins: [user.email],
+                admins: [{
+                    email: user.email,
+                    name: user.displayName
+                }],
                 timeTables: initialTimetable,
+                specialDays: [],
+                resources:[],
+                images:{
+                    background: 'https://firebasestorage.googleapis.com/v0/b/ajanvaraus-fs20.appspot.com/o/bookerkeilaamo%2Fimages%2Fbackground.jpg?alt=media&token=f2c3863b-b57f-4d63-9806-a0416da334fd'
+                },
                 siteSettings: {
                     color: '',
                     footerBorderRadius: 0,
@@ -360,15 +368,13 @@ const NewBooker = () => {
                         g:158,
                         b:201
                     },
-                    visibleToPublic: true,
-                    images:{
-                        background: 'https://firebasestorage.googleapis.com/v0/b/ajanvaraus-fs20.appspot.com/o/bookerkeilaamo%2Fimages%2Fbackground.jpg?alt=media&token=f2c3863b-b57f-4d63-9806-a0416da334fd'
-                    }
+                    visibleToPublic: false,
+                    
                 }
             }
             firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
-                
-
+                firestore.collection(`booker${webAddress}`).doc('bookings').set({init:true})
+                .then((resp) => {
                 firestore.collection('userCollection').doc(user.email).update({bookers: firebase.firestore.FieldValue.arrayUnion({address: webAddress, name: systName})})
                 .then((res) => {
                     console.log(res)
@@ -380,6 +386,7 @@ const NewBooker = () => {
                         }, 3000)   
                 })
                 })
+            })
                 
         } catch (error) {
             setLoading(false)

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import 'date-fns'
 import { format, getDay, addDays, isBefore, set } from 'date-fns'
 import firebase, { auth, firestore } from '../../firebase'
-import { ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, Typography, CircularProgress, capitalize, Dialog, DialogTitle, DialogContentText, DialogContent, DialogActions, TextField } from '@material-ui/core';
+import { ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, Typography, CircularProgress, capitalize, Dialog, DialogTitle, DialogContentText, DialogContent, DialogActions, TextField, Select, MenuItem, ListSubheader } from '@material-ui/core';
 import { useRouteMatch } from 'react-router-dom'
 import useStyles from './useStyles'
 import clsx from 'clsx';
@@ -36,6 +36,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
     const [reason, setReason] = useState('')
+    const [selectedResources, setSelectedResources] = useState('all')
 
     const classes = useStyles()
 
@@ -125,16 +126,37 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
     }
 
+    const getBookings = () => {
+        if(selectedResources==='all') return bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`]
+        else return bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].filter(a => a.worker === selectedResources)
+    }
 
-    if (!bookingsObject) {
+
+    if (bookingsObject  === null) {
         return (
-            <CircularProgress size={25} />
+            <Typography>Ladataan varauksia <CircularProgress size={25} /></Typography>
+            
+        )
+    } else if (bookingsObject === undefined) {
+        return (
+            <Typography>Sivustollasi ei ole vielä varauksia</Typography>
         )
     }
     return (
         <div>
 
-            <Typography variant="h5">Varaukset sivustolla </Typography>
+            <div style={{display:'flex'}}><Typography variant="h5" style={{flexBasis:'80%', paddingLeft:'20%'}}>Varaukset sivustolla </Typography> <div>
+                <Select style={{ minWidth: 150 }}
+                value={selectedResources}
+                onChange={({ target }) => {if(!!target.value) setSelectedResources(target.value)}}>
+                <MenuItem value='all'>Kaikki</MenuItem>
+                <ListSubheader>Henkilöt</ListSubheader>
+                {bookerObject.resources.filter(a => a.human).map(r => (
+                    <MenuItem value={r.name}>{r.name}</MenuItem>
+                ))}
+                <ListSubheader>Laitteet</ListSubheader>
+                </Select></div></div>
+                {selectedResources==='all'? <Typography>Näytetään varaukset kaikkien henkilöiden osalta</Typography> : <Typography>Näytetään henkilöön {selectedResources} kohdistuvat varaukset</Typography>}
             <div className={classes.adminDatepicker}>
                 <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
                     <KeyboardDatePicker
@@ -182,8 +204,20 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
             </div>
             <Divider />
 
-
-            {!bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`] ? <em /> : <div>{bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].map(booking => (
+            <ExpansionPanel>
+                <ExpansionPanelSummary disabled>
+                <div className={classes.column}>
+                                <Typography className={classes.heading}>Palvelu</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>Aika / tila</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>Työntekijä</Typography>
+                            </div>
+                </ExpansionPanelSummary>
+            </ExpansionPanel>
+            {!bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`] ? <em /> : <div>{getBookings().map(booking => (
                 <div className={classes.root} key={booking.whenBooked}>
                     <ExpansionPanel >
                         <ExpansionPanelSummary
@@ -196,6 +230,9 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                             </div>
                             <div className={classes.column}>
                                 <Typography className={classes.secondaryHeading}>{getFormattedTimes([booking.times.start, booking.times.end])} {!booking.active ? <span>PERUTTU {<BlockIcon className={classes.errorMessage} />}</span> : <span>AKTIIVINEN {<CheckIcon className={classes.green} />}</span>}</Typography>
+                            </div>
+                            <div className={classes.column}>
+                                <Typography className={classes.heading}>{booking.worker}</Typography>
                             </div>
 
                         </ExpansionPanelSummary>

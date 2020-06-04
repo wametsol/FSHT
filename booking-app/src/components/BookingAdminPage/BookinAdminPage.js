@@ -36,16 +36,19 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                     setLoading(false)
                 }
                 setBookerObject(response.data())
-
                 firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
-                    .then(res => {
+                    .then((res) => {
+                        console.log('asd')
+
                         if (res.empty) {
-
+                        } else {
+                            setBookings(res.data())
                         }
-                        setBookings(res.data())
-                    })
 
+                    })
                 setLoading(false)
+
+
 
             })
             .catch(error => {
@@ -58,6 +61,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
         try {
             setLoading(true)
             fetchData()
+            setLoading(false)
         } catch (error) {
             console.log(error)
             setLoading(false)
@@ -71,11 +75,11 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
         try {
             console.log('Asetetaan julkisuus: ', !bookerObject.siteSettings.visibleToPublic)
             setLoading(true)
-            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ 'siteSettings.visibleToPublic': !bookerObject.siteSettings.visibleToPublic})
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ 'siteSettings.visibleToPublic': !bookerObject.siteSettings.visibleToPublic })
                 .then((res) => {
                     fetchData()
                     setLoading(false)
-                    setSuccessMessage(bookerObject.siteSettings.visibleToPublic?  'Sivusto piilotettiin asiakkailta': 'Sivusto julkaistiin asiakkaille')
+                    setSuccessMessage(bookerObject.siteSettings.visibleToPublic ? 'Sivusto piilotettiin asiakkailta' : 'Sivusto julkaistiin asiakkaille')
                 })
 
         } catch (error) {
@@ -98,7 +102,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
             case 1:
                 return <ServiceTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 2:
-                return <Resources setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData}/>
+                return <Resources setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 3:
                 return <TimeManagement setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 4:
@@ -139,7 +143,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                     >
                         <Tab label='Varaukset' />
                         <Tab label='Palvelut' />
-                        <Tab label='Resurssit'/>
+                        <Tab label='Resurssit' />
                         <Tab label='Ajanhallinta' />
                         <Tab label='Näkymät' />
                         <Tab label='Käyttäjähallinta' />

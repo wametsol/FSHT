@@ -58,6 +58,16 @@ const getDayContent = (day, timetables) => {
     }
 }
 
+export const getNumberArray = (amount, step) => {
+    var numberArray = new Array(amount)
+    var i
+
+    for (i = 0; i <= amount; i += step) {
+        numberArray[i] = i
+    }
+    return numberArray
+}
+
 export const getSingleDayTimes = (day, timetables) => {
     return getDayContent(day, timetables)
 }

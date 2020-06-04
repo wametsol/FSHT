@@ -12,6 +12,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import EuroIcon from '@material-ui/icons/Euro'
 
 import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { getNumberArray } from './TimeTableServices'
 import { getMinutes } from 'date-fns';
 const BootstrapInput = withStyles((theme) => ({
     root: {
@@ -125,16 +126,6 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
             setError(true)
         }
 
-    }
-
-    const getNumberArray = (amount, step) => {
-        var numberArray = new Array(amount)
-        var i
-
-        for (i = 0; i <= amount; i += step) {
-            numberArray[i] = i
-        }
-        return numberArray
     }
 
 

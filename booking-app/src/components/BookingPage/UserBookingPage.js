@@ -132,11 +132,11 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
     const getTabContent = (tab) => {
         switch (tab) {
             case 0:
-                return userData.bookings[`${site}`].length > 0 ? activeTab() : <em />
+                return !!userData.bookings[`${site}`] && userData.bookings[`${site}`].length > 0 ? activeTab() : <em />
             case 1:
-                return userData.bookings[`${site}`].length > 0 ? pastTab() : <em />
+                return !!userData.bookings[`${site}`] && userData.bookings[`${site}`].length > 0 ? pastTab() : <em />
             case 2:
-                return userData.bookings[`${site}`].length > 0 ? cancelTab() : <em />
+                return !!userData.bookings[`${site}`] && userData.bookings[`${site}`].length > 0 ? cancelTab() : <em />
             default:
                 return 'Unknown step';
         }

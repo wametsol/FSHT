@@ -47,8 +47,6 @@ const useStyles = makeStyles((theme) => ({
     footer: {
         margin: 'auto',
         minHeight: '15vh',
-        maxWidth: '60%',
-        position:'fixed',
         bottom:0,
         left: 0,
         right: 0,
@@ -229,6 +227,19 @@ const useStyles = makeStyles((theme) => ({
     },
     profileButtonBox: {
         textAlign: 'right'
+    },
+    singleWorker: {
+        padding: 20,
+        border: '1px solid',
+        minWidth: 150,
+        margin: 5,
+        borderRadius: 3,
+        '&:hover': {
+            backgroundColor: 'lightgrey'
+        }
+    },
+    workerBox: {
+        display: 'inline-flex'
     }
 }))
 

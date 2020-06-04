@@ -38,6 +38,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
             bookingDate: format(data.date, `dd/MM/yyyy`),
             whenBooked: format(new Date(), 'dd/MM/yyyy:HH.mm'),
             service: data.service.service,
+            worker: data.worker.name,
             user: {
                 name: auth.currentUser.displayName,
                 email: auth.currentUser.email,
@@ -150,6 +151,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
                         Palvelu: {data.service.service} <br />
                         {format(data.date, "EEEE : dd.MM.yyyy", { locale: fi })}<br />
                         Klo: {getFormattedTimes([data.times.start, data.times.end])}, Kesto: {data.service.timelength.minutes} min<br />
+                        Työntekijä: {data.worker.name}<br/>
                         Hinta: {data.service.price}€<br />
 
                     </DialogContentText>

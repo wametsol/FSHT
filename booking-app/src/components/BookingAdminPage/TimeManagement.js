@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Slider, Typography, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, CircularProgress, TextField, capitalize } from '@material-ui/core';
+import { Slider, Typography, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, CircularProgress, TextField, capitalize, Select, MenuItem, ListSubheader, InputLabel, FormControl } from '@material-ui/core';
 import useStyles from './useStyles'
 import clsx from 'clsx'
 
@@ -73,17 +73,18 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const [specialDayTimes, setSpecialDayTimes] = useState([8, 16])
     const [specialDayReason, setSpecialDayReason] = useState('')
     const pagematch = useRouteMatch('/:id')
-    const [specialDayKeys, setSpecialDayKeys] = useState([])
+    const [specialDayKeys, setSpecialDayKeys] = useState(Object.keys(bookerObject.specialDays))
+    const [selectedResources, setSelectedResources] = useState('default')
 
-    if(!!bookerObject.specialDays){
-        setSpecialDayKeys(Object.keys(bookerObject.specialDays))
-    }
+
+
+
+    
     
     
     //SORT SPECIALDAYS TO ASC ORDER
-    if (!!specialDayKeys){
     specialDayKeys.sort((a,b) => parseISO(`${a.substring(6,10)}-${a.substring(3,5)}-${a.substring(0,2)}`) - parseISO(`${b.substring(6,10)}-${b.substring(3,5)}-${b.substring(0,2)}`))
-    }
+    
     
     
 
@@ -698,15 +699,53 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         </ExpansionPanel>
     )
 
+    const resourcePanel = () => {
+
+        return(
+        <div>
+        <div style={{display:'flex'}}><Typography variant="h6" style={{flexBasis:'80%', paddingLeft:'20%'}}>Resurssikohtainen ajanhallinta</Typography>
+        <FormControl style={{bottom: 10}}>
+        <InputLabel id='resouceTimes'>Valitse henkilö</InputLabel>
+        <Select labelId='resourceTimes'
+                style={{ minWidth: 150 }}
+                value={selectedResources}
+                onChange={({ target }) => {if(!!target.value) setSelectedResources(target.value)}}>
+                {bookerObject.resources.filter(a => a.human).map(r => (
+                    <MenuItem value={r.name}>{r.name}</MenuItem>
+                ))}
+                </Select></FormControl>
+                <br/>
+                <Divider/>
+                </div>
+                {selectedResources==='default'? <div>
+                    <Typography variant='caption'>Valitse henkilö nähdäksesi henkilökohtaiset ajat</Typography>
+                </div> :<div>
+                <Typography variant='caption'>Henkilön {selectedResources} ajanhallinta</Typography>
+                {weekdayPanel()}
+                {weekendPanel()}
+                {holidayPanel()}
+                    {console.log(selectedResources)}
+                    </div>}
+                </div>
+                
+        )
+    }
+
 
     return (
         <div>
-
-            <Typography>Aukioloajat</Typography>
-            <Typography>Aseta varausjärjestelmääsi aukioloajat</Typography>
+            <br/>
+            <Typography variant='h5'>Aukioloajat</Typography>
+            <Typography variant='caption'>Aseta varausjärjestelmääsi aukioloajat</Typography>
+            <br/>
             {weekdayPanel()}
             {weekendPanel()}
             {holidayPanel()}
+            <Divider/>
+            <br/>
+            {resourcePanel()}
+            
+
 
         </div>
     )

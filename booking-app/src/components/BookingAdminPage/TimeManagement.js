@@ -10,7 +10,7 @@ import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
 
 import firebase, { firestore } from '../../firebase'
 import { useRouteMatch } from 'react-router-dom'
-import { sameAsBase, isClosed, getFormattedTimes, getWeekdayTimes, valueLabelFormat, valuetext } from './TimeTableServices'
+import { sameAsBase, isClosed, getFormattedTimes, getWeekdayTimes, valueLabelFormat, valuetext, getSingleDayTimesText, getSingleDayTimes } from './TimeTableServices'
 
 import DateFnsUtils from '@date-io/date-fns'
 import { fi } from 'date-fns/locale'
@@ -69,7 +69,10 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const [editWeekEnds, setEditWeekends] = useState(true)
     const [loading, setLoading] = useState(false)
     const [holidayFormOpen, setHolidayFormOpen] = useState(false)
+    const [holidayForm2Open, setHolidayForm2Open] = useState(false)
     const [selectedDate, setSelectedDate] = useState(new Date)
+    const [resourceSelectedDate, setResourceSelectedDate] = useState(new Date)
+    const [resourceSpecialTimes, setResourceSpecialTimes] = useState([8, 16])
     const [specialDayTimes, setSpecialDayTimes] = useState([8, 16])
     const [specialDayReason, setSpecialDayReason] = useState('')
     const pagematch = useRouteMatch('/:id')
@@ -79,14 +82,14 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
 
 
-    
-    
-    
+
+
+
     //SORT SPECIALDAYS TO ASC ORDER
-    specialDayKeys.sort((a,b) => parseISO(`${a.substring(6,10)}-${a.substring(3,5)}-${a.substring(0,2)}`) - parseISO(`${b.substring(6,10)}-${b.substring(3,5)}-${b.substring(0,2)}`))
-    
-    
-    
+    specialDayKeys.sort((a, b) => parseISO(`${a.substring(6, 10)}-${a.substring(3, 5)}-${a.substring(0, 2)}`) - parseISO(`${b.substring(6, 10)}-${b.substring(3, 5)}-${b.substring(0, 2)}`))
+
+
+
 
     const handleBase = (event, newValue) => {
         console.log(newValue)
@@ -183,8 +186,12 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     }
     const handleSpecial = (event, newValue) => {
         setSpecialDayTimes(newValue)
+
     }
 
+    const handleResourceSpecial = (event, newValue) => {
+        setResourceSpecialTimes(newValue)
+    }
 
     const saveWeekDayEdit = (e) => {
         e.preventDefault()
@@ -211,6 +218,43 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         setSpecialDayTimes([8, 16])
         setHolidayFormOpen(false)
         setSpecialDayReason('')
+    }
+    const resetResourceSpecialForm = (e) => {
+        e.preventDefault()
+        setResourceSpecialTimes([8, 16])
+        setHolidayForm2Open(false)
+    }
+
+
+    const addResourceSpecialDay = (e) => {
+        e.preventDefault()
+        console.log(resourceSelectedDate)
+        console.log(resourceSpecialTimes)
+
+        try {
+            setLoading(true)
+            const resSpecialDayObject = {
+                date: format(resourceSelectedDate, 'dd/MM/yyyy'),
+                times: resourceSpecialTimes,
+            }
+            console.log(bookerObject.resources[`${selectedResources}`].specialDays)
+            console.log([`${format(resourceSelectedDate, `dd:MM:yyyy`)}`],  resSpecialDayObject)
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({[`resources.${selectedResources}`]: 
+            {
+                ...bookerObject.resources[`${selectedResources}`],
+                specialDays: {
+                    ...bookerObject.resources[`${selectedResources}`].specialDays,
+                    [`${format(resourceSelectedDate, `dd:MM:yyyy`)}`]: resSpecialDayObject
+                }
+            }
+        })
+            .then(res => {
+                resetResourceSpecialForm()
+            })
+
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     const addNewSpecialDay = (e) => {
@@ -286,6 +330,21 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             setHolidayFormOpen(false)
             setSpecialDayReason('')
             console.log(error)
+        }
+    }
+    const dayHasSpecialTimes = (date) => {
+        if (!bookerObject.specialDays[[`${format(date, `dd:MM:yyyy`)}`]]) {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    const getDateTimes = (date) => {
+        if (!bookerObject.specialDays[[`${format(date, `dd:MM:yyyy`)}`]]) {
+            return getSingleDayTimes(getDay(date), value)
+        } else {
+            return bookerObject.specialDays[[`${format(date, `dd:MM:yyyy`)}`]].times
         }
     }
 
@@ -645,10 +704,10 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                             />
                         </div>
                         <Typography>Näkymä:</Typography>
-                                <Typography style={{ fontWeight: 600 }}>  {specialDayReason.length===0? <span>Syy tai nimi</span>: <span>{specialDayReason}</span>}, {format(selectedDate, 'dd.MM.')} : {getFormattedTimes(specialDayTimes)} {isClosed(specialDayTimes) ? <Button size='small' color='secondary' onClick={() => handleSpecial(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSpecial(1, [0, 0])}>Aseta suljetuksi</Button>}</Typography>
+                        <Typography style={{ fontWeight: 600 }}>  {specialDayReason.length === 0 ? <span>Syy tai nimi</span> : <span>{specialDayReason}</span>}, {format(selectedDate, 'dd.MM.')} : {getFormattedTimes(specialDayTimes)} {isClosed(specialDayTimes) ? <Button size='small' color='secondary' onClick={() => handleSpecial(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSpecial(1, [0, 0])}>Aseta suljetuksi</Button>}</Typography>
 
                         <div style={{ margin: 10, float: 'right' }}>
-                                {specialDayReason.length===0? <Tooltip title='Täytä kaikki tiedot ensiksi'><Button disabled>Lisää</Button></Tooltip> : <Button onClick={addNewSpecialDay} style={{backgroundColor: 'green', color: 'white'}} variant='contained'>Lisää</Button> }
+                            {specialDayReason.length === 0 ? <Tooltip title='Täytä kaikki tiedot ensiksi'><Button disabled>Lisää</Button></Tooltip> : <Button onClick={addNewSpecialDay} style={{ backgroundColor: 'green', color: 'white' }} variant='contained'>Lisää</Button>}
                             <Button onClick={resetSpecialForm} color='secondary' variant='contained'>Peru</Button>
                         </div>
                     </div>
@@ -699,52 +758,193 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         </ExpansionPanel>
     )
 
-    const resourcePanel = () => {
+    const personSpecialPanel = () => (
+        <ExpansionPanel >
+            <ExpansionPanelSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1c-content"
+                id="panel1c-header"
+            >
+                <div className={classes.column}>
+                    <Typography className={classes.heading}>Yksittäiset päivät</Typography>
+                </div>
+                <div className={classes.column}>
+                    <Typography className={classes.secondaryHeading}>Määrittele yksittäisille päiville aikatauluja</Typography>
+                </div>
 
-        return(
-        <div>
-        <div style={{display:'flex'}}><Typography variant="h6" style={{flexBasis:'80%', paddingLeft:'20%'}}>Resurssikohtainen ajanhallinta</Typography>
-        <FormControl style={{bottom: 10}}>
-        <InputLabel id='resouceTimes'>Valitse henkilö</InputLabel>
-        <Select labelId='resourceTimes'
-                style={{ minWidth: 150 }}
-                value={selectedResources}
-                onChange={({ target }) => {if(!!target.value) setSelectedResources(target.value)}}>
-                {bookerObject.resources.filter(a => a.human).map(r => (
-                    <MenuItem value={r.name}>{r.name}</MenuItem>
-                ))}
-                </Select></FormControl>
-                <br/>
-                <Divider/>
+            </ExpansionPanelSummary>
+            <div >
+                {holidayForm2Open ? <div className={classes.holidayAddForm}>
+                    <div className={classes.halfDiv}>
+                        <div>
+                            <Tooltip title={`${capitalize(format(addDays(resourceSelectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(resourceSelectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(resourceSelectedDate, -1), 'MM/dd/yyyy')} `}>
+                                <span className={classes.dayBtn}><Button className={classes.dayBtn} disabled={isBefore(resourceSelectedDate, new Date)} onClick={() => setResourceSelectedDate(addDays(resourceSelectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
+                                <KeyboardDatePicker
+                                    //disableToolbar
+                                    variant="dialog"
+                                    cancelLabel="Peru"
+                                    format={"EEEE dd/MM/yyyy"}
+
+                                    options={{ locale: fi }}
+                                    margin="normal"
+                                    id="date-picker-inline"
+                                    value={resourceSelectedDate}
+                                    onChange={(date) => {
+                                        setResourceSelectedDate(date)
+                                    }}
+                                    autoOk
+                                    locale={fi}
+                                    disablePast
+                                    inputProps={{
+                                        disabled: true,
+                                        size: 'small',
+                                        className: classes.dateInput
+
+                                    }}
+                                    KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                    }}
+                                />
+
+                            </MuiPickersUtilsProvider>
+                            <Tooltip title={`${capitalize(format(addDays(resourceSelectedDate, 1), "EEEE", { locale: fi }).substring(0, format(addDays(resourceSelectedDate, 1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(resourceSelectedDate, 1), 'dd/MM/yyyy')} `}>
+                                <span className={classes.dayBtn}><Button className={classes.dayBtn} onClick={() => setResourceSelectedDate(addDays(resourceSelectedDate, 1))} size='small'><NavigateNextRoundedIcon /></Button></span></Tooltip>
+
+                        </div>
+                        <br />
+                        <div style={{ margin: 20 }}>
+                            <Typography>Aseta ajat </Typography>
+
+
+                            <Slider
+                                name='Erikoispäivä'
+                                value={resourceSpecialTimes}
+                                onChange={handleResourceSpecial}
+                                valueLabelDisplay="auto"
+                                aria-labelledby="range-slider"
+                                getAriaValueText={valuetext}
+                                valueLabelFormat={valueLabelFormat}
+                                step={0.25}
+                                min={0}
+                                max={24}
+                                type={'number'}
+                                aria-labelledby='input-slider'
+                                marks={marks}
+                            //disabled={editWeekDays}
+                            />
+                        </div>
+                    </div>
+                    <br />
+                    <div className={classes.halfDiv} >
+                        <div style={{ marginLeft: 20, marginRight: 20, marginTop: 10 }}>
+                            <Typography>Valitun päivän aukioloajat: <span style={{ fontWeight: 600 }}>{dayHasSpecialTimes(resourceSelectedDate) ? <span>(Poikkeusaikataulu) {getFormattedTimes(bookerObject.specialDays[[`${format(resourceSelectedDate, `dd:MM:yyyy`)}`]].times)}</span> : getSingleDayTimesText(getDay(resourceSelectedDate), bookerObject.timeTables)}</span></Typography>
+                            {console.log('Singletimes:', getDateTimes(resourceSelectedDate))}
+
+                        </div>
+                        <br />
+                        {(getDateTimes(resourceSelectedDate)[0] > resourceSpecialTimes[0] || getDateTimes(resourceSelectedDate)[1] < resourceSpecialTimes[1]) && !isClosed(resourceSpecialTimes) ? <Typography>Et voi asettaa henkilölle aukioloaikoja pidempiä aikoja <Button size='small' color='secondary' onClick={() => handleResourceSpecial(2, [getDateTimes(resourceSelectedDate)[0], getDateTimes(resourceSelectedDate)[1]])}>Aseta kokoajaksi</Button></Typography> : <span>
+                            <Typography style={{ fontWeight: 600 }}>  {specialDayReason.length === 0 ? <span>{selectedResources}</span> : <span>{specialDayReason}</span>}, {format(resourceSelectedDate, 'dd.MM.')} : {!isClosed(resourceSpecialTimes) ? <span>{getFormattedTimes(resourceSpecialTimes)}   <Button size='small' color='secondary' onClick={() => handleResourceSpecial(1, [0, 0])}>Aseta poissaolevaksi</Button></span> : <span> Ei paikalla <Button size='small' color='secondary' onClick={() => handleResourceSpecial(2, [getDateTimes(resourceSelectedDate)[0], getDateTimes(resourceSelectedDate)[1]])}>Aseta kokoajaksi</Button></span>}</Typography>
+                        </span>}
+                        <div style={{ margin: 10, float: 'right' }}>
+                            {(getDateTimes(resourceSelectedDate)[0] > resourceSpecialTimes[0] || getDateTimes(resourceSelectedDate)[1] < resourceSpecialTimes[1]) && !isClosed(resourceSpecialTimes) ? <Tooltip title='Tarkista antamasi tiedot'><Button >Lisää</Button></Tooltip> : <Button onClick={addResourceSpecialDay} style={{ backgroundColor: 'green', color: 'white' }} variant='contained'>Lisää</Button>}
+                            <Button onClick={resetResourceSpecialForm} color='secondary' variant='contained'>Peru</Button>
+                        </div>
+                    </div>
+
+                </div> : <div ><span>Lisää uusi<Tooltip title='Lisää uusi poikkeuspäivä'><Button onClick={() => setHolidayForm2Open(true)}><AddCircleIcon style={{ color: 'green' }} /></Button></Tooltip></span></div>
+
+                }
+
+            </div>
+            <br />
+            <div className={classes.column}>
+
+            </div>
+            <div className={classes.column}>
+
+            </div>
+            {console.log(specialDayKeys)}
+            {Object.keys(bookerObject.resources[`${selectedResources}`].specialDays).map(key => (
+                <div style={{ marginLeft: '20%', marginRight: '20%' }}>
+                    <Divider />
+                    <div className={classes.specialDays}>
+
+                        
+                        <div className={classes.specialDay}>
+                            <Typography variant="caption" className={classes.specialText}>
+                                {bookerObject.resources[`${selectedResources}`].specialDays[key].date}
+                            </Typography>
+                        </div>
+                        <div className={classes.specialDay}>
+                            <Button size='small' color='secondary' variant='contained' >Poista</Button>
+                        </div>
+                    </div>
                 </div>
-                {selectedResources==='default'? <div>
+            ))}
+            <Divider />
+            <ExpansionPanelDetails className={classes.details}>
+
+            </ExpansionPanelDetails>
+
+            <ExpansionPanelActions>
+            </ExpansionPanelActions>
+        </ExpansionPanel>
+    )
+
+    const resourcePanel = () => {
+        
+        var humanResources = []
+        Object.keys(bookerObject.resources).map(key => {
+            if (bookerObject.resources[key].human){
+                humanResources.push(bookerObject.resources[key])
+            }
+        })
+
+        return (
+            <div>
+                <div style={{ display: 'flex' }}><Typography variant="h6" style={{ flexBasis: '80%', paddingLeft: '20%' }}>Resurssikohtainen ajanhallinta</Typography>
+                    <FormControl style={{ bottom: 10 }}>
+                        <InputLabel id='resouceTimes'>Valitse henkilö</InputLabel>
+                        <Select labelId='resourceTimes'
+                            style={{ minWidth: 150 }}
+                            value={selectedResources}
+                            onChange={({ target }) => { if (!!target.value) setSelectedResources(target.value) }}>
+                            {humanResources.map(r => (
+                                <MenuItem value={r.name}>{r.name}</MenuItem>
+                            ))}
+                        </Select></FormControl>
+                    <br />
+                    <Divider />
+                </div>
+                {selectedResources === 'default' ? <div>
                     <Typography variant='caption'>Valitse henkilö nähdäksesi henkilökohtaiset ajat</Typography>
-                </div> :<div>
-                <Typography variant='caption'>Henkilön {selectedResources} ajanhallinta</Typography>
-                {weekdayPanel()}
-                {weekendPanel()}
-                {holidayPanel()}
-                    {console.log(selectedResources)}
+                </div> : <div>
+                        <Typography variant='caption'>Henkilön {selectedResources} ajanhallinta</Typography>
+                        {weekdayPanel()}
+                        {weekendPanel()}
+                        {personSpecialPanel()}
+                        {console.log(selectedResources)}
                     </div>}
-                </div>
-                
+            </div>
+
         )
     }
 
 
     return (
         <div>
-            <br/>
+            <br />
             <Typography variant='h5'>Aukioloajat</Typography>
             <Typography variant='caption'>Aseta varausjärjestelmääsi aukioloajat</Typography>
-            <br/>
+            <br />
             {weekdayPanel()}
             {weekendPanel()}
             {holidayPanel()}
-            <Divider/>
-            <br/>
+            <Divider />
+            <br />
             {resourcePanel()}
-            
+
 
 
         </div>

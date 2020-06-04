@@ -367,6 +367,17 @@ const BookingPage = () => {
         </MuiPickersUtilsProvider>
     )
 
+    const getHumanResources = () => {
+        var humanResources = []
+        Object.keys(bookerObject.resources).map(key => {
+            if (bookerObject.resources[key].human){
+                humanResources.push(bookerObject.resources[key])
+            }
+        })
+
+        return humanResources
+    }
+
 
     const BookerHomePage = () => (
         <div>
@@ -436,8 +447,8 @@ const BookingPage = () => {
                                 <div className={classes.singleService} key={chosenService.service}>
                                     <Typography variant='h5'>{chosenService.service}</Typography>
                                     <Typography>Kuvaus: {chosenService.description}</Typography>
-                                    <Typography>{chosenService.price != 0 ? <span>Hinta: {chosenService.price}€</span> : <span>Varaus on maksuton</span>}</Typography>
-                                    <Typography>Varauksen kesto: {chosenService.timelength.hours != 0 ? <span>{chosenService.timelength.hours}h</span> : <em />} {chosenService.timelength.minutes != 0 ? <span>{chosenService.timelength.minutes}min</span> : <em />}</Typography>
+                                    <Typography>{chosenService.price !== 0 ? <span>Hinta: {chosenService.price}€</span> : <span>Varaus on maksuton</span>}</Typography>
+                                    <Typography>Varauksen kesto: {chosenService.timelength.hours !== 0 ? <span>{chosenService.timelength.hours}h</span> : <em />} {chosenService.timelength.minutes !== 0 ? <span>{chosenService.timelength.minutes}min</span> : <em />}</Typography>
                                 </div>
                             </div>
                             
@@ -445,13 +456,11 @@ const BookingPage = () => {
                     </div>
                     
                     {!chosenService.service ? <em /> : <div className={classes.freeTimesBox}>
-                        {console.log(bookerObject.resources)}
-                        {console.log(bookerObject.resources.filter(r => r.human && r.services.filter(a => a.service === chosenService.service)))}
                         <Typography>Sopivat työntekijät</Typography>
                         <div className={classes.workerBox} >
 
                         
-                    {bookerObject.resources.filter(r => r.human && r.services.filter(a => a.service === chosenService.service).length>0).map(person => (
+                    {getHumanResources().filter(r => r.services.filter(a => a.service === chosenService.service).length>0).map(person => (
                         <div className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
                             
                         <Typography>{person.name}</Typography>

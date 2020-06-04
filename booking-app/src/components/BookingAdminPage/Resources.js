@@ -68,7 +68,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                 }
             }
             
-            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('baseInformation').update({ resources: firebase.firestore.FieldValue.arrayUnion(resourceObject) })
+            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('baseInformation').update({ [`resources.${resourceObject.name}`]: resourceObject })
                 .then(response => {
                                 resetForm()
                                 fetchData()
@@ -186,9 +186,18 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
         if (gender === 'other') return 'Muu / ei ilmoitettu'
     }
 
-    const humanTab = () => (
+    const humanTab = () => {
+
+        var humanResources = []
+        Object.keys(bookerObject.resources).map(key => {
+            if (bookerObject.resources[key].human){
+                humanResources.push(bookerObject.resources[key])
+            }
+        })
+
+        return(
         <div>
-        {bookerObject.resources.filter(a => a.human).map(resource => (
+        {humanResources.map(resource => (
             <div key={resource.name} >
                 <div className={classes.root}>
                     <ExpansionPanel >
@@ -231,11 +240,19 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                 </div>
             </div>
         ))}</div>
-    )
+         ) }
     
-    const nonHumanTab = () => (
+    const nonHumanTab = () => {
+        var nonHumanResources = []
+        Object.keys(bookerObject.resources).map(key => {
+            if (!bookerObject.resources[key].human){
+                nonHumanResources.push(bookerObject.resources[key])
+            }
+        })
+
+        return (
         <div>
-        {bookerObject.resources.filter(a => !a.human).map(resource => (
+        {nonHumanResources.map(resource => (
             <div key={resource.name} >
                 <div className={classes.root}>
                     <ExpansionPanel >
@@ -278,7 +295,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                 </div>
             </div>
         ))}</div>
-    )
+    )}
 
     return (
         <div>

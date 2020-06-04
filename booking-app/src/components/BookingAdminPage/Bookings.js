@@ -142,6 +142,18 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
             <Typography>Sivustollasi ei ole vielä varauksia</Typography>
         )
     }
+
+    const getHumanResources = () => {
+        var humanResources = []
+        Object.keys(bookerObject.resources).map(key => {
+            if (bookerObject.resources[key].human){
+                humanResources.push(bookerObject.resources[key])
+            }
+        })
+
+        return humanResources
+    }
+
     return (
         <div>
 
@@ -151,7 +163,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                 onChange={({ target }) => {if(!!target.value) setSelectedResources(target.value)}}>
                 <MenuItem value='all'>Kaikki</MenuItem>
                 <ListSubheader>Henkilöt</ListSubheader>
-                {bookerObject.resources.filter(a => a.human).map(r => (
+                {getHumanResources().map(r => (
                     <MenuItem value={r.name}>{r.name}</MenuItem>
                 ))}
                 <ListSubheader>Laitteet</ListSubheader>

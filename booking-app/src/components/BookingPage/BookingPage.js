@@ -221,6 +221,7 @@ const BookingPage = () => {
 
     const handleSelectChange = (e) => {
         setChosenService(e.target.value)
+        setChosenWorker(null)
         console.log(getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
     }
     const dayHasSpecialTimes = () => {
@@ -460,7 +461,7 @@ const BookingPage = () => {
                         <div className={classes.workerBox} >
 
                         
-                    {getHumanResources().filter(r => r.services.filter(a => a.service === chosenService.service).length>0).map(person => (
+                    {getHumanResources().filter(r => r.services.filter(a => a === chosenService.service).length>0).map(person => (
                         <div className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
                             
                         <Typography>{person.name}</Typography>

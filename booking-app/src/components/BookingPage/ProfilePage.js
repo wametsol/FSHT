@@ -185,8 +185,9 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
                                         <TableCell align='right' style={{ fontWeight: 'bold' }}>Varauksia yhteensä</TableCell>
                                     </TableRow>
                                 </TableHead>
+                                <TableBody>
                                 {Object.keys(userData.bookings).map((bookingsKey) => (
-                                    <TableRow>
+                                    <TableRow key={bookingsKey}>
                                         <TableCell>{capitalize(bookingsKey)}</TableCell>
                                         <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && !isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
                                         <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
@@ -195,6 +196,7 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
                                     </TableRow>
         
                                 ))}
+                                </TableBody>
                             </Table>
                         </TableContainer>
                     </div>

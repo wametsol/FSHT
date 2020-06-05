@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, firestore } from '../../firebase'
 import { Tabs, Tab, Paper, CircularProgress, Typography, Tooltip, Button } from '@material-ui/core';
-import { useRouteMatch } from 'react-router-dom'
+import { useRouteMatch, Link } from 'react-router-dom'
 
 import ServiceTab from './ServiceTab'
 import UserTab from './UserTab'
@@ -31,10 +31,11 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
 
         firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
             .then((response) => {
-                if (response.empty) {
+                if (response.empty || !response.data().admins.includes(user.displayName)) {
                     setError(true)
                     setLoading(false)
                 }
+                if(response.data().admins.filter(a => a.email === user.email).length>0){
                 setBookerObject(response.data())
                 firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
                     .then((res) => {
@@ -48,7 +49,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                     })
                 setLoading(false)
 
-
+            }
 
             })
             .catch(error => {
@@ -68,6 +69,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
             setErrorMessage('Tapahtui odottamaton virhe')
         }
     }, [])
+
 
     const updatePublicVisibility = (e) => {
         e.preventDefault()
@@ -125,12 +127,16 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                 : (<Paper>
                     <div className={classes.visibilityBar}>
                         <div className={classes.innerVisibilityBox}>
+                            <div className={classes.visibilityButtons}>
                             {bookerObject.siteSettings.visibleToPublic ?
                                 <Typography>Sivustosi on julkinen <Tooltip title='Piilottamalla sivuston, vain sinä ja muut adminit voivat nähdä sivuston'><Button onClick={updatePublicVisibility} variant='contained' className={classes.hideVisibilityBtn}>Piilota</Button></Tooltip> </Typography>
                                 :
                                 <Typography>Sivustosi ei ole julkinen <Tooltip title='Julkaisemalla sivuston, avautuu sivusto kaikille käyttäjille'><Button onClick={updatePublicVisibility} variant='contained' className={classes.publishVisibilityBtn}>Julkaise</Button></Tooltip> </Typography>
                             }
-
+                            </div>
+                            <div className={classes.visibilityButtons}>
+                            <Typography >Siirry sivustolle<Button variant='contained' className={classes.toSiteButton} component={Link} to={`/${bookerObject.bookerAddress}`}>{bookerObject.bookerName}</Button></Typography>
+                            </div>
                         </div>
 
                     </div>

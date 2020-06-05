@@ -55,15 +55,16 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                     human : isHuman,
                     name: resName,
                     description: resDesc,
-                    services: resourceServiceList,
-                    gender: humanGender
+                    services: resourceServiceList.map(s => s.service),
+                    gender: humanGender,
+                    timeTables: bookerObject.timeTables 
                 }
             } else {
                 resourceObject = {
                     human : isHuman,
                     name: resName,
                     description: resDesc,
-                    services: resourceServiceList,
+                    services: resourceServiceList.map(s => s.service),
                     amountOfResources: identicalResources 
                 }
             }
@@ -87,7 +88,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
         try {
             setError(false)
             setLoading(true)
-            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ resources: firebase.firestore.FieldValue.arrayRemove(resource) })
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ [`resources.${resource.name}`]: firebase.firestore.FieldValue.delete() })
                 .then(res => {
                     console.log(res)
                     fetchData()
@@ -224,7 +225,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                                     Henkilön tarjoamat palvelut
                                <br />
                                {resource.services.map(singleService => (
-                                    <Chip label={singleService.service} onDelete={() => { }} />
+                                    <Chip key={singleService} label={singleService} onDelete={() => { }} />
                                 ))}
                                 </Typography>
                             </div>
@@ -279,7 +280,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                                     Resurssia voidaan käyttää seuraaviin palveluihin
                                <br />
                                {resource.services.map(singleService => (
-                                    <Chip label={singleService.service} onDelete={() => { }} />
+                                    <Chip label={singleService} onDelete={() => { }} />
                                 ))}
                                 </Typography>
                             </div>
@@ -396,7 +397,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
             value={tabValue}
             onChange={handleTabChange}
             TabIndicatorProps={{ style: { background: `pink`} }}
-            textColor='green'>
+            >
                 <Tab label='Henkilöt'/>
                 <Tab label='Laitteet'/>
             </Tabs>

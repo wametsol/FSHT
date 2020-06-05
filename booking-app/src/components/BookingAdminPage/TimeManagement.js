@@ -88,6 +88,13 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     //SORT SPECIALDAYS TO ASC ORDER
     specialDayKeys.sort((a, b) => parseISO(`${a.substring(6, 10)}-${a.substring(3, 5)}-${a.substring(0, 2)}`) - parseISO(`${b.substring(6, 10)}-${b.substring(3, 5)}-${b.substring(0, 2)}`))
 
+    useEffect(() => {
+        try {
+            setSpecialDayKeys(Object.keys(bookerObject.specialDays))
+        } catch (error) {
+            console.log(error)
+        }
+    }, [bookerObject])
 
 
 
@@ -220,7 +227,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         setSpecialDayReason('')
     }
     const resetResourceSpecialForm = (e) => {
-        e.preventDefault()
         setResourceSpecialTimes([8, 16])
         setHolidayForm2Open(false)
     }
@@ -249,10 +255,43 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             }
         })
             .then(res => {
+                fetchData()
+                setLoading(false)
                 resetResourceSpecialForm()
+                setSuccessMessage(`Päiväkohtainen työaika henkilölle ${selectedResources} asetettu`)
             })
 
         } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const removeResourceSpecialDay = (key, person) => {
+        console.log(key)
+        try {
+            setLoading(true)
+
+
+            firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
+                .then(obj => {
+                    const editedObj = obj.data().resources[`${person}`].specialDays
+                    delete editedObj[`${key}`]
+                    firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).update({[`resources.${selectedResources}`]: 
+                    {
+                        ...bookerObject.resources[`${selectedResources}`],
+                        specialDays: editedObj
+                    }
+                    })
+                        .then((res) => {
+                            setSuccessMessage(`Poikkeusaikataulu henkilöltä '${person}' poistettu`)
+                            fetchData()
+                            setLoading(false)
+                        })
+                })
+
+        } catch (error) {
+            setErrorMessage(`Tapahtui virhe`)
+            setLoading(false)
             console.log(error)
         }
     }
@@ -277,7 +316,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     [`${format(selectedDate, `dd:MM:yyyy`)}`]: specialDayObject
                 }
             })
-                .then((res) => {
+                .then(res => {
                     fetchData()
                     setLoading(false)
                     setSuccessMessage(`Poikkeusaikataulu lisätty`)
@@ -308,6 +347,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     })
                         .then((res) => {
                             setSuccessMessage(`Poikkeusaikataulu '${bookerObject.specialDays[key].reason}' poistettu`)
+                            setSpecialDayKeys(Object.keys(editedObj))
                             fetchData()
                             setLoading(false)
                             setSpecialDayTimes([8, 16])
@@ -449,7 +489,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     <Typography className={classes.heading}>Arkipäivät</Typography>
                 </div>
                 <div className={classes.column}>
-                    <Typography className={classes.secondaryHeading}>{sameAsBase(value) ? <div>Arkisin: {getFormattedTimes(value.base)}</div> : <div>{getWeekdayTimes(value)}</div>}</Typography>
+                    <Typography className={classes.secondaryHeading}>{sameAsBase(value) ? <span>Arkisin: {getFormattedTimes(value.base)}</span> : <span>{getWeekdayTimes(value)}</span>}</Typography>
                 </div>
 
             </ExpansionPanelSummary>
@@ -726,7 +766,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             </div>
             {console.log(specialDayKeys)}
             {specialDayKeys.map(specialKey => (
-                <div style={{ marginLeft: '20%', marginRight: '20%' }}>
+                <div key={specialKey} style={{ marginLeft: '20%', marginRight: '20%' }}>
                     <Divider />
                     <div className={classes.specialDays}>
 
@@ -865,6 +905,8 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
             </div>
             {console.log(specialDayKeys)}
+            {!!bookerObject.resources[`${selectedResources}`].specialDays?
+            <div>
             {Object.keys(bookerObject.resources[`${selectedResources}`].specialDays).map(key => (
                 <div style={{ marginLeft: '20%', marginRight: '20%' }}>
                     <Divider />
@@ -877,11 +919,16 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                             </Typography>
                         </div>
                         <div className={classes.specialDay}>
-                            <Button size='small' color='secondary' variant='contained' >Poista</Button>
+                            <Typography variant='caption' className={classes.specialText}>
+                                {isClosed(bookerObject.resources[`${selectedResources}`].specialDays[key].times)? <span>Poissa</span> : getFormattedTimes(bookerObject.resources[`${selectedResources}`].specialDays[key].times)}
+                            </Typography>
+                        </div>
+                        <div className={classes.specialDay}>
+                            <Button size='small' color='secondary' variant='contained' disabled={loading} onClick={() => removeResourceSpecialDay(key, selectedResources)} >Poista</Button>
                         </div>
                     </div>
                 </div>
-            ))}
+            ))}</div>: <em/>}
             <Divider />
             <ExpansionPanelDetails className={classes.details}>
 

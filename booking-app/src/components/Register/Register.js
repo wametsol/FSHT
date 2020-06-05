@@ -57,7 +57,12 @@ const Register = () => {
                     uid: registeredUser.user.uid,
                     name: name,
                     email: email,
-                    bookers: []
+                    bookers: [],
+                    bookings: [],
+                    contactPreferences:{
+                        email: true,
+                        phone: false
+                    }
                 })
                 var user = auth.currentUser
                 user.updateProfile({

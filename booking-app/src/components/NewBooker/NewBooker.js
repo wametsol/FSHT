@@ -145,9 +145,11 @@ const NewBooker = () => {
 
     const checkAvailability = (e) => {
         e.preventDefault()
-
+        
         try {
-            if (!loading) {
+            if (webAddress.length<3){
+                setError(true)
+            } else if (!loading) {
                 setSuccess(false)
                 setError(false)
                 setLoading(true)
@@ -169,7 +171,6 @@ const NewBooker = () => {
         } catch (exception) {
             console.log(exception)
         }
-
     }
     const isReady = () => {
         console.log(completed)
@@ -243,7 +244,7 @@ const NewBooker = () => {
                 label="Sivustosi osoite"
                 style={{ margin: 8, width: '75%' }}
                 placeholder="omasivustosi"
-                helperText={error? <Typography variant='caption' style={{color: 'red'}}>Tunnus ei ole sopiva tai se on jo käytössä</Typography>: success? <Typography variant='caption' className={classes.success}>Tämä tunnus on vapaana</Typography> :'Sivusto josta ajanvarausjärjestelmäsi löytyy luomisen jälkeen. Et pysty muuttamaan sivustosi osoitetta myöhemmin.'}
+            helperText={error? <Typography variant='caption' style={{color: 'red'}}>{webAddress.length<3? <span>Sivuston osoitteen pituus voi minimissään olla 3 merkkiä</span>: <span>Tunnus ei ole sopiva tai se on jo käytössä</span>}</Typography>: success? <Typography variant='caption' className={classes.success}>Tämä tunnus on vapaana</Typography> :'Sivusto josta ajanvarausjärjestelmäsi löytyy luomisen jälkeen. Et pysty muuttamaan sivustosi osoitetta myöhemmin.'}
                 margin="dense"
                 className={classes.addresInput}
                 onChange={({target}) => {

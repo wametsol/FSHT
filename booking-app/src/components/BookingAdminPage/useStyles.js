@@ -269,7 +269,19 @@ const useStyles = makeStyles((theme) => ({
         padding: '10px'
     },
     innerVisibilityBox: {
-        display: 'inline-flex'
+        display: 'flex',
+        justifyContent: 'center'
+    },
+    visibilityButtons: {
+        flexBasis: '33%'
+    },
+    toSiteButton: {
+        backgroundColor: green[200],
+        padding: '2px !important',
+        marginLeft: '5px',
+        '&:hover': {
+            backgroundColor: green[300],
+        }
     },
     hideVisibilityBtn: {
         padding: '2px !important',

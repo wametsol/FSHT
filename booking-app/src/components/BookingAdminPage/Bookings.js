@@ -164,7 +164,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                 <MenuItem value='all'>Kaikki</MenuItem>
                 <ListSubheader>Henkilöt</ListSubheader>
                 {getHumanResources().map(r => (
-                    <MenuItem value={r.name}>{r.name}</MenuItem>
+                    <MenuItem key={r.name} value={r.name}>{r.name}</MenuItem>
                 ))}
                 <ListSubheader>Laitteet</ListSubheader>
                 </Select></div></div>

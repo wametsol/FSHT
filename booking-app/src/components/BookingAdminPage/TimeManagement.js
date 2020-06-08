@@ -10,7 +10,7 @@ import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
 
 import firebase, { firestore } from '../../firebase'
 import { useRouteMatch } from 'react-router-dom'
-import { sameAsBase, isClosed, getFormattedTimes, getWeekdayTimes, valueLabelFormat, valuetext, getSingleDayTimesText, getSingleDayTimes } from './TimeTableServices'
+import { sameAsBase, isClosed, getFormattedTimes, getFormattedPersonTimes, getWeekdayTimes, getWeekdayPersonTimes, valueLabelFormat, valuetext, getSingleDayTimesText, getSingleDayTimes } from './TimeTableServices'
 
 import DateFnsUtils from '@date-io/date-fns'
 import { fi } from 'date-fns/locale'
@@ -21,23 +21,6 @@ import {
 } from '@material-ui/pickers'
 import { format, getDay, addDays, isBefore, parseISO } from 'date-fns'
 
-
-
-
-const initialTimetable = {
-    base: [8, 16],
-    weekDays: {
-        mon: [8, 16],
-        tue: [8, 16],
-        wed: [8, 16],
-        thu: [8, 16],
-        fri: [8, 16],
-    },
-    weekEnds: {
-        sat: [8, 16],
-        sun: [8, 16]
-    }
-}
 const marks = [
     {
         value: 0,
@@ -66,7 +49,9 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const classes = useStyles()
     const [value, setValue] = useState(bookerObject.timeTables)
     const [editWeekDays, setEditWeekdays] = useState(true)
+    const [editPersonWeekDays, setEditPersonWeekdays] = useState(true)
     const [editWeekEnds, setEditWeekends] = useState(true)
+    const [editPersonWeekEnds, setEditPersonWeekends] = useState(true)
     const [loading, setLoading] = useState(false)
     const [holidayFormOpen, setHolidayFormOpen] = useState(false)
     const [holidayForm2Open, setHolidayForm2Open] = useState(false)
@@ -78,11 +63,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const pagematch = useRouteMatch('/:id')
     const [specialDayKeys, setSpecialDayKeys] = useState(Object.keys(bookerObject.specialDays))
     const [selectedResources, setSelectedResources] = useState('default')
-
-
-
-
-
+    const [selectedTimeTables, setSelectedTimeTables] = useState(null)
 
 
     //SORT SPECIALDAYS TO ASC ORDER
@@ -99,6 +80,9 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
 
     const handleBase = (event, newValue) => {
+        if (event === 2 && isClosed(value.base)) {
+            newValue = [8, 16]
+        }
         console.log(newValue)
         setValue({
             ...value,
@@ -110,6 +94,38 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 thu: newValue,
                 fri: newValue
             }
+        })
+    }
+
+    const handlePersonBase = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
+        setSelectedTimeTables({
+            ...selectedTimeTables,
+            base: newValue,
+            weekDays: {
+                mon: newValue,
+                tue: newValue,
+                wed: newValue,
+                thu: newValue,
+                fri: newValue
+            }
+        })
+
+    }
+
+    const handlePersonMon = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
+        setSelectedTimeTables({
+            ...selectedTimeTables,
+            weekDays: {
+                ...selectedTimeTables.weekDays,
+                mon: newValue
+            }
+
         })
     }
     const handleMon = (event, newValue) => {
@@ -125,6 +141,21 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
         })
     }
+
+    const handlePersonTue = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
+        setSelectedTimeTables({
+            ...selectedTimeTables,
+            weekDays: {
+                ...selectedTimeTables.weekDays,
+                tue: newValue
+            }
+
+        })
+    }
+
     const handleTue = (event, newValue) => {
         if (event === 2 && isClosed(value.base)) {
             newValue = [8, 16]
@@ -137,6 +168,21 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             }
         })
     }
+
+    const handlePersonWed = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
+        setSelectedTimeTables({
+            ...selectedTimeTables,
+            weekDays: {
+                ...selectedTimeTables.weekDays,
+                wed: newValue
+            }
+
+        })
+    }
+
     const handleWed = (event, newValue) => {
         if (event === 2 && isClosed(value.base)) {
             newValue = [8, 16]
@@ -149,6 +195,21 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             }
         })
     }
+
+    const handlePersonThu = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
+        setSelectedTimeTables({
+            ...selectedTimeTables,
+            weekDays: {
+                ...selectedTimeTables.weekDays,
+                thu: newValue
+            }
+
+        })
+    }
+
     const handleThu = (event, newValue) => {
         if (event === 2 && isClosed(value.base)) {
             newValue = [8, 16]
@@ -161,6 +222,21 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             }
         })
     }
+
+    const handlePersonFri = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
+        setSelectedTimeTables({
+            ...selectedTimeTables,
+            weekDays: {
+                ...selectedTimeTables.weekDays,
+                fri: newValue
+            }
+
+        })
+    }
+
     const handleFri = (event, newValue) => {
         if (event === 2 && isClosed(value.base)) {
             newValue = [8, 16]
@@ -174,6 +250,9 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         })
     }
     const handleSat = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
         setValue({
             ...value,
             weekEnds: {
@@ -182,7 +261,25 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             }
         })
     }
+
+    const handlePersonSat = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
+        setSelectedTimeTables({
+            ...selectedTimeTables,
+            weekEnds: {
+                ...selectedTimeTables.weekEnds,
+                sat: newValue
+            }
+
+        })
+    }
+
     const handleSun = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
         setValue({
             ...value,
             weekEnds: {
@@ -191,6 +288,21 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             }
         })
     }
+
+    const handlePersonSun = (event, newValue) => {
+        if (event === 2 && isClosed(selectedTimeTables.base)) {
+            newValue = [8, 16]
+        }
+        setSelectedTimeTables({
+            ...selectedTimeTables,
+            weekEnds: {
+                ...selectedTimeTables.weekEnds,
+                sun: newValue
+            }
+
+        })
+    }
+
     const handleSpecial = (event, newValue) => {
         setSpecialDayTimes(newValue)
 
@@ -217,6 +329,28 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             console.log(error)
         }
 
+    }
+
+    const savePersonWeekDayEdit = (e) => {
+        e.preventDefault()
+        try {
+            setEditPersonWeekdays(true)
+            setLoading(true)
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({[`resources.${selectedResources}`]:
+            {
+                ...bookerObject.resources[`${selectedResources}`],
+                timeTables: selectedTimeTables
+            }})
+                .then((res) => {
+                    fetchData()
+                    setLoading(false)
+                    setSuccessMessage(`Aikataulujen muokkaus onnistui`)
+                })
+
+        } catch (error) {
+            setErrorMessage(`Tapahtui virhe`)
+            console.log(error)
+        }
     }
 
 
@@ -408,48 +542,8 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 <div className={classes.column} >
                 </div>
                 <div className={classes.column} >
-                    <div style={{ margin: 20, border: 'solid 1px' }}>
-                        <Typography>Lauantai: </Typography>
-                        <Slider
-                            name='Lauantai'
-                            value={value.weekEnds.sat}
-                            onChange={handleSat}
-                            valueLabelDisplay="auto"
-                            aria-labelledby="range-slider"
-                            getAriaValueText={valuetext}
-                            valueLabelFormat={valueLabelFormat}
-                            step={0.25}
-                            min={0}
-                            max={24}
-                            type={'number'}
-                            aria-labelledby='input-slider'
-                            disabled={editWeekEnds}
-
-                        />
-                        <Typography >{getFormattedTimes(value.weekEnds.sat)}</Typography>
-                        {editWeekEnds ? <em /> : <div>{isClosed(value.weekEnds.sat) ? <Button size='small' color='secondary' onClick={() => handleSat(2, [8, 16])}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSat(1, [0, 0])}>Aseta suljetuksi</Button>}</div>}
-                    </div>
-                    <div style={{ margin: 20, border: 'solid 1px' }}>
-                        <Typography>Sunnuntai: </Typography>
-                        <Slider
-                            name='Sunnuntai'
-                            value={value.weekEnds.sun}
-                            onChange={handleSun}
-                            valueLabelDisplay="auto"
-                            aria-labelledby="range-slider"
-                            getAriaValueText={valuetext}
-                            valueLabelFormat={valueLabelFormat}
-                            step={0.25}
-                            min={0}
-                            max={24}
-                            type={'number'}
-                            aria-labelledby='input-slider'
-                            disabled={editWeekEnds}
-
-                        />
-                        <Typography >{getFormattedTimes(value.weekEnds.sun)}</Typography>
-                        {editWeekEnds ? <em /> : <div>{isClosed(value.weekEnds.sun) ? <Button size='small' color='secondary' onClick={() => handleSun(2, [8, 16])}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleSun(1, [0, 0])}>Aseta suljetuksi</Button>}</div>}
-                    </div>
+                    {singleDaySlider('Lauantai', value.weekEnds.sat, handleSat, editWeekEnds, value.base, true)}
+                    {singleDaySlider('Sunnuntai', value.weekEnds.sun, handleSun, editWeekEnds, value.base, true)}
 
 
 
@@ -495,148 +589,18 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             </ExpansionPanelSummary>
             <ExpansionPanelDetails className={classes.details}>
                 <div className={classes.column} >
-                    <Typography variant='h5'>Yleinen</Typography>
                     <Typography>Yleisen ajan muokkaaminen asettaa kaikki arkipäivät samaan aikaan</Typography>
-                    <Slider
-                        name='Yleinen'
-                        value={value.base}
-                        onChange={handleBase}
-                        valueLabelDisplay="auto"
-                        aria-labelledby="range-slider"
-                        getAriaValueText={valuetext}
-                        valueLabelFormat={valueLabelFormat}
-                        step={0.25}
-                        min={0}
-                        max={24}
-                        marks={marks}
-                        type={'number'}
-                        aria-labelledby='input-slider'
-                        width='75%'
-                        disabled={editWeekDays}
-
-
-                    />
-                    <Typography >{getFormattedTimes(value.base)}</Typography>
-                    {editWeekDays ? <em /> : <div>{isClosed(value.base) ? <Button size='small' color='secondary' onClick={() => handleBase(2, [8, 16])}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleBase(1, [0, 0])}>Aseta suljetuksi</Button>}</div>}
-
+                    {singleDaySlider('Yleinen', value.base, handleBase, editWeekDays, value.base, true)}
+                    
                 </div>
                 <div className={classes.column} >
-                    <div className={classes.sliderOuter} >
-                        <div className={classes.sliderInner}>
-                            <Typography>Maanantai: </Typography>
-                            <Slider
-                                name='Maanantai'
-                                value={value.weekDays.mon}
-                                onChange={handleMon}
-                                valueLabelDisplay="auto"
-                                aria-labelledby="range-slider"
-                                getAriaValueText={valuetext}
-                                valueLabelFormat={valueLabelFormat}
-                                step={0.25}
-                                min={0}
-                                max={24}
-                                type={'number'}
-                                aria-labelledby='input-slider'
-                                marks={marks}
-                                disabled={editWeekDays}
-                            />
-                            <Typography >{getFormattedTimes(value.weekDays.mon)}</Typography>
-                            {editWeekDays ? <em /> : <div>{isClosed(value.weekDays.mon) ? <Button size='small' color='secondary' onClick={() => handleMon(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleMon(1, [0, 0])}>Aseta suljetuksi</Button>}</div>}
-
-                        </div>
-                    </div>
-                    <div className={classes.sliderOuter} >
-                        <div className={classes.sliderInner}>
-                            <Typography>Tiistai: </Typography>
-                            <Slider
-                                name='Tiistai'
-                                value={value.weekDays.tue}
-                                onChange={handleTue}
-                                valueLabelDisplay="auto"
-                                aria-labelledby="range-slider"
-                                getAriaValueText={valuetext}
-                                valueLabelFormat={valueLabelFormat}
-                                step={0.25}
-                                min={0}
-                                max={24}
-                                type={'number'}
-                                aria-labelledby='input-slider'
-                                marks={marks}
-                                disabled={editWeekDays}
-                            />
-                            <Typography >{getFormattedTimes(value.weekDays.tue)}</Typography>
-                            {editWeekDays ? <em /> : <div>{isClosed(value.weekDays.tue) ? <Button size='small' color='secondary' onClick={() => handleTue(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleTue(1, [0, 0])}>Aseta suljetuksi</Button>}</div>}
-                        </div>
-                    </div>
-                    <div className={classes.sliderOuter} >
-                        <div className={classes.sliderInner}>
-                            <Typography>Keskiviikko: </Typography>
-                            <Slider
-                                name='Keskiviikko'
-                                value={value.weekDays.wed}
-                                onChange={handleWed}
-                                valueLabelDisplay="auto"
-                                aria-labelledby="range-slider"
-                                getAriaValueText={valuetext}
-                                valueLabelFormat={valueLabelFormat}
-                                step={0.25}
-                                min={0}
-                                max={24}
-                                type={'number'}
-                                aria-labelledby='input-slider'
-                                marks={marks}
-                                disabled={editWeekDays}
-                            />
-                            <Typography>{getFormattedTimes(value.weekDays.wed)}</Typography>
-                            {editWeekDays ? <em /> : <div>{isClosed(value.weekDays.wed) ? <Button size='small' color='secondary' onClick={() => handleWed(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleWed(1, [0, 0])}>Aseta suljetuksi</Button>}</div>}
-                        </div>
-                    </div>
-                    <div className={classes.sliderOuter} >
-                        <div className={classes.sliderInner}>
-                            <Typography>Torstai: </Typography>
-                            <Slider
-                                name='Torstai'
-                                value={value.weekDays.thu}
-                                onChange={handleThu}
-                                valueLabelDisplay="auto"
-                                aria-labelledby="range-slider"
-                                getAriaValueText={valuetext}
-                                valueLabelFormat={valueLabelFormat}
-                                step={0.25}
-                                min={0}
-                                max={24}
-                                type={'number'}
-                                aria-labelledby='input-slider'
-                                marks={marks}
-                                disabled={editWeekDays}
-                            />
-                            <Typography > {getFormattedTimes(value.weekDays.thu)}</Typography>
-                            {editWeekDays ? <em /> : <div>{isClosed(value.weekDays.thu) ? <Button size='small' color='secondary' onClick={() => handleThu(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleThu(1, [0, 0])}>Aseta suljetuksi</Button>}</div>}
-                        </div>
-                    </div>
-                    <div className={classes.sliderOuter} >
-                        <div className={classes.sliderInner}>
-                            <Typography>Perjantai: </Typography>
-                            <Slider
-                                name='Perjantai'
-                                value={value.weekDays.fri}
-                                onChange={handleFri}
-                                valueLabelDisplay="auto"
-                                aria-labelledby="range-slider"
-                                getAriaValueText={valuetext}
-                                valueLabelFormat={valueLabelFormat}
-                                step={0.25}
-                                min={0}
-                                max={24}
-                                type={'number'}
-                                aria-labelledby='input-slider'
-                                marks={marks}
-                                disabled={editWeekDays}
-                            />
-                            <Typography >{getFormattedTimes(value.weekDays.fri)}</Typography>
-                            {editWeekDays ? <em /> : <div>{isClosed(value.weekDays.fri) ? <Button size='small' color='secondary' onClick={() => handleFri(2, value.base)}>Aseta avonaiseksi</Button> : <Button size='small' color='secondary' onClick={() => handleFri(1, [0, 0])}>Aseta suljetuksi</Button>}</div>}
-                        </div>
-                    </div>
+                {singleDaySlider('Maanantai', value.weekDays.mon, handleMon, editWeekDays, value.base, true)}
+                {singleDaySlider('Tiistai', value.weekDays.tue, handleTue, editWeekDays, value.base, true)}
+                {singleDaySlider('Keskiviikko', value.weekDays.wed, handleWed, editWeekDays, value.base, true)}
+                {singleDaySlider('Torstai', value.weekDays.thu, handleThu, editWeekDays, value.base, true)}
+                {singleDaySlider('Perjantai', value.weekDays.fri, handleFri, editWeekDays, value.base, true)}
+                
+                
                 </div>
                 <div className={clsx(classes.column, classes.helper)}>
                     <Typography variant="caption">
@@ -724,8 +688,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     <div className={classes.halfDiv} >
                         <div style={{ marginLeft: 20, marginRight: 20, marginTop: 10 }}>
                             <Typography>Aseta ajat </Typography>
-
-
                             <Slider
                                 name='Erikoispäivä'
                                 value={specialDayTimes}
@@ -797,6 +759,131 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             </ExpansionPanelActions>
         </ExpansionPanel>
     )
+
+    const personWeekdayPanel = () => (
+        <ExpansionPanel >
+            <ExpansionPanelSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1c-content"
+                id="panel1c-header"
+            >
+                <div className={classes.column}>
+                    <Typography className={classes.heading}>Arkipäivät</Typography>
+                </div>
+                <div className={classes.column}>
+                    <Typography className={classes.secondaryHeading}>{sameAsBase(selectedTimeTables) ? <span>Arkisin: {getFormattedPersonTimes(selectedTimeTables.base)}</span> : <span>{getWeekdayPersonTimes(selectedTimeTables)}</span>}</Typography>
+                </div>
+
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails className={classes.details}>
+                <div className={classes.column} >
+                    <Typography>Yleisen ajan muokkaaminen asettaa kaikki arkipäivät samaan aikaan</Typography>
+                    {singleDaySlider('Yleinen', selectedTimeTables.base, handlePersonBase, editPersonWeekDays, selectedTimeTables.base, false)}
+                </div>
+                <div className={classes.column} >
+                    {singleDaySlider('Maanantai', selectedTimeTables.weekDays.mon, handlePersonMon, editPersonWeekDays, selectedTimeTables.base, false)}
+                    {singleDaySlider('Tiistai', selectedTimeTables.weekDays.tue, handlePersonTue, editPersonWeekDays, selectedTimeTables.base, false)}
+                    {singleDaySlider('Keskiviikko', selectedTimeTables.weekDays.wed, handlePersonWed, editPersonWeekDays, selectedTimeTables.base, false)}
+                    {singleDaySlider('Torstai', selectedTimeTables.weekDays.thu, handlePersonThu, editPersonWeekDays, selectedTimeTables.base, false)}
+                    {singleDaySlider('Perjantai', selectedTimeTables.weekDays.fri, handlePersonFri, editPersonWeekDays, selectedTimeTables.base, false)}
+
+                    
+                    
+                </div>
+                <div className={clsx(classes.column, classes.helper)}>
+                    <Typography variant="caption">
+                        Näkymä:
+                    </Typography>
+                    {sameAsBase(selectedTimeTables) ? <div>Arkisin: {isClosed(selectedTimeTables.base)? <span>Ei paikalla</span> : <span>{getFormattedPersonTimes(selectedTimeTables.base)}</span>}</div> : <div>{getWeekdayPersonTimes(selectedTimeTables)}</div>}
+                </div>
+            </ExpansionPanelDetails>
+            <Divider />
+            <ExpansionPanelActions>
+                {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div>{editPersonWeekDays ? <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' onClick={() => setEditPersonWeekdays(!editPersonWeekDays)}>Muokkaa</Button></Tooltip> : <div>
+                    <Tooltip title={`Talleta muokkauksesi `} arrow><Button size='small' variant='outlined' color='primary' onClick={savePersonWeekDayEdit}>Tallenna</Button></Tooltip>
+                    <Tooltip title={`Peru muokkaukset`} arrow><Button size='small' variant='outlined' color='secondary' onClick={() => {
+                        setSelectedTimeTables(bookerObject.resources[`${selectedResources}`].timeTables)
+                        setEditPersonWeekdays(!editPersonWeekDays)
+                    }}>Peru</Button></Tooltip>
+                </div>}</div>}
+
+            </ExpansionPanelActions>
+        </ExpansionPanel>
+    )
+
+    const personWeekendPanel = () => (
+        <ExpansionPanel >
+            <ExpansionPanelSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1c-content"
+                id="panel1c-header"
+            >
+                <div className={classes.column}>
+                    <Typography className={classes.heading}>Viikonloppu </Typography>
+                </div>
+                <div className={classes.column}>
+                    <Typography className={classes.secondaryHeading}>Aseta Viikonloppu</Typography>
+                </div>
+
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails className={classes.details}>
+                <div className={classes.column} >
+                </div>
+                <div className={classes.column} >
+                    {singleDaySlider('Lauantai', selectedTimeTables.weekEnds.sat, handlePersonSat, editPersonWeekEnds, selectedTimeTables.base, false)}
+                    {singleDaySlider('Sunnuntai', selectedTimeTables.weekEnds.sun, handlePersonSun, editPersonWeekEnds, selectedTimeTables.base, false)}
+
+
+
+                </div>
+                <div className={clsx(classes.column, classes.helper)}>
+                    {isClosed(selectedTimeTables.weekEnds.sun) && isClosed(value.weekEnds.sat) ? <Typography >Viikonloppuisin: ei paikalla</Typography> : <div>
+                    <Typography >La: {isClosed(selectedTimeTables.weekEnds.sat)? <span>Ei paikalla</span> : <span>{getFormattedTimes(selectedTimeTables.weekEnds.sat)}</span>}</Typography>
+                        <Typography >Su: {isClosed(selectedTimeTables.weekEnds.sun)? <span>Ei paikalla</span> : <span>{getFormattedTimes(selectedTimeTables.weekEnds.sun)}</span>}</Typography>
+                    </div>}
+
+
+                </div>
+            </ExpansionPanelDetails>
+            <Divider />
+            <ExpansionPanelActions>
+                {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div>{editPersonWeekEnds ? <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' onClick={() => setEditPersonWeekends(!editPersonWeekDays)}>Muokkaa</Button></Tooltip> : <div>
+                    <Tooltip title={`Talleta muokkauksesi `} arrow><Button size='small' variant='outlined' color='primary' onClick={saveWeekDayEdit}>Tallenna</Button></Tooltip>
+                    <Tooltip title={`Peru muokkaukset`} arrow><Button size='small' variant='outlined' color='secondary' onClick={() => {
+                        setSelectedTimeTables(bookerObject.resources[`${selectedResources}`].timeTables)
+                        setEditPersonWeekends(!editPersonWeekEnds)
+                    }}>Peru</Button></Tooltip>
+                </div>}</div>}
+            </ExpansionPanelActions>
+        </ExpansionPanel>
+    )
+
+    const singleDaySlider = (name, dayValue, onChange, disabled, baseValue, system) => (
+            <div className={classes.sliderOuter} >
+                        <div className={classes.sliderInner}>
+                            <Typography>{name}: </Typography>
+                            <Slider
+                                name={`${name}`}
+                                value={dayValue}
+                                onChange={onChange}
+                                valueLabelDisplay="auto"
+                                aria-labelledby="range-slider"
+                                getAriaValueText={valuetext}
+                                valueLabelFormat={valueLabelFormat}
+                                step={0.25}
+                                min={0}
+                                max={24}
+                                type={'number'}
+                                aria-labelledby='input-slider'
+                                marks={marks}
+                                disabled={disabled}
+                            />
+                            <Typography >{system? getFormattedTimes(dayValue) : getFormattedPersonTimes(dayValue)}</Typography>
+                            {disabled ? <em /> : <div>{isClosed(dayValue) ? <Button size='small' color='secondary' onClick={() => onChange(2, baseValue)}>{system? 'Aseta avonaiseksi' : 'Aseta läsnäolevaksi'}</Button> : <Button size='small' color='secondary' onClick={() => onChange(1, [0, 0])}>{system? 'Aseta suljetuksi' : 'Aseta poissaolevaksi'}</Button>}</div>}
+                        </div>
+                    </div>
+        )
+    
 
     const personSpecialPanel = () => (
         <ExpansionPanel >
@@ -956,7 +1043,9 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                         <Select labelId='resourceTimes'
                             style={{ minWidth: 150 }}
                             value={selectedResources}
-                            onChange={({ target }) => { if (!!target.value) setSelectedResources(target.value) }}>
+                            onChange={({ target }) => { if (!!target.value) {
+                                setSelectedResources(target.value)
+                                setSelectedTimeTables(bookerObject.resources[`${target.value}`].timeTables)} }}>
                             {humanResources.map(r => (
                                 <MenuItem value={r.name}>{r.name}</MenuItem>
                             ))}
@@ -968,8 +1057,8 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     <Typography variant='caption'>Valitse henkilö nähdäksesi henkilökohtaiset ajat</Typography>
                 </div> : <div>
                         <Typography variant='caption'>Henkilön {selectedResources} ajanhallinta</Typography>
-                        {weekdayPanel()}
-                        {weekendPanel()}
+                        {personWeekdayPanel()}
+                        {personWeekendPanel()}
                         {personSpecialPanel()}
                         {console.log(selectedResources)}
                     </div>}

@@ -31,11 +31,13 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
 
         firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
             .then((response) => {
-                if (response.empty || !response.data().admins.includes(user.displayName)) {
+                if (response.empty) {
                     setError(true)
                     setLoading(false)
                 }
-                if(response.data().admins.filter(a => a.email === user.email).length>0){
+                console.log(user.email)
+                console.log(response.data().bookerCreator)
+                if(response.data().admins.filter(a => a.email === user.email).length>0 || response.data().bookerCreator === user.email){
                 setBookerObject(response.data())
                 firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
                     .then((res) => {

@@ -17,7 +17,7 @@ import {
     KeyboardTimePicker,
     KeyboardDatePicker,
 } from '@material-ui/pickers';
-import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
+import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText, getFormattedPersonTimes, getSinglePersonDayTimesText, getDayContent } from '../BookingAdminPage/TimeTableServices'
 
 import UserBookingPage from './UserBookingPage'
 import ConfirmationWindow from './ConfirmationWindow'
@@ -232,6 +232,7 @@ const BookingPage = () => {
         }
     }
 
+
     const getFreeTimes = () => {
         const dailyBookings = bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]]
 
@@ -379,6 +380,41 @@ const BookingPage = () => {
         return humanResources
     }
 
+    const getMaxWorktimes = (person) => {
+        var maxWorktimes = Object.assign([], !!person.specialDays && !!person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times : getDayContent(getDay(selectedDate), person.timeTables))
+        if(maxWorktimes[0]===maxWorktimes[1]){
+            return maxWorktimes
+        }
+        console.log('Initial times: ', maxWorktimes)
+        console.log('Specialday: ', dayHasSpecialTimes())
+        console.log('Special times: ', bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
+        var openinHours = dayHasSpecialTimes()? bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times : getDayContent(getDay(selectedDate), bookerObject.timeTables)
+
+        
+        console.log('Initial openingtimes: ',openinHours)
+        if (maxWorktimes[0]<openinHours[0]){
+            maxWorktimes[0] = openinHours[0]
+        }
+        if (maxWorktimes[1]>openinHours[1]){
+            maxWorktimes[1] = openinHours[1]
+        }
+        console.log('Returning times: ',maxWorktimes)
+        console.log('Initial times: ', !!person.specialDays && !!person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times : getDayContent(getDay(selectedDate), person.timeTables))
+        return maxWorktimes
+    }
+
+    const workerHasShift = (day, worker) => {
+        console.log('Työntekijä: ', worker)
+        var workerDayTimes = !!worker.specialDays && !!worker.specialDays[`${format(day, 'dd:MM:yyyy')}`]? worker.specialDays[`${format(day, 'dd:MM:yyyy')}`].times : getDayContent(getDay(day), worker.timeTables)
+        console.log('Ajat: ',workerDayTimes)
+        if (workerDayTimes[0] !== workerDayTimes[1]){
+            return true
+        }
+
+
+        return false
+    }
+
 
     const BookerHomePage = () => (
         <div>
@@ -461,10 +497,11 @@ const BookingPage = () => {
                         <div className={classes.workerBox} >
 
                         
-                    {getHumanResources().filter(r => r.services.filter(a => a === chosenService.service).length>0).map(person => (
+                    {getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).map(person => (
                         <div className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
                             
                         <Typography>{person.name}</Typography>
+                    <Typography variant='caption'>{getFormattedPersonTimes(getMaxWorktimes(person))}</Typography>
                         </div>
                     ))}</div>
                         <Divider />

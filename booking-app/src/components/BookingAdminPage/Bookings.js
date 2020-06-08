@@ -7,7 +7,7 @@ import { useRouteMatch } from 'react-router-dom'
 import useStyles from './useStyles'
 import clsx from 'clsx';
 
-import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
+import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText, getSinglePersonDayTimesText, getFormattedPersonTimes } from '../BookingAdminPage/TimeTableServices'
 
 import DateFnsUtils from '@date-io/date-fns'
 import { fi } from 'date-fns/locale'
@@ -134,7 +134,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
     if (bookingsObject  === null) {
         return (
-            <Typography>Ladataan varauksia <CircularProgress size={25} /></Typography>
+            <span><Typography>Ladataan varauksia </Typography><CircularProgress size={25} /></span>
             
         )
     } else if (bookingsObject === undefined) {
@@ -195,7 +195,14 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                     {!!bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]?
                     <Typography>Valittuna päivänä käytössä poikkeuksellinen aukiolo, {bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].reason}: <b>{getFormattedTimes(bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times)}</b> </Typography>
                     :
-                    <Typography>Ilmoittamasi aukioloajat valitulle päivälle: <b>{getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)}</b></Typography>}
+                    <Typography>Ilmoittamasi aukioloajat valitulle päivälle: <b>{getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)} </b></Typography>}
+                    {selectedResources==='all'? <em/>: 
+                    <Typography>
+                    {selectedResources} työajat valittuna päivänä: {!!bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? 
+                    <b>{getFormattedPersonTimes(bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times)}</b>
+                    : 
+                    <b>{getSinglePersonDayTimesText(getDay(selectedDate), bookerObject.resources[`${selectedResources}`].timeTables)}</b>}
+                    </Typography>}
                     
                 </div>
             </div>

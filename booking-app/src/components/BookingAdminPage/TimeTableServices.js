@@ -17,6 +17,14 @@ export const getFormattedTimes = (times) => {
     }
 }
 
+export const getFormattedPersonTimes = (times) => {
+    if(isClosed(times)){
+        return 'poissa'
+    } else {
+        return `(${valueLabelFormat(times[0])} - ${valueLabelFormat(times[1])})`
+    }
+}
+
 
 
 export const isClosed = (times) => {
@@ -37,7 +45,17 @@ export const getWeekdayTimes = (value) => {
     return weekdays
 }
 
-const getDayContent = (day, timetables) => {
+export const getWeekdayPersonTimes = (value) => {
+    var weekdays = ''
+    weekdays += `Ma: ${getFormattedPersonTimes(value.weekDays.mon)} `
+    weekdays += `Ti: ${getFormattedPersonTimes(value.weekDays.tue)} `
+    weekdays += `Ke: ${getFormattedPersonTimes(value.weekDays.wed)} `
+    weekdays += `To: ${getFormattedPersonTimes(value.weekDays.thu)} `
+    weekdays += `Pe: ${getFormattedPersonTimes(value.weekDays.fri)} `
+    return weekdays
+}
+
+export const getDayContent = (day, timetables) => {
     switch (day) {
         case 1:
             return timetables.weekDays.mon
@@ -74,6 +92,9 @@ export const getSingleDayTimes = (day, timetables) => {
 
 export const getSingleDayTimesText = (day, timetables) => {
     return getFormattedTimes(getDayContent(day, timetables))
+}
+export const getSinglePersonDayTimesText = (day, timetables) => {
+    return getFormattedPersonTimes(getDayContent(day, timetables))
 }
 export const valueLabelFormat = (value) => {
     var label = ''

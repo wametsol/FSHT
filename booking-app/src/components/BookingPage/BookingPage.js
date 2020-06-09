@@ -262,12 +262,14 @@ const BookingPage = () => {
 
             // CHECK IF DAILYBOOKINGS EXIST
             for (const b in dailyBookings) {
-                if (dailyBookings[b].active === true && dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end > singleTime.start) {
+                //console.log(dailyBookings[b].worker, ' === ', chosenWorker)
+                if ((dailyBookings[b].active === true && (!!chosenWorker && dailyBookings[b].worker === chosenWorker.name)) && dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end > singleTime.start) {
                     singleTime.bookedAlready = true
                 }
             }
             timeObject.push(singleTime)
         }
+        console.log(timeObject)
         return timeObject
     }
 

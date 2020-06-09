@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import firebase, { auth, firestore } from '../../firebase'
 import {
     Typography, CircularProgress, TextField, Button, Tooltip, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Chip, Divider, Switch, InputAdornment, FormControl, FormLabel, FormHelperText, MenuItem, InputLabel, Select,
-    Grid, List, ListItem, ListItemIcon, ListItemText, Checkbox, Paper, Tab, Tabs, RadioGroup, FormControlLabel, Radio
+    Grid, List, ListItem, ListItemIcon, ListItemText, Checkbox, Paper, Tab, Tabs, RadioGroup, FormControlLabel, Radio, Dialog, DialogTitle, DialogContent
 } from '@material-ui/core';
 import { useRouteMatch } from 'react-router-dom'
 import clsx from 'clsx';
@@ -33,6 +33,8 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
     const [humanGender, setHumanGender] = useState(null)
     const [identicalResources, setIdenticalResources] = useState(1)
     const [tabValue, setTabValue] = useState(0)
+    const [openEditForm, setOpenEditForm] = useState(false)
+    const [selectedPerson, setSelectedPerson] = useState(null)
 
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue)
@@ -82,6 +84,38 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
             setError(true)
         }
     }
+
+    const updateResource = (e) => {
+        e.preventDefault()
+        
+        try {
+            setError(false)
+            setLoading(true)
+
+            let resourceObject
+            
+            if(selectedPerson.human){
+                const {amountOfResources, ...humanResource} = selectedPerson
+                resourceObject = humanResource
+            } else {
+                const {gender, ...nonHumanResource} = selectedPerson
+                resourceObject = nonHumanResource
+            }
+            
+            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('baseInformation').update({ [`resources.${resourceObject.name}`]: resourceObject })
+                .then(response => {
+                                handleEditFormClose()
+                                fetchData()
+                                setLoading(false)
+                                setSuccessMessage(`Resurssi ${resourceObject.name} päivitetty`)
+                            })
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            setError(true)
+        }
+    }
+
     const removeResource = (resource) => {
         console.log(resource)
 
@@ -126,7 +160,22 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
         setResourceServiceList(editedList)
     }
 
-    const serviceLists = (services, isBase) => (
+    const editFormAddService = (index) => {
+        setSelectedPerson({
+            ...selectedPerson,
+            services: selectedPerson.services.concat(serviceList.filter(s => !selectedPerson.services.includes(s.service))[index].service)
+        })
+    }
+    const editFormRemoveService = (index) => {
+        var editedList = selectedPerson.services
+        editedList.splice(index, 1)
+        setSelectedPerson({
+            ...selectedPerson,
+            services: editedList
+        })
+    }
+
+    const serviceLists = (services, isBase, isEditForm) => (
         <Paper className={classes.serviceListPaper}>
             <List>
                 {isBase? <Typography>Palvelut</Typography>:<Typography>Resurssin palvelut</Typography>}
@@ -139,18 +188,26 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                         <ListItem>
                             <ListItemText primary={service.service} />
                             <ListItemIcon>
+                                {isEditForm? <Button style={{ color: 'green' }} onClick={() => editFormAddService(index)}>
+                                    <AddIcon />
+                                </Button>: 
                                 <Button style={{ color: 'green' }} onClick={() => addService(index)}>
                                     <AddIcon />
-                                </Button>
+                                </Button>}
                             </ListItemIcon>
 
 
                             </ListItem> : <ListItem>
                                 
                                 <ListItemIcon>
+                                {isEditForm?
+                                    <Button style={{ color: 'red' }} onClick={() => editFormRemoveService(index)}>
+                                        <RemoveIcon />
+                                    </Button> : 
                                     <Button style={{ color: 'red' }} onClick={() => removeService(index)}>
                                         <RemoveIcon />
                                     </Button>
+                                }
                                 </ListItemIcon>
                                 <ListItemText primary={service.service} />
                                 </ListItem>}
@@ -160,11 +217,17 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
             </List>
             <div>
             {isBase? <Button style={{backgroundColor: 'lightgreen'}} variant='contained' size='small' onClick={() => {
-                setResourceServiceList(resourceServiceList.concat(serviceList))
-                setServiceList([])
+                isEditForm? setSelectedPerson({
+                    ...selectedPerson,
+                    services: bookerObject.services.map(s => s.service)
+                }) : setResourceServiceList(resourceServiceList.concat(serviceList))
+                isEditForm? console.log('Adding all') : setServiceList([])
                 }}>Lisää kaikki</Button>:<Button style={{backgroundColor: 'pink'}}  variant='contained' size='small' onClick={() => {
-                    setServiceList(resourceServiceList.concat(serviceList))
-                    setResourceServiceList([])
+                    isEditForm? setSelectedPerson({
+                        ...selectedPerson,
+                        services: []
+                    }) : setServiceList(resourceServiceList.concat(serviceList))
+                    isEditForm? console.log('Removing all') : setResourceServiceList([])
                     }}>Poista kaikki</Button>}
             </div>
         </Paper>
@@ -185,6 +248,16 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
         if (gender === 'male') return 'Mies'
         if (gender === 'female') return 'Nainen'
         if (gender === 'other') return 'Muu / ei ilmoitettu'
+    }
+
+    const editPerson = (person) => {
+        setSelectedPerson(person)
+        setOpenEditForm(true)
+    }
+
+    const handleEditFormClose = () => {
+        setOpenEditForm(false)
+        setSelectedPerson(null)
     }
 
     const humanTab = () => {
@@ -233,14 +306,124 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                         <Divider />
                         <ExpansionPanelActions>
                             <Tooltip title={`Poista resurssi ${resource.name} `} arrow><span><Button size='small' className={classes.removeAdmin} onClick={() => removeResource(resource)}><CancelIcon /></Button></span></Tooltip>
-                            <Button variant='contained' size="small" color="primary">
+                            <Button variant='contained' size="small" color="primary" onClick={() => editPerson(resource)}>
                                 Muokkaa
                             </Button>
                         </ExpansionPanelActions>
                     </ExpansionPanel>
                 </div>
             </div>
-        ))}</div>
+        ))}
+        {!!selectedPerson? 
+        <Dialog open={openEditForm} onClose={handleEditFormClose} >
+            
+        <DialogTitle>Muokkaa henkilön {selectedPerson.name} tietoja</DialogTitle>
+                         <DialogContent>
+                         <form>
+                        <Typography style={{display:'inline'}}>Resurssin tyyppi: <Switch
+                            classes={{
+                                switchBase: classes.switchBase,
+                                checked: classes.checked,
+                                track: classes.track
+
+                            }}
+                            checked={selectedPerson.human}
+                            onChange={() => {
+                                    setSelectedPerson({
+                                        ...selectedPerson,
+                                        human: !selectedPerson.human
+                                    })
+                                
+                                
+                                }}
+                        ></Switch> </Typography>
+                            {selectedPerson.human ? <span><span style={{ backgroundColor: 'pink' }} className={classes.humanBox}>Henkilö</span>
+                            <br/>
+                            Sukupuoli 
+                            <span >
+                            <RadioGroup row style={{justifyContent: 'center'}} value={selectedPerson.gender} onChange={({target}) => setSelectedPerson({
+                                    ...selectedPerson,
+                                    gender: target.value,
+                            })}>
+                                <FormControlLabel value='male' control={<Radio/>} label='Mies'/>
+                                <FormControlLabel value='female' control={<Radio/>} label='Nainen'/>
+                                <FormControlLabel value='other' control={<Radio/>} label='Muu/ei ilmoitettu' />
+                            </RadioGroup>
+                            </span>
+                            </span> : <span><span style={{ backgroundColor: 'lightblue' }} className={classes.humanBox}>Laite</span>
+                            <br/>
+                            <FormControl>
+                            <div style={{display:'inline'}}>Identtisten resurssien määrä <Select
+                            MenuProps={{ style: { maxHeight: '300px' } }}
+                            onChange={({target}) => setSelectedPerson({
+                                ...selectedPerson,
+                                amountOfResources: target.value
+                            })}
+                            value={selectedPerson.amountOfResources || 1}>
+                            {getNumberArray(25, 1).filter(number => number != 0).map(number => (
+                                                <MenuItem value={number}>{number}kpl</MenuItem>
+                                            ))}
+                            </Select> </div>
+                            <FormHelperText>Esimerkiksi Rata 5kpl, joita voidaan varata samanaikaisesti. Järjestelmä erottelee identtiset resurssit numeroilla (Rata 1, Rata 2 jne.)</FormHelperText>
+                            </FormControl>
+                            </span>}
+                            <br/>
+                        <TextField
+                            id="resource"
+                            label="Nimi"
+                            style={{ margin: 4 }}
+                            helperText="Tämä tulee resurssin nimeksi. Esimerkiksi 'Huone' tai 'Teppo Työntekijä'"
+                            margin="dense"
+                            variant='outlined'
+                            disabled={loading}
+                            value={selectedPerson.name}
+                            onChange={({target}) => setSelectedPerson({
+                                ...selectedPerson,
+                                name: target.value
+                            })}
+                            InputProps={{
+                                style: { backgroundColor: 'white' },
+                            }}
+                        />
+                        <TextField
+                            id="info"
+                            label="Lisätiedot"
+                            style={{ margin: 4 }}
+                            helperText="Voit määritellä tähän haluamasi lisätiedot"
+                            margin="dense"
+                            variant='outlined'
+                            disabled={loading}
+                            value={selectedPerson.description}
+                            onChange={({target}) => setSelectedPerson({
+                                ...selectedPerson,
+                                description: target.value
+                            })}
+                            InputProps={{
+                                style: { backgroundColor: 'white' },
+                            }}
+                        />
+                        <br />
+                        <Typography>Resurssin tarjoamat palvelut näkyvät oikealla</Typography>
+                        <Grid container spacing={2} justify="center" alignItems="center" className={classes.root}>
+                            <Grid item>{serviceLists(serviceList.filter(s => !selectedPerson.services.includes(s.service) ), true, true)}</Grid>
+                            <Grid item>
+
+                            </Grid>
+                            <Grid item>{serviceLists(selectedPerson.services.map(s => serviceList.filter(a => a.service === s)[0]), false, true)}</Grid>
+                        </Grid>
+
+
+
+
+                        {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div style={{ display: 'inline' }}><Tooltip title='Päivitä tiedot'><Button className={classes.addServiceButton} onClick={updateResource} ><AddCircleIcon /></Button></Tooltip><Tooltip title='Peru'><Button className={classes.cancelServiceButton} onClick={() => {
+                            handleEditFormClose()
+                        }}><CancelIcon /></Button></Tooltip></div>}
+                        {error ? <div className={classes.errorMessage}>Tietojen antamisessa tapahtui virhe, tarkasta kentät</div> : <em />}
+                    </form>
+                         </DialogContent>
+
+        </Dialog>: <em/>}
+        </div>
          ) }
     
     const nonHumanTab = () => {
@@ -373,11 +556,11 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                         <br />
                         <Typography>Resurssin tarjoamat palvelut näkyvät oikealla</Typography>
                         <Grid container spacing={2} justify="center" alignItems="center" className={classes.root}>
-                            <Grid item>{serviceLists(serviceList, true)}</Grid>
+                            <Grid item>{serviceLists(serviceList, true, false)}</Grid>
                             <Grid item>
 
                             </Grid>
-                            <Grid item>{serviceLists(resourceServiceList, false)}</Grid>
+                            <Grid item>{serviceLists(resourceServiceList, false, false)}</Grid>
                         </Grid>
 
 

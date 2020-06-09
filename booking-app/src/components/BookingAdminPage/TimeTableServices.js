@@ -119,6 +119,25 @@ export const valueLabelFormat = (value) => {
     if ((Number((value-Math.floor(value)).toFixed(2))) === 0.67) {
         label += Math.floor(value) + '.40'
     }
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.08) {
+        label += Math.floor(value) + '.05'
+    }
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.17) {
+        label += Math.floor(value) + '.10'
+    }
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.42) {
+        label += Math.floor(value) + '.25'
+    }
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.58) {
+        label += Math.floor(value) + '.35'
+    }
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.83) {
+        label += Math.floor(value) + '.50'
+    }
+    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.92) {
+        label += Math.floor(value) + '.40'
+    }
+
     return label
 
 }

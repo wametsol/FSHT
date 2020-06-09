@@ -198,7 +198,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                     <Typography>Ilmoittamasi aukioloajat valitulle päivälle: <b>{getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)} </b></Typography>}
                     {selectedResources==='all'? <em/>: 
                     <Typography>
-                    {selectedResources} työajat valittuna päivänä: {!!bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? 
+                    {selectedResources} työajat valittuna päivänä: {!!bookerObject.resources[`${selectedResources}`].specialDays && !!bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? 
                     <b>{getFormattedPersonTimes(bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times)}</b>
                     : 
                     <b>{getSinglePersonDayTimesText(getDay(selectedDate), bookerObject.resources[`${selectedResources}`].timeTables)}</b>}

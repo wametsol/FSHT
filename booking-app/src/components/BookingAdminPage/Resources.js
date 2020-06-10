@@ -372,10 +372,9 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                             id="resource"
                             label="Nimi"
                             style={{ margin: 4 }}
-                            helperText="Tämä tulee resurssin nimeksi. Esimerkiksi 'Huone' tai 'Teppo Työntekijä'"
+                            helperText="Nimen vaihtaminen ei ole mahdollista"
                             margin="dense"
                             variant='outlined'
-                            disabled={loading}
                             value={selectedPerson.name}
                             onChange={({target}) => setSelectedPerson({
                                 ...selectedPerson,
@@ -384,6 +383,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                             InputProps={{
                                 style: { backgroundColor: 'white' },
                             }}
+                            disabled
                         />
                         <TextField
                             id="info"

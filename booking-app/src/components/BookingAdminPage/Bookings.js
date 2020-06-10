@@ -90,9 +90,9 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
                         firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').update({ [`${format(selectedDate, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
 
-                            firestore.collection('userCollection').doc(updatedObject.user.email).update({ bookings: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
+                            firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
 
-                                firestore.collection('userCollection').doc(b.user.email).update({ bookings: firebase.firestore.FieldValue.arrayUnion(b) }).then(res => {
+                                firestore.collection('userCollection').doc(b.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayUnion(b) }).then(res => {
                                     console.log(resp)
                                     setTimeout(() => {
                                         setSuccess(true)
@@ -237,7 +237,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                 </ExpansionPanelSummary>
             </ExpansionPanel>
             {!bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`] ? <em /> : <div>{getBookings().map(booking => (
-                <div className={classes.root} key={booking.whenBooked}>
+                <div className={classes.root} key={booking.whenBooked+booking.worker}>
                     <ExpansionPanel >
                         <ExpansionPanelSummary
                             expandIcon={<ExpandMoreIcon />}

@@ -109,11 +109,18 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
     }
 
     const validCancelTime = (booking) => {
-
+        console.log(booking)
+        console.log('services', !services.filter(s => s.service === booking.service)[0])
+        if (!services.filter(s => s.service === booking.service)[0]){
+            return true
+        }
         return isAfter(new Date, sub(new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)), { hours: services.filter(service => service.service === booking.service)[0].cancelTime }))
     }
 
     const lastCancelTime = (booking) => {
+        if (!services.filter(s => s.service === booking.service)[0]){
+            return new Date(sub(new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)), { hours: 24 }))
+        }
         return new Date(sub(new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)), { hours: services.filter(service => service.service === booking.service)[0].cancelTime }))
     }
 

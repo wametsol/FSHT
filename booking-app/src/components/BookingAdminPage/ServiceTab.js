@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import firebase, { firestore } from '../../firebase'
-import { Typography, CircularProgress, TextField, Button, Tooltip, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, InputAdornment, Select, MenuItem, InputBase, FormControl, InputLabel, FormHelperText, FormLabel } from '@material-ui/core';
+import { Typography, CircularProgress, TextField, Button, Tooltip, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, InputAdornment, Select, MenuItem, InputBase, FormControl, InputLabel, FormHelperText, FormLabel, Dialog, DialogTitle, DialogContent } from '@material-ui/core';
 import { useRouteMatch } from 'react-router-dom'
 import clsx from 'clsx';
 
@@ -62,6 +62,10 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
     const [serviceTimeMins, setServiceTimeMins] = useState(0)
     const [serviceCancelHours, setServiceCancelHours] = useState(24)
     const [addFormOpen, setAddFormOpen] = useState(false)
+    const [openEditForm, setOpenEditForm] = useState(false)
+    const [selectedService, setSelectedService] = useState(null)
+    const [initialService, setInitialService] = useState(null)
+
 
 
 
@@ -99,6 +103,39 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
 
     }
 
+    const updateService = (e) => {
+        e.preventDefault()
+        try {
+
+            if (selectedService.length === 0 || selectedService.length === 0 || selectedService.length === 0 || (selectedService === 0 && selectedService === 0)) {
+                setErrorMessage('Antamassasi syötteessä oli vikaa, tarkista antamasi tiedot')
+            } else {
+                setLoading(true)
+
+                console.log(selectedService)
+
+                console.log(initialService)
+
+                
+                firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayRemove(initialService) }).then(res => {
+                })
+                firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayUnion(selectedService) })
+                    .then((res) => {
+                        setSuccessMessage(`Palvelun '${selectedService.service}' päivitys onnistui`)
+                        handleEditFormClose()
+                        fetchData()
+                        setLoading(false)
+                        
+                    })
+            }
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+            setErrorMessage('Tapahtui odottamaton virhe')
+        }
+
+    }
+
     const resetForm = () => {
         setServiceName('')
         setServiceDescription('')
@@ -113,6 +150,8 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
         try {
             setError(false)
             setLoading(true)
+
+            
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayRemove(service) })
                 .then(res => {
                     console.log(res)
@@ -126,6 +165,18 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
             setError(true)
         }
 
+    }
+
+    const editService = (service) => {
+        setInitialService({...service})
+        setSelectedService(service)
+        setOpenEditForm(true)
+    }
+
+    const handleEditFormClose = () => {
+        setOpenEditForm(false)
+        setSelectedService(null)
+        setInitialService(null)
     }
 
 
@@ -317,7 +368,7 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                                 </ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions>
-                                    <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' >Muokkaa</Button></Tooltip>
+                                    <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' onClick={() => editService(service)} >Muokkaa</Button></Tooltip>
                                     <Button size="small" color="secondary" onClick={() => removeService(service)}>
                                         Poista
                                     </Button>
@@ -326,6 +377,178 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                         </div>
                     ))}</div>
             }
+
+{!!selectedService? 
+        <Dialog open={openEditForm} onClose={handleEditFormClose} >
+            
+        <DialogTitle>Muokkaat palvelun {selectedService.service} tietoja</DialogTitle>
+                         <DialogContent>
+                         <div className={classes.addServiceForm}>
+                    <form>
+                        <TextField
+                            id="service"
+                            label="Palvelusi nimi"
+                            style={{ margin: 4 }}
+                            helperText="Tämä tulee palvelusi nimeksi. Esimerkiksi 'Hieronta'"
+                            margin="dense"
+                            variant='outlined'
+                            disabled
+                            value={selectedService.service}
+                            onChange={({ target }) => setSelectedService({
+                                ...selectedService,
+                                service: target.value
+                            })}
+                            InputProps={{
+                                style: { backgroundColor: 'white' },
+                            }}
+                        />
+                        <TextField
+                            id="description"
+                            label="Palvelusi kuvaus"
+                            style={{ margin: 4 }}
+                            helperText="Tämä tulee kuvaukseksi palvelulle. Esimerkiksi 'Normaali tunnin hieronta'"
+                            margin="dense"
+                            variant='outlined'
+                            disabled={loading}
+                            value={selectedService.description}
+                            onChange={({ target }) => setSelectedService({
+                                ...selectedService,
+                                description: target.value
+                            })}
+                            InputProps={{
+                                style: { backgroundColor: 'white' },
+                            }}
+                        />
+                        <br />
+                        <FormControl className={classes.formControl}>
+                            <FormLabel>Hinta</FormLabel>
+                            <span>
+                                <TextField
+                                    id="price"
+                                    //label="Hinta"
+                                    //style={{ margin: 4, width: '120px', height: '42px', marginTop: '17px' }}
+                                    //helperText="Palvelusi hinta"
+                                    margin="dense"
+                                    className={classes.priceInput}
+                                    variant='outlined'
+                                    disabled={loading}
+                                    value={selectedService.price}
+                                    onChange={({ target }) => setSelectedService({
+                                        ...selectedService,
+                                        price: target.value
+                                    })}
+                                    InputProps={{
+                                        style: { paddingRight: '0px', backgroundColor: 'white' },
+                                        endAdornment: (
+                                            <InputAdornment position='end' >
+                                                <span style={{ padding: '6px', backgroundColor: 'lightgrey' }}>
+                                                    <EuroIcon style={{ paddingTop: 3 }} />
+                                                </span>
+
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </span>
+
+                            <FormHelperText>Palvelusi hinta</FormHelperText>
+
+                        </FormControl>
+                        <FormControl style={{ marginLeft: 20 }} >
+                            <FormLabel>Kesto</FormLabel>
+                            <div style={{ display: 'inline-flex', border: 'solid 1px lightgrey', borderRadius: '5px', maxHeight: '45px', backgroundColor: 'white' }}>
+                                <FormControl style={{ minWidth: 100 }}>
+                                    <InputLabel id="tunnit">Tunnit</InputLabel>
+                                    <span >
+
+                                        <Select
+                                            style={{ minWidth: 100 }}
+                                            id='tunnit'
+                                            value={selectedService.timelength.hours}
+                                            onChange={({ target }) => setSelectedService({
+                                                ...selectedService,
+                                                timelength: {
+                                                    ...selectedService.timelength,
+                                                    hours: target.value
+                                                }
+                                            })}
+                                            input={<BootstrapInput />}
+                                            InputProps={{
+                                                id: 'tunnit'
+                                            }}
+                                            MenuProps={{ style: { maxHeight: '500px' } }}
+
+                                        >
+                                            {getNumberArray(23, 1).map(number => (
+                                                <MenuItem value={number}>{number}h</MenuItem>
+                                            ))}
+
+                                        </Select>
+                                    </span>
+                                </FormControl>
+                                <FormControl style={{ minWidth: 100 }}>
+                                    <InputLabel id="minutes">Minuutit</InputLabel>
+                                    <span>
+                                        <Select
+                                            style={{ minWidth: 100 }}
+                                            InputProps={{
+                                                id: 'minutes'
+                                            }}
+                                            value={selectedService.timelength.minutes}
+                                            onChange={({ target }) => setSelectedService({
+                                                ...selectedService,
+                                                timelength: {
+                                                    ...selectedService.timelength,
+                                                    minutes: target.value
+                                                }
+                                            })}
+                                            input={<BootstrapInput />}
+                                        >
+                                            {getNumberArray(59, 5).map(number => (
+                                                <MenuItem value={number}>{number} min</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </span>
+                                </FormControl>
+
+                            </div>
+                            <FormHelperText>Tunnit/minuutit</FormHelperText>
+                        </FormControl>
+
+
+                        <FormControl style={{ marginLeft: 20, minWidth: 100 }}>
+                            <FormLabel>Peruutusaika</FormLabel>
+                            <span>
+                                <Select
+                                    style={{ minWidth: 100 }}
+                                    InputProps={{
+                                        id: 'cancelhours',
+                                        style: { width: 200 }
+                                    }}
+                                    value={selectedService.cancelTime}
+                                    onChange={({ target }) => setSelectedService({
+                                        ...selectedService,
+                                        cancelTime: target.value
+                                    })}
+                                    input={<BootstrapInput />}
+                                >
+                                    {getNumberArray(72, 6).map(number => (
+                                        <MenuItem value={number}>{number}h</MenuItem>
+                                    ))}
+                                </Select>
+                            </span>
+
+                            <FormHelperText>Peruutusaika tunneissa</FormHelperText>
+                        </FormControl>
+
+
+                        {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div style={{ display: 'inline' }}><Tooltip title='Lisää uusi palvelu'><Button className={classes.addServiceButton} onClick={updateService}><AddCircleIcon /></Button></Tooltip><Tooltip title='Peru'><Button className={classes.cancelServiceButton} onClick={() => handleEditFormClose()}><CancelIcon /></Button></Tooltip></div>}
+                        {error ? <div className={classes.errorMessage}>Tietojen antamisessa tapahtui virhe, tarkasta kentät</div> : <em />}
+                    </form>
+                    </div>
+                         </DialogContent>
+
+        </Dialog>: <em/>}
         </div>
     )
 }

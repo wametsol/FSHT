@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import 'date-fns'
-import { format, getDay, addDays, isBefore, parseISO } from 'date-fns'
+import { format, getDay, addDays, isBefore, parseISO, isToday, getTime } from 'date-fns'
 import { auth, firestore } from '../../firebase'
 import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip, Slide, Snackbar, IconButton, Drawer, Icon } from '@material-ui/core'
 import useStyles from './useStyles'
@@ -243,9 +243,13 @@ const BookingPage = () => {
         } else {
             dayTimes = (getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
         }
+
         console.log(bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
 
         const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes / 60
+
+        
+
         var timeObject = []
         for (var x = dayTimes[0]; x < dayTimes[1]; x += timeSlot) {
 
@@ -259,11 +263,18 @@ const BookingPage = () => {
             if (singleTime.end > dayTimes[1]) {
                 continue
             }
+            // PREVENT BOOKINGS IF TIME HAS PASSED OR IS TOO CLOSE
+            const currentHH = Number(format(new Date, 'HH'))
+            const currentMM = Number(format(new Date, 'mm'))
+            if(isToday(selectedDate) && singleTime.start < currentHH+(currentMM/60)){
+                continue
+                
+            }
 
             // CHECK IF DAILYBOOKINGS EXIST
             for (const b in dailyBookings) {
                 //console.log(dailyBookings[b].worker, ' === ', chosenWorker)
-                if ((dailyBookings[b].active === true && (!!chosenWorker && dailyBookings[b].worker === chosenWorker.name)) && dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end > singleTime.start) {
+                if (dailyBookings[b].active === true && (!!chosenWorker && dailyBookings[b].worker === chosenWorker.name) && (dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end >= singleTime.end || dailyBookings[b].times.start < singleTime.end && dailyBookings[b].times.start >= singleTime.start ||  dailyBookings[b].times.start < singleTime.start && dailyBookings[b].times.end > singleTime.start)) {
                     singleTime.bookedAlready = true
                 }
             }

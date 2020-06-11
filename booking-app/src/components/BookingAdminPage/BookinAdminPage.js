@@ -13,6 +13,11 @@ import ContactInfoTab from './ContactInfoTab';
 import useStyles from './useStyles'
 import Resources from './Resources';
 
+const firebase = require('firebase')
+const app = firebase.app()
+const functions = app.functions('europe-west3')
+
+const getSubCollections = functions.httpsCallable('getSubCollections')
 
 const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
     const pagematch = useRouteMatch('/:id')
@@ -29,6 +34,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
 
     const fetchData = () => {
 
+        
         firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
             .then((response) => {
                 if (response.empty) {
@@ -39,17 +45,29 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                 console.log(response.data().bookerCreator)
                 if(response.data().admins.filter(a => a.email === user.email).length>0 || response.data().bookerCreator === user.email){
                 setBookerObject(response.data())
-                firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
-                    .then((res) => {
-                        console.log('asd')
-
-                        if (res.empty) {
-                        } else {
-                            setBookings(res.data())
-                        }
-
+                
+                console.log('Getting subs: ', getSubCollections)
+                getSubCollections({docPath: `booker${pagematch.params.id}/bookings` })
+                .then(result => {
+                    var collections = {}
+                    result.data.collections.map(c => {
+                        firestore.collection(`booker${pagematch.params.id}`).doc('bookings').collection(c).get()
+                        .then(res => {
+                            res.docs.map(doc => {
+                                console.log(doc.data())
+                                collections = {...collections,
+                                    [`${doc.id}`]: doc.data()
+                                }
+                            })
+                            setBookings(collections)
+                            console.log(collections)
+                            setLoading(false)
+                        })
                     })
                 setLoading(false)
+
+                })
+                
 
             }
 

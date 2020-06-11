@@ -55,19 +55,39 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
 
         try {
             setLoading(true)
-            firestore.collection(`booker${data.target}`).doc('bookings').get().then(doc => {
-                console.log(!!doc.data()[`${format(data.date, `dd:MM:yyyy`)}`])
-                console.log(doc.data()[`${format(data.date, `dd:MM:yyyy`)}`])
+            firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).get().then(col => {
+                //console.log(!!doc.data()[`${format(data.date, `dd:MM:yyyy`)}`])
+                //console.log(doc.data()[`${format(data.date, `dd:MM:yyyy`)}`])
 
 
-                if (!!doc.data()[`${format(data.date, `dd:MM:yyyy`)}`]) {
-                    console.log(doc.data())
-                    const bookings = doc.data()[`${format(data.date, `dd:MM:yyyy`)}`]
-                    console.log('HURRAA ON')
-                    console.log(bookings)
-                    if ((bookings.filter(booking => booking.times.start === data.times.start && booking.active===true && booking.worker === data.worker)).length === 0) {
+                if (col.docs.length > 0 && col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`)).length > 0) {
+                    console.log(data)
+                    //console.log(col.docs.filter(d => d.id === format(data.date, `MM`))[0].data()[`${format(data.date, `dd:MM:yyyy`)}`].filter(b => b.worker === data.worker.name))
+                    console.log((col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data()))
+                    console.log(col.docs)
+                    if (!(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings) || (col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings.filter(booking => booking.times.start === data.times.start && booking.active===true && booking.worker === data.worker.name)).length === 0) {
 
-                        firestore.collection(`booker${data.target}`).doc('bookings').update({ [`${format(data.date, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
+                            firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).update({bookings: firebase.firestore.FieldValue.arrayUnion(bookingObject)}).then(res => {
+                                firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
+                                    .then((res) => {
+                                        setSuccess(true)
+                                        setLoading(false)
+                                        setTimeout(() => {
+                                            setSuccess(false)
+                                            setOpen(false)
+                                        }, 2000);
+                                        console.log(res)
+                                    })
+                            })
+                        
+                    //const existingBookings = col.docs.map(d => console.log(d.data())[`${format(data.date, `dd:MM:yyyy`)}`])
+                    //.data()[`${format(data.date, `dd:MM:yyyy`)}`]
+                    
+                    
+                    
+                        /*
+
+                        firestore.collection(`booker${data.target}`).doc('bookings').update({ [`${format(data.date, `dd:MM:yyyy`)}.${bookingObject.id}`]: bookingObject }).then(res => {
 
                             firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
                                 .then((res) => {
@@ -82,7 +102,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
                             console.log(res)
                             
 
-                        })
+                        })*/
                     } else {
                         console.log('AIKA ON JO VARATTU')
                         setError(true)
@@ -97,19 +117,19 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
 
                 } else {
                     console.log('EI OO, TEHÄÄN!')
-                    firestore.collection(`booker${data.target}`).doc('bookings').update({ [`${format(data.date, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
+                    firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).set({ bookings: firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
                         firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
-                                .then((res) => {
-                                    console.log(res)
-                                    setSuccess(true)
-                        setLoading(false)
-                        setTimeout(() => {
-                            setSuccess(false)
-                            setOpen(false)
-                        }, 2000);
-                                })
+                            .then((res) => {
+                                console.log(res)
+                                setSuccess(true)
+                                setLoading(false)
+                                setTimeout(() => {
+                                    setSuccess(false)
+                                    setOpen(false)
+                                }, 2000);
+                            })
                         console.log(`Added document at '${res}'`);
-                        
+
 
                     })
                 }
@@ -151,7 +171,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target }
                         Palvelu: {data.service.service} <br />
                         {format(data.date, "EEEE : dd.MM.yyyy", { locale: fi })}<br />
                         Klo: {getFormattedTimes([data.times.start, data.times.end])}, Kesto: {data.service.timelength.minutes} min<br />
-                        Työntekijä: {data.worker.name}<br/>
+                        Työntekijä: {data.worker.name}<br />
                         Hinta: {data.service.price}€<br />
 
                     </DialogContentText>

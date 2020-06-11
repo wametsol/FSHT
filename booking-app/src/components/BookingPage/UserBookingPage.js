@@ -51,7 +51,7 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
     }
     const confirmCancellation = (e) => {
         e.preventDefault()
-        setLoading(true)
+        
         var cancelReason
         if (reason.length > 0) {
             cancelReason = reason
@@ -59,26 +59,30 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
             cancelReason = 'Tuntematon syy'
         }
         try {
+            setLoading(true)
+            console.log('VALITTU: ', chosenBooking)
             const dateObj = chosenBooking.bookingDate.replace(/\//g, ":")
             console.log(bookingsObject[dateObj])
-            bookingsObject[dateObj].map(b => {
-                console.log(b.id + " vs. " + chosenBooking.id)
-                if (b.id === chosenBooking.id) {
-                    let updatedObject = { ...b }
-                    b.active = false
-                    b.cancelled = {
+
+            //bookingsObject[dateObj].map(b => {
+             //   console.log(b.id + " vs. " + chosenBooking.id)
+            //    if (b.id === chosenBooking.id) {
+                    let updatedObject = { ...chosenBooking }
+                    updatedObject.active = false
+                    updatedObject.cancelled = {
                         date: format(new Date, `dd:MM:yyyy:HH.mm`),
                         reason: cancelReason
                     }
-                    firestore.collection(`booker${site}`).doc('bookings').update({ [`${dateObj}`]: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
+
+                    firestore.collection(`booker${site}`).doc('bookings').update({ [`${dateObj}.${chosenBooking.id}`]: updatedObject}).then(res => {
                         console.log(res)
 
-                        firestore.collection(`booker${site}`).doc('bookings').update({ [`${dateObj}`]: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
+                        //firestore.collection(`booker${site}`).doc('bookings').update({ [`${dateObj}.${chosenBooking.id}`]: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
 
                             firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
 
-                                firestore.collection('userCollection').doc(b.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayUnion(b) }).then(res => {
-                                    console.log(resp)
+                                firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
+                                    console.log(res)
                                     setTimeout(() => {
                                         setSuccess(true)
                                         setTimeout(() => {
@@ -90,8 +94,8 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
 
                                     }, 2000);
                                 })
-                            })
-                        })
+                          //  })
+                       // })
 
 
 
@@ -100,7 +104,7 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
                         console.log(err)
                     })
 
-                }
+                //}
             })
 
         } catch (error) {

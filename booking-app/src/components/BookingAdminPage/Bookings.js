@@ -40,7 +40,6 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
     const classes = useStyles()
 
-
     const handleClickOpen = () => {
         setOpen(true)
     }
@@ -52,7 +51,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
     const handleDateChange = (date) => {
         setSelectedDate(date)
-        console.log(bookingsObject[`${format(date, `dd:MM:yyyy`)}`])
+        console.log(bookingsObject[`${format(date, `MM`)}`][`${format(date, `dd:MM:yyyy`)}`])
     }
 
     const cancelBooking = (booking) => {
@@ -76,7 +75,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
             cancelReason = 'Tuntematon syy'
         }
         try {
-            bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].map(b => {
+            bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings.map(b => {
                 console.log(b.id + " vs. " + chosenBooking.id)
                 if (b.id === chosenBooking.id) {
                     let updatedObject = { ...b }
@@ -85,10 +84,14 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                         date: format(new Date, `dd:MM:yyyy:HH.mm`),
                         reason: cancelReason
                     }
-                    firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').update({ [`${format(selectedDate, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
+
+                    
+
+
+                    firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
                         console.log(res)
 
-                        firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').update({ [`${format(selectedDate, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
+                        firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
 
                             firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
 
@@ -127,8 +130,9 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
     }
 
     const getBookings = () => {
-        if(selectedResources==='all') return bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`]
-        else return bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].filter(a => a.worker === selectedResources)
+        if(!Boolean(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`])) return []
+        if(selectedResources==='all') return bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings
+        else return bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings.filter(a => a.worker === selectedResources)
     }
 
 
@@ -237,7 +241,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                 </ExpansionPanelSummary>
             </ExpansionPanel>
             {!bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`] ? <em /> : <div>{getBookings().map(booking => (
-                <div className={classes.root} key={booking.whenBooked+booking.worker}>
+                <div className={classes.root} key={booking.times.start+booking.worker}>
                     <ExpansionPanel >
                         <ExpansionPanelSummary
                             expandIcon={<ExpandMoreIcon />}

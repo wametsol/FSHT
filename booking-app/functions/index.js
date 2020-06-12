@@ -127,6 +127,7 @@ exports.sendNewBookingEmailToSystem = functions.region('europe-west3').firestore
                 }
                 var userMailOptions = {
                     from: `${bookerObject.publicInformation.name} <${bookerObject.publicInformation.email}>`,
+                    replyTo:`${bookerObject.publicInformation.email}`,
                     to: `${gmailInfo.email}`,
                     subject: `Varausvahvistus sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)} `,
                     html: `
@@ -240,6 +241,7 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                     }
                     mailOptions[1] = {
                         from: `${bookerObject.publicInformation.name} <${bookerObject.publicInformation.email}>`,
+                        replyTo:`${bookerObject.publicInformation.email}`,
                         to: `${gmailInfo.email}`,
                         subject: `Varausvahvistus sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)} `,
                         html: `

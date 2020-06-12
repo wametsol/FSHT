@@ -64,8 +64,8 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
                     console.log(data)
                     //console.log(col.docs.filter(d => d.id === format(data.date, `MM`))[0].data()[`${format(data.date, `dd:MM:yyyy`)}`].filter(b => b.worker === data.worker.name))
                     console.log((col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data()))
-                    console.log(col.docs)
-                    //if (!(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings) || (col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings.filter(booking => booking.times.start === data.times.start && booking.active===true && booking.worker === data.worker.name)).length === 0) {
+                    console.log(Object.keys(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings).map(k => col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings[k]))
+                    if (!(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings) || (Object.keys(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings).map(k => col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings[k]).filter(booking => booking.times.start === data.times.start && booking.active===true && booking.worker === data.worker.name)).length === 0) {
 
                             firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).set({bookings:{[bookingObject.id]:  bookingObject }}, {merge: true}).then(res => {
                                 firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
@@ -107,7 +107,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
                         })*/
 
 
-                        /*
+                        
                     } else {
                         console.log('AIKA ON JO VARATTU')
                         setError(true)
@@ -118,7 +118,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
                         }, 2000);
 
                     }
-*/
+
 
                 } else {
                     console.log('EI OO, TEHÄÄN!')

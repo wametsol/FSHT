@@ -122,7 +122,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
 
                 } else {
                     console.log('EI OO, TEHÄÄN!')
-                    firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).set({bookings: { [bookingObject.id]:  bookingObject }}).then(res => {
+                    firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).set({bookings: { [bookingObject.id]:  bookingObject }}, {merge: true}).then(res => {
                         firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
                             .then((res) => {
                                 handleSuccess()

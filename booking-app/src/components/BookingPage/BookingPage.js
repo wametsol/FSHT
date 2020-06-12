@@ -54,8 +54,10 @@ const BookingPage = () => {
 
 
 
+
     useEffect(() => {
         try {
+            
             setLoading(true)
             firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
                 .then((response) => {
@@ -67,14 +69,24 @@ const BookingPage = () => {
                     setBookerObject(response.data())
                     document.title = `${response.data().bookerName} ajanvaraus`
 
-                    firestore.collection(`booker${pagematch.params.id}`).doc('bookings').get()
+                    var collections = {}
+
+                    const years = ['2020', '2021']
+                    years.map(c => {
+                        firestore.collection(`booker${pagematch.params.id}`).doc('bookings').collection(c).get()
                         .then(res => {
-                            if (res.empty) {
-
-                            }
-                            setBookings(res.data())
-
+                            res.docs.map(doc => {
+                                console.log(doc.data())
+                                collections = {...collections,
+                                    [`${doc.id}`]: doc.data()
+                                }
+                            })
+                            setBookings(collections)
+                            console.log(collections)
+                            setLoading(false)
                         })
+                    })
+
                     setLoading(false)
                     /*
                     
@@ -100,11 +112,12 @@ const BookingPage = () => {
         }
     }, [])
     useEffect(() => {
+        
         fetchUserData()
     }, [user])
 
     const fetchUserData = () => {
-        console.log(user)
+        console.log('FECTHING')
         try {
             setLoading(true)
             firestore.collection('userCollection').doc(`${user.email}`).get()
@@ -113,7 +126,6 @@ const BookingPage = () => {
                         setError(true)
                         setLoading(false)
                     }
-                    console.log(response)
                     console.log(response.data().bookings)
                     setUserData(response.data())
                     setLoading(false)
@@ -135,7 +147,12 @@ const BookingPage = () => {
         }
     }
 
-    console.log(userData)
+    const handleSuccess = () => {
+        setChosenWorker(null)
+        setChosenService('')
+        successMessageSetter('Varauksesi on onnistunut')
+    }
+
 
     const signOut = (e) => {
         e.preventDefault()
@@ -205,7 +222,7 @@ const BookingPage = () => {
             case 0:
                 return BookerHomePage()
             case 1:
-                return !!user ? <UserBookingPage site={bookerObject.bookerAddress} bookingsObject={bookings} services={bookerObject.services} userData={userData} /> : <LoginTab fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter} />
+                return !!user ? <UserBookingPage site={bookerObject.bookerAddress} fetchUserData={fetchUserData} bookingsObject={bookings} services={bookerObject.services} userData={userData} /> : <LoginTab fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter} />
             case 2:
                 return <ProfilePage userData={userData} fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter} />
             default:
@@ -222,7 +239,7 @@ const BookingPage = () => {
     const handleSelectChange = (e) => {
         setChosenService(e.target.value)
         setChosenWorker(null)
-        console.log(getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
+        //console.log(getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
     }
     const dayHasSpecialTimes = () => {
         if (!bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]]) {
@@ -234,7 +251,7 @@ const BookingPage = () => {
 
 
     const getFreeTimes = () => {
-        const dailyBookings = bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]]
+        const dailyBookings = Boolean(bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]])? bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]].bookings : []
 
         var dayTimes
         // CHECK IF DAY IS IN SPECIAL DAYS
@@ -244,7 +261,7 @@ const BookingPage = () => {
             dayTimes = (getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
         }
 
-        console.log(bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
+        //console.log(bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
 
         const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes / 60
 
@@ -280,7 +297,7 @@ const BookingPage = () => {
             }
             timeObject.push(singleTime)
         }
-        console.log(timeObject)
+        //console.log(timeObject)
         return timeObject
     }
 
@@ -294,7 +311,7 @@ const BookingPage = () => {
 
         Object.keys(bookerObject.specialDays).map(key => {
             const specDate = bookerObject.specialDays[key].date
-            console.log(isBefore(selectedDate, parseISO(`${specDate.substring(6, 10)}-${specDate.substring(3, 5)}-${specDate.substring(0, 2)}`)))
+            //console.log(isBefore(selectedDate, parseISO(`${specDate.substring(6, 10)}-${specDate.substring(3, 5)}-${specDate.substring(0, 2)}`)))
             if (isBefore(addDays(selectedDate, -1), parseISO(`${specDate.substring(6, 10)}-${specDate.substring(3, 5)}-${specDate.substring(0, 2)}`))) {
                 specialTimes.push(bookerObject.specialDays[key])
             }
@@ -398,28 +415,28 @@ const BookingPage = () => {
         if(maxWorktimes[0]===maxWorktimes[1]){
             return maxWorktimes
         }
-        console.log('Initial times: ', maxWorktimes)
-        console.log('Specialday: ', dayHasSpecialTimes())
-        console.log('Special times: ', bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
+        //console.log('Initial times: ', maxWorktimes)
+        //console.log('Specialday: ', dayHasSpecialTimes())
+        //console.log('Special times: ', bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
         var openinHours = dayHasSpecialTimes()? bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times : getDayContent(getDay(selectedDate), bookerObject.timeTables)
 
         
-        console.log('Initial openingtimes: ',openinHours)
+        //console.log('Initial openingtimes: ',openinHours)
         if (maxWorktimes[0]<openinHours[0]){
             maxWorktimes[0] = openinHours[0]
         }
         if (maxWorktimes[1]>openinHours[1]){
             maxWorktimes[1] = openinHours[1]
         }
-        console.log('Returning times: ',maxWorktimes)
-        console.log('Initial times: ', !!person.specialDays && !!person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times : getDayContent(getDay(selectedDate), person.timeTables))
+        //console.log('Returning times: ',maxWorktimes)
+        //console.log('Initial times: ', !!person.specialDays && !!person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times : getDayContent(getDay(selectedDate), person.timeTables))
         return maxWorktimes
     }
 
     const workerHasShift = (day, worker) => {
-        console.log('Työntekijä: ', worker)
+       // console.log('Työntekijä: ', worker)
         var workerDayTimes = !!worker.specialDays && !!worker.specialDays[`${format(day, 'dd:MM:yyyy')}`]? worker.specialDays[`${format(day, 'dd:MM:yyyy')}`].times : getDayContent(getDay(day), worker.timeTables)
-        console.log('Ajat: ',workerDayTimes)
+       // console.log('Ajat: ',workerDayTimes)
         if (workerDayTimes[0] !== workerDayTimes[1]){
             return true
         }
@@ -439,8 +456,6 @@ const BookingPage = () => {
 
                 </CardContent>
                 <Divider />
-                {console.log(window.innerWidth)}
-                {console.log(window.innerWidth < 600)}
 
                 <div className={classes.currentDayTitle}>
                     {window.innerWidth > 600 ?
@@ -511,7 +526,7 @@ const BookingPage = () => {
 
                         
                     {getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).map(person => (
-                        <div className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
+                        <div key={person.name} className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
                             
                         <Typography>{person.name}</Typography>
                     <Typography variant='caption'>{getFormattedPersonTimes(getMaxWorktimes(person))}</Typography>
@@ -528,7 +543,7 @@ const BookingPage = () => {
                     
 
 
-                    {confirmationOpen ? <ConfirmationWindow setOpen={setConfirmationOpen} open={confirmationOpen} data={confirmationData} setConfirmationData={setConfirmationData} /> : <em />}
+                    {confirmationOpen ? <ConfirmationWindow setOpen={setConfirmationOpen} open={confirmationOpen} data={confirmationData} setConfirmationData={setConfirmationData} fetchUserData={fetchUserData} handleSuccess={handleSuccess}/> : <em />}
                 </Paper>
             </div>}
         </div>
@@ -540,9 +555,6 @@ const BookingPage = () => {
         
         return (
             <div className={classes.root}>
-                {console.log(bookerObject)}
-                {console.log(user)}
-                {console.log((bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!userData && bookerObject.admins.filter(a => a.email === userData.email).length > 0))))}
                 {(bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && bookerObject.admins.filter(a => a.email === user.email).length > 0)))?
                 <div>
                     

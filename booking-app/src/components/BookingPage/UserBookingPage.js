@@ -13,7 +13,7 @@ import CheckIcon from '@material-ui/icons/Check'
 import BlockIcon from '@material-ui/icons/Block'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
 
-const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
+const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserData }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     //const [userData, setUserData] = useState(null)
@@ -51,7 +51,7 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
     }
     const confirmCancellation = (e) => {
         e.preventDefault()
-        
+
         var cancelReason
         if (reason.length > 0) {
             cancelReason = reason
@@ -60,49 +60,42 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
         }
         try {
             setLoading(true)
-            console.log('VALITTU: ', chosenBooking)
             const dateObj = chosenBooking.bookingDate.replace(/\//g, ":")
-            console.log(bookingsObject[dateObj])
+            let updatedObject = { ...chosenBooking }
+            updatedObject.active = false
+            updatedObject.cancelled = {
+                date: format(new Date, `dd:MM:yyyy:HH.mm`),
+                reason: cancelReason
+            }
 
-            //bookingsObject[dateObj].map(b => {
-             //   console.log(b.id + " vs. " + chosenBooking.id)
-            //    if (b.id === chosenBooking.id) {
-                    let updatedObject = { ...chosenBooking }
-                    updatedObject.active = false
-                    updatedObject.cancelled = {
-                        date: format(new Date, `dd:MM:yyyy:HH.mm`),
-                        reason: cancelReason
-                    }
+            
 
-                    firestore.collection(`booker${site}`).doc('bookings').update({ [`${dateObj}.${chosenBooking.id}`]: updatedObject}).then(res => {
-                        console.log(res)
 
-                        //firestore.collection(`booker${site}`).doc('bookings').update({ [`${dateObj}.${chosenBooking.id}`]: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
+            firestore.collection(`booker${site}`).doc('bookings').collection(`${dateObj.slice(6)}`).doc(`${dateObj}`).set({bookings:{[chosenBooking.id]:  updatedObject }}, {merge: true}).then(res => {
+                //firestore.collection(`booker${site}`).doc('bookings').collection(`${dateObj.slice(6)}`).doc(`${dateObj}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(resp => {
+                    firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayRemove(chosenBooking) }).then(res => {
+                        firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
+                            setTimeout(() => {
+                                setSuccess(true)
+                                setTimeout(() => {
+                                    setReason('')
+                                    fetchUserData()
+                                    setOpen(false)
+                                    setSuccess(false)
+                                    setLoading(false)
+                                }, 2000);
 
-                            firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
-
-                                firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
-                                    console.log(res)
-                                    setTimeout(() => {
-                                        setSuccess(true)
-                                        setTimeout(() => {
-                                            setReason(cancelReason)
-                                            setOpen(false)
-                                            setSuccess(false)
-                                            setLoading(false)
-                                        }, 2000);
-
-                                    }, 2000);
-                                })
-                          //  })
-                       // })
+                            }, 2000);
+                        })
+                        //  })
+                 //   })
 
 
 
 
-                    }).catch(err => {
-                        console.log(err)
-                    })
+                }).catch(err => {
+                    console.log(err)
+                })
 
                 //}
             })
@@ -113,16 +106,14 @@ const UserBookingPage = ({ site, bookingsObject, services, userData }) => {
     }
 
     const validCancelTime = (booking) => {
-        console.log(booking)
-        console.log('services', !services.filter(s => s.service === booking.service)[0])
-        if (!services.filter(s => s.service === booking.service)[0]){
+        if (!services.filter(s => s.service === booking.service)[0]) {
             return true
         }
         return isAfter(new Date, sub(new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)), { hours: services.filter(service => service.service === booking.service)[0].cancelTime }))
     }
 
     const lastCancelTime = (booking) => {
-        if (!services.filter(s => s.service === booking.service)[0]){
+        if (!services.filter(s => s.service === booking.service)[0]) {
             return new Date(sub(new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)), { hours: 24 }))
         }
         return new Date(sub(new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)), { hours: services.filter(service => service.service === booking.service)[0].cancelTime }))

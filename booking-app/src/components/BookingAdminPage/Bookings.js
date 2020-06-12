@@ -75,28 +75,21 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
             cancelReason = 'Tuntematon syy'
         }
         try {
-            bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings.map(b => {
-                console.log(b.id + " vs. " + chosenBooking.id)
-                if (b.id === chosenBooking.id) {
-                    let updatedObject = { ...b }
-                    b.active = false
-                    b.cancelled = {
+                    let updatedObject = { ...chosenBooking }
+                    updatedObject.active = false
+                    updatedObject.cancelled = {
                         date: format(new Date, `dd:MM:yyyy:HH.mm`),
                         reason: cancelReason
                     }
-
-                    
-
-
-                    firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
+                    firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).set({bookings:{[chosenBooking.id]:  updatedObject }}, {merge: true}).then(res => {
                         console.log(res)
 
-                        firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
+                        //firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
 
-                            firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(updatedObject) }).then(res => {
+                            firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(chosenBooking) }).then(res => {
 
-                                firestore.collection('userCollection').doc(b.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayUnion(b) }).then(res => {
-                                    console.log(resp)
+                                firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
+                                    
                                     setTimeout(() => {
                                         setSuccess(true)
                                         setTimeout(() => {
@@ -108,7 +101,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
                                     }, 2000);
                                 })
-                            })
+                          //  })
                         })
 
 
@@ -117,10 +110,6 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                     }).catch(err => {
                         console.log(err)
                     })
-
-                }
-            })
-
         } catch (error) {
             console.log(error)
         }
@@ -131,8 +120,8 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
     const getBookings = () => {
         if(!Boolean(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`])) return []
-        if(selectedResources==='all') return bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings
-        else return bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings.filter(a => a.worker === selectedResources)
+        if(selectedResources==='all') return Object.keys(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings).map(o => bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings[o])
+        else return Object.keys(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings).map(o => bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings[o]).filter(a => a.worker === selectedResources)
     }
 
 

@@ -56,7 +56,7 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
         if (reason.length > 0) {
             cancelReason = reason
         } else {
-            cancelReason = 'Tuntematon syy'
+            cancelReason = 'Käyttäjän peruma'
         }
         try {
             setLoading(true)
@@ -674,7 +674,7 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
 
 
                                 <TextField
-                                    helperText={reason.length === 0 ? "Anna peruutukselle syy" : ""}
+                                    helperText={reason.length === 0 ? "Voit halutessasi antaa peruutukselle syyn" : ""}
                                     autoFocus
                                     margin="dense"
                                     id="name"
@@ -683,8 +683,6 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
                                     type="text"
                                     fullWidth
                                     multiline
-                                    required
-                                    error={reason.length === 0 ? true : false}
                                     onChange={({ target }) => setReason(target.value)}
 
                                 />

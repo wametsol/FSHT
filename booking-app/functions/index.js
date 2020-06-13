@@ -106,11 +106,11 @@ exports.sendNewBookingEmailToSystem = functions.region('europe-west3').firestore
         const data = snap.data().bookings[Object.keys(snap.data().bookings)[0]]
         console.log(data)
 
-        
+
 
         admin.firestore().collection(`${context.params.bookerAddress}`).doc(`baseInformation`).get()
             .then(doc => {
-                
+
                 const bookerObject = doc.data()
                 const promises = []
                 var systemMailOptions = {
@@ -119,28 +119,36 @@ exports.sendNewBookingEmailToSystem = functions.region('europe-west3').firestore
                     subject: `Päivän ${data.bookingDate} ensimmäinen varaus sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)}`,
                     html: `
         <h1>${data.service}</h1>
-        <p>Varaaja: ${data.user.name}, ${data.user.email}</p>
-        <p>Työntekijä: ${data.worker}</p>
-        <p>Ajankohta: ${data.bookingDate}, klo: ${formatTimes(data.times.start)} - ${formatTimes(data.times.end)}</p>
+        <p>Varaaja: ${data.user.name}, ${data.user.email}<br/>
+         ${data.deviceID === 0 ? `Työntekijä: ${data.worker}` : `Resurssi ${data.worker} ${data.deviceID}`}</p>
+        <p>Ajankohta: ${data.bookingDate}, klo: ${formatTimes(data.times.start)} - ${formatTimes(data.times.end)}<br/>
+        Varaustunnus: ${data.id}</p>
         `
 
                 }
                 var userMailOptions = {
                     from: `${bookerObject.publicInformation.name} <${bookerObject.publicInformation.email}>`,
-                    replyTo:`${bookerObject.publicInformation.email}`,
+                    replyTo: `${bookerObject.publicInformation.email}`,
                     to: `${gmailInfo.email}`,
-                    subject: `Varausvahvistus sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)} `,
+                    subject: `Varausvahvistus sivustolla ${bookerObject.bookerName} `,
                     html: `
-                <h1>Hei ${data.user.name}, tämä on automaattinen ilmoitus varauksesi onnistumisesta</h1>
-                <p>${data.service}, ${data.bookingDate}, klo: ${formatTimes(data.times.start)} - ${formatTimes(data.times.end)}</p>
-                <p>Varaustunnus: ${data.id}</p>
+                <h1>Hei ${data.user.name}!</h1>
+                <p>Tämä on automaattinen ilmoitus varauksesi onnistumisesta</p>
+                <p>${data.service}<br/>
+                ${data.bookingDate}, klo: ${formatTimes(data.times.start)} - ${formatTimes(data.times.end)}<br/>
+                ${data.deviceID === 0 ? `Työntekijä: ${data.worker}` : `Resurssi: ${data.worker} ${data.deviceID}`}<br/>
+                Varaustunnus: ${data.id}</p>
                 <br/>
-
+                <br/>
+                <p>Omien varausten tarkastelu ja peruutus onnistuu ajanvaraussivustollamme: <a href="https://ajanvaraus.web.app/${bookerObject.bookerAddress}">${bookerObject.bookerName}</a><br/>
+                Huomioithan että tämän varauksen peruutusaika päättyy ${bookerObject.services.filter(a => a.service === data.service)[0].cancelTime}h ennen varauksen alkua</p>
+                
                 <p>Tervetuloa,<br/>
-                ${bookerObject.publicInformation.name}<br/>
+                ${bookerObject.publicInformation.name},<br/>
+                ${bookerObject.bookerName}<br/>
                 ${bookerObject.publicInformation.email}<br/>
                 ${bookerObject.publicInformation.phone}
-
+                </p>
                 `
 
                 }
@@ -230,31 +238,37 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                     mailOptions[0] = {
                         from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
                         to: `${gmailInfo.email}`,
-                        subject: `Uusi varaus sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)}  `,
+                        subject: `Uusi varaus sivustolla ${bookerObject.bookerName}  `,
                         html: `
             <h1>${object.service}</h1>
-            <p>Varaaja: ${object.user.name}, ${object.user.email}</p>
-            <p>Työntekijä: ${object.worker}</p>
+            <p>Varaaja: ${object.user.name}, ${object.user.email}<br/>
+            ${object.deviceID === 0 ? `Työntekijä: ${object.worker}` : `Resurssi: ${object.worker} ${object.deviceID}`}</p>
             <p>Ajankohta: ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)}</p>
             <p>Varaustunnus: ${object.id}</p>
             `
                     }
                     mailOptions[1] = {
                         from: `${bookerObject.publicInformation.name} <${bookerObject.publicInformation.email}>`,
-                        replyTo:`${bookerObject.publicInformation.email}`,
+                        replyTo: `${bookerObject.publicInformation.email}`,
                         to: `${gmailInfo.email}`,
-                        subject: `Varausvahvistus sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)} `,
+                        subject: `Varausvahvistus sivustolla ${bookerObject.bookerName} `,
                         html: `
-                <h1>Hei ${object.user.name}, tämä on automaattinen ilmoitus varauksesi onnistumisesta</h1>
-                <p>${object.service}, ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)}</p>
-                <p>Varaustunnus: ${object.id}</p>
+                        <h1>Hei ${object.user.name}!</h1>
+                        <p>Tämä on automaattinen ilmoitus varauksesi onnistumisesta</p>
+                <p>${object.service}, ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)}<br/>
+                ${object.deviceID === 0 ? `Työntekijä: ${object.worker}` : `Resurssi: ${object.worker} ${object.deviceID}`}<br/>
+                Varaustunnus: ${object.id}</p>
                 <br/>
+                <br/>
+                <p>Omien varausten tarkastelu ja peruutus onnistuu ajanvaraussivustollamme: <a href="https://ajanvaraus.web.app/${bookerObject.bookerAddress}">${bookerObject.bookerName}</a><br/>
+                Huomioithan että tämän varauksen peruutusaika päättyy ${bookerObject.services.filter(a => a.service === object.service)[0].cancelTime}h ennen varauksen alkua</p>
 
                 <p>Tervetuloa,<br/>
-                ${bookerObject.publicInformation.name}<br/>
+                ${bookerObject.publicInformation.name},<br/>
+                ${bookerObject.bookerName}<br/>
                 ${bookerObject.publicInformation.email}<br/>
                 ${bookerObject.publicInformation.phone}
-
+                </p>
                 `
                     }
 
@@ -268,28 +282,37 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                     mailOptions[0] = {
                         from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
                         to: `${gmailInfo.email}`,
-                        subject: `Varauksen peruutus sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)}  `,
+                        subject: `Varauksen peruutus sivustolla ${bookerObject.bookerName}  `,
                         html: `
             <h1>Varaus ${object.id} on peruttu</h1>
             <p>Palvelu: ${object.service}</p>
             <p>Peruttu: ${object.cancelled.date}</p>
-            <p>Syy: ${object.cancelled.reason}</p>
-            <p>Työntekijä: ${object.worker}</p>
+            ${object.deviceID === 0 ? `Työntekijä: ${object.worker}` : `Resurssi ${object.worker} ${object.deviceID}`}</p>
             <p>Ajankohta: ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)}</p>
             <p>Varaaja: ${object.user.name}, ${object.user.email}</p>
             <p>Varaustunnus: ${object.id}</p>
+            <p>Selite: ${object.cancelled.reason}<br/>
             `
                     }
                     mailOptions[1] = {
-                        from: `${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)} <${gmailInfo.email}>`,
+                        from: `${bookerObject.bookerName} <${gmailInfo.email}>`,
+                        replyTo: `${bookerObject.publicInformation.email}`,
                         to: `${gmailInfo.email}`,
-                        subject: `Varauksesi sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)} on peruttu `,
+                        subject: `Varauksesi sivustolla ${bookerObject.bookerName} on peruttu `,
                         html: `
                 <h1>Hei ${object.user.name}, olemme peruneet varauksesi ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)}</h1>
                 <p>Palvelu: ${object.service}</p>
-                <p>Syy: ${object.cancelled.reason}</p>
                 <p>Peruttu: ${object.cancelled.date}</p>
                 <p>Varaustunnus: ${object.id}</p>
+                <p>Selite: ${object.cancelled.reason}</p>
+
+                <br/>
+                <p>Terveisin,<br/>
+                ${bookerObject.bookerName},<br/>
+                ${bookerObject.bookerName}<br/>
+                ${bookerObject.publicInformation.email}<br/>
+                ${bookerObject.publicInformation.phone}
+                </p>
                 `
                     }
 

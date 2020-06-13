@@ -220,9 +220,6 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
 
             uploadTask.on('state_changed', (snapshot) => {
                 let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                console.log(snapshot)
-                console.log(snapshot.bytesTransferred, ' / ', snapshot.totalBytes)
-                console.log('Progress: ', progress)
                 setUploadProgress(progress)
             }, (error) => {
                 console.log(error)
@@ -273,7 +270,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
 
             </ExpansionPanelSummary>
             <Typography style={{ textAlign: 'left', marginLeft: '20%' }}>Alapalkki käytössä:<Checkbox color='primary' checked={footerON} onChange={() => setFooterON(!footerON)} /></Typography>
-
+            {footerON ? <div>
             <Typography className={classes.secondaryHeading}>Tässä näkyvien tietojen päivittäminen tapahtuu niitä koskevilta välilehdiltä</Typography>
             <div>
 
@@ -295,7 +292,6 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.address}</Typography>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.postnumber}, {bookerObject.publicInformation.city}</Typography>
                             </div>
-                            {footerON ? <em /> : <div className={classes.floatingErrorBox}>Alapalkki ei käytössä</div>}
                             <div className={classes.footerObject}>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>Avoinna: </Typography>
                                 <Typography style={{ color: rgbLabeller(footerTextColor) }}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
@@ -307,7 +303,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                     </div>
                 </div>
             </div>
-            {footerON ? <ExpansionPanelDetails className={classes.details}>
+            <ExpansionPanelDetails className={classes.details}>
 
                 <div className={classes.oneFourthColumn} >
 
@@ -335,7 +331,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                 <div className={classes.oneFourthColumn}>
                     <ColorPicker title='Alapalkin tekstiväri' initialColor={bookerObject.siteSettings.footerTextColor} changeColor={changeFooterTextColor} color={footerTextColor} disabled={!footerON} />
                 </div>
-            </ExpansionPanelDetails> : <em />}
+            </ExpansionPanelDetails></div> : <em />}
             <Divider />
             <ExpansionPanelActions>
                 {!loading ? <div><Button disabled={sameAsInitialFooterStyle()} color='secondary' onClick={resetFooterStyling}>Peru muutokset</Button>
@@ -432,7 +428,6 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
             </ExpansionPanelSummary>
             <ExpansionPanelDetails className={classes.details}>
                 <div className={classes.halfColumn} >
-                    {console.log(imageUpload)}
                     <input
                         accept='image/*'
                         id='uploadImage'

@@ -41,20 +41,21 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                     setError(true)
                     setLoading(false)
                 }
-                console.log(user.email)
-                console.log(response.data().bookerCreator)
                 if(response.data().admins.filter(a => a.email === user.email).length>0 || response.data().bookerCreator === user.email){
                 setBookerObject(response.data())
                 
                 console.log('Getting subs: ', getSubCollections)
                 getSubCollections({docPath: `booker${pagematch.params.id}/bookings` })
                 .then(result => {
+                    console.log(result.data.collections[0])
+                    if(result.data.collections.length===0){
+                        setBookings(undefined)
+                    }else {
                     var collections = {}
                     result.data.collections.map(c => {
                         firestore.collection(`booker${pagematch.params.id}`).doc('bookings').collection(c).get()
                         .then(res => {
                             res.docs.map(doc => {
-                                console.log(doc.data())
                                 collections = {...collections,
                                     [`${doc.id}`]: doc.data()
                                 }
@@ -64,6 +65,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                             setLoading(false)
                         })
                     })
+                }
                 setLoading(false)
 
                 })
@@ -113,9 +115,6 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
 
     }
 
-
-    console.log(bookings)
-    console.log(bookerObject)
 
     const getTabContent = (tab) => {
         switch (tab) {

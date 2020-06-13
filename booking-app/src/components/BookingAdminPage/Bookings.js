@@ -75,41 +75,42 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
             cancelReason = 'Tuntematon syy'
         }
         try {
-                    let updatedObject = { ...chosenBooking }
-                    updatedObject.active = false
-                    updatedObject.cancelled = {
-                        date: format(new Date, `dd:MM:yyyy:HH.mm`),
-                        reason: cancelReason
-                    }
-                    firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).set({bookings:{[chosenBooking.id]:  updatedObject }}, {merge: true}).then(res => {
-                        console.log(res)
+            let updatedObject = { ...chosenBooking }
+            updatedObject.active = false
+            updatedObject.cancelled = {
+                date: format(new Date, `dd:MM:yyyy:HH.mm`),
+                reason: cancelReason
+            }
+            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).set({ bookings: { [chosenBooking.id]: updatedObject } }, { merge: true }).then(res => {
+                console.log(res)
 
-                        //firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
+                //firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
 
-                            firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(chosenBooking) }).then(res => {
+                firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(chosenBooking) }).then(res => {
 
-                                firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
-                                    
-                                    setTimeout(() => {
-                                        setSuccess(true)
-                                        setTimeout(() => {
-                                            setReason(cancelReason)
-                                            setOpen(false)
-                                            setSuccess(false)
-                                            setLoading(false)
-                                        }, 2000);
+                    firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
 
-                                    }, 2000);
-                                })
-                          //  })
-                        })
+                        setTimeout(() => {
+                            setSuccess(true)
+                            setTimeout(() => {
+                                setReason('')
+                                fetchData()
+                                setOpen(false)
+                                setSuccess(false)
+                                setLoading(false)
+                            }, 2000);
 
-
-
-
-                    }).catch(err => {
-                        console.log(err)
+                        }, 2000);
                     })
+                    //  })
+                })
+
+
+
+
+            }).catch(err => {
+                console.log(err)
+            })
         } catch (error) {
             console.log(error)
         }
@@ -119,16 +120,16 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
     }
 
     const getBookings = () => {
-        if(!Boolean(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`])) return []
-        if(selectedResources==='all') return Object.keys(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings).map(o => bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings[o])
+        if (!Boolean(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`]) || !Boolean(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings)) return []
+        if (selectedResources === 'all') return Object.keys(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings).map(o => bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings[o])
         else return Object.keys(bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings).map(o => bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`].bookings[o]).filter(a => a.worker === selectedResources)
     }
 
 
-    if (bookingsObject  === null) {
+    if (bookingsObject === null) {
         return (
             <span><Typography>Ladataan varauksia </Typography><CircularProgress size={25} /></span>
-            
+
         )
     } else if (bookingsObject === undefined) {
         return (
@@ -139,29 +140,42 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
     const getHumanResources = () => {
         var humanResources = []
         Object.keys(bookerObject.resources).map(key => {
-            if (bookerObject.resources[key].human){
+            if (bookerObject.resources[key].human) {
                 humanResources.push(bookerObject.resources[key])
             }
         })
 
         return humanResources
     }
+    const getNonHumanResources = () => {
+        var nonHumanResources = []
+        Object.keys(bookerObject.resources).map(key => {
+            if (!bookerObject.resources[key].human) {
+                nonHumanResources.push(bookerObject.resources[key])
+            }
+        })
+
+        return nonHumanResources
+    }
 
     return (
         <div>
 
-            <div style={{display:'flex'}}><Typography variant="h5" style={{flexBasis:'80%', paddingLeft:'20%'}}>Varaukset sivustolla </Typography> <div>
+            <div style={{ display: 'flex' }}><Typography variant="h5" style={{ flexBasis: '80%', paddingLeft: '20%' }}>Varaukset sivustolla </Typography> <div>
                 <Select style={{ minWidth: 150 }}
-                value={selectedResources}
-                onChange={({ target }) => {if(!!target.value) setSelectedResources(target.value)}}>
-                <MenuItem value='all'>Kaikki</MenuItem>
-                <ListSubheader>Henkilöt</ListSubheader>
-                {getHumanResources().map(r => (
-                    <MenuItem key={r.name} value={r.name}>{r.name}</MenuItem>
-                ))}
-                <ListSubheader>Laitteet</ListSubheader>
+                    value={selectedResources}
+                    onChange={({ target }) => { if (!!target.value) setSelectedResources(target.value) }}>
+                    <MenuItem value='all'>Kaikki</MenuItem>
+                    <ListSubheader>Henkilöt</ListSubheader>
+                    {getHumanResources().map(r => (
+                        <MenuItem key={r.name} value={r.name}>{r.name}</MenuItem>
+                    ))}
+                    <ListSubheader>Laitteet</ListSubheader>
+                    {getNonHumanResources().map(r => (
+                        <MenuItem key={r.name} value={r.name}>{r.name}</MenuItem>
+                    ))}
                 </Select></div></div>
-                {selectedResources==='all'? <Typography>Näytetään varaukset kaikkien henkilöiden osalta</Typography> : <Typography>Näytetään henkilöön {selectedResources} kohdistuvat varaukset</Typography>}
+            {selectedResources === 'all' ? <Typography>Näytetään varaukset kaikkien henkilöiden osalta</Typography> : <Typography>Näytetään {!bookerObject.resources[`${selectedResources}`].human ? 'resurssiin' : 'henkilöön'} {selectedResources} kohdistuvat varaukset</Typography>}
             <div className={classes.adminDatepicker}>
                 <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
                     <KeyboardDatePicker
@@ -185,18 +199,18 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
                 </MuiPickersUtilsProvider>
                 <div className={classes.datePickerTitle}>
-                    {!!bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]?
-                    <Typography>Valittuna päivänä käytössä poikkeuksellinen aukiolo, {bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].reason}: <b>{getFormattedTimes(bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times)}</b> </Typography>
-                    :
-                    <Typography>Ilmoittamasi aukioloajat valitulle päivälle: <b>{getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)} </b></Typography>}
-                    {selectedResources==='all'? <em/>: 
-                    <Typography>
-                    {selectedResources} työajat valittuna päivänä: {!!bookerObject.resources[`${selectedResources}`].specialDays && !!bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? 
-                    <b>{getFormattedPersonTimes(bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times)}</b>
-                    : 
-                    <b>{getSinglePersonDayTimesText(getDay(selectedDate), bookerObject.resources[`${selectedResources}`].timeTables)}</b>}
-                    </Typography>}
-                    
+                    {!!bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`] ?
+                        <Typography>Valittuna päivänä käytössä poikkeuksellinen aukiolo, {bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].reason}: <b>{getFormattedTimes(bookerObject.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times)}</b> </Typography>
+                        :
+                        <Typography>Ilmoittamasi aukioloajat valitulle päivälle: <b>{getSingleDayTimesText(getDay(selectedDate), bookerObject.timeTables)} </b></Typography>}
+                    {selectedResources === 'all' || !bookerObject.resources[`${selectedResources}`].human ? <em /> :
+                        <Typography>
+                            {selectedResources} työajat valittuna päivänä: {!!bookerObject.resources[`${selectedResources}`].specialDays && !!bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`] ?
+                                <b>{getFormattedPersonTimes(bookerObject.resources[`${selectedResources}`].specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times)}</b>
+                                :
+                                <b>{getSinglePersonDayTimesText(getDay(selectedDate), bookerObject.resources[`${selectedResources}`].timeTables)}</b>}
+                        </Typography>}
+
                 </div>
             </div>
             <Divider />
@@ -218,19 +232,19 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
             <ExpansionPanel>
                 <ExpansionPanelSummary disabled>
-                <div className={classes.column}>
-                                <Typography className={classes.heading}>Palvelu</Typography>
-                            </div>
-                            <div className={classes.column}>
-                                <Typography className={classes.heading}>Aika / tila</Typography>
-                            </div>
-                            <div className={classes.column}>
-                                <Typography className={classes.heading}>Työntekijä</Typography>
-                            </div>
+                    <div className={classes.column}>
+                        <Typography className={classes.heading}>Palvelu</Typography>
+                    </div>
+                    <div className={classes.column}>
+                        <Typography className={classes.heading}>Aika / tila</Typography>
+                    </div>
+                    <div className={classes.column}>
+                        <Typography className={classes.heading}>Työntekijä</Typography>
+                    </div>
                 </ExpansionPanelSummary>
             </ExpansionPanel>
             {!bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`] ? <em /> : <div>{getBookings().map(booking => (
-                <div className={classes.root} key={booking.times.start+booking.worker}>
+                <div className={classes.root} key={booking.times.start + booking.worker}>
                     <ExpansionPanel >
                         <ExpansionPanelSummary
                             expandIcon={<ExpandMoreIcon />}
@@ -280,7 +294,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                     <DialogContent>
                         <DialogContentText>
                             Olet perumassa varausta "{chosenBooking.service}"
-            <br />Päivämäärä: {chosenBooking.bookingDate}
+                            <br />Päivämäärä: {chosenBooking.bookingDate}
                             <br />Kello: {getFormattedTimes([chosenBooking.times.start, chosenBooking.times.end])}
                             <br />Varaaja: {chosenBooking.user.name}
 
@@ -290,7 +304,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                             autoFocus
                             margin="dense"
                             id="name"
-                            label="Peruutuksen syy"
+                            label="Peruutuksen syy. Tämä selite lähetetään asiakkaalle peruutusvahvistuksen mukana"
                             type="text"
                             fullWidth
                             multiline

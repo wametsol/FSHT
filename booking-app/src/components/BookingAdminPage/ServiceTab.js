@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import firebase, { firestore } from '../../firebase'
-import { Typography, CircularProgress, TextField, Button, Tooltip, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, InputAdornment, Select, MenuItem, InputBase, FormControl, InputLabel, FormHelperText, FormLabel, Dialog, DialogTitle, DialogContent } from '@material-ui/core';
+import { Tabs, Tab, Typography, CircularProgress, TextField, Button, Tooltip, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, InputAdornment, Select, MenuItem, InputBase, InputLabel, FormHelperText, FormLabel, Dialog, DialogTitle, DialogContent, RadioGroup, FormControlLabel, Radio, FormControl } from '@material-ui/core';
 import { useRouteMatch } from 'react-router-dom'
 import clsx from 'clsx';
 
@@ -65,15 +65,16 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
     const [openEditForm, setOpenEditForm] = useState(false)
     const [selectedService, setSelectedService] = useState(null)
     const [initialService, setInitialService] = useState(null)
+    const [serviceType, setServiceType] = useState('')
+    const [tabValue, setTabValue] = useState(0)
 
 
-
-
+    
     const addNewService = (e) => {
         e.preventDefault()
         try {
 
-            if (serviceName.length === 0 || servicePrice.length === 0 || serviceDescription.length === 0 || (serviceTimeHours === 0 && serviceTimeMins === 0)) {
+            if (serviceType.length === 0 || serviceName.length === 0 || servicePrice.length === 0 || serviceDescription.length === 0 || (serviceTimeHours === 0 && serviceTimeMins === 0)) {
                 setErrorMessage('Antamassasi syötteessä oli vikaa, tarkista antamasi tiedot')
             } else {
                 setLoading(true)
@@ -85,7 +86,8 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                         hours: serviceTimeHours,
                         minutes: serviceTimeMins
                     },
-                    cancelTime: serviceCancelHours
+                    cancelTime: serviceCancelHours,
+                    type: serviceType
                 }
                 firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayUnion(serviceObject) })
                     .then((res) => {
@@ -136,6 +138,10 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
 
     }
 
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue)
+    }
+
     const resetForm = () => {
         setServiceName('')
         setServiceDescription('')
@@ -143,6 +149,7 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
         setServiceTimeHours(0)
         setServiceTimeMins(0)
         setServiceCancelHours(24)
+        setServiceType('')
     }
     const removeService = (service) => {
         console.log(service)
@@ -179,7 +186,61 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
         setInitialService(null)
     }
 
+    const getTabContent = (tab) => {
+        switch (tab) {
+            case 0:
+                return serviceTab(bookerObject.services.filter(a => a.type === 'human'))
+            case 1:
+                return serviceTab(bookerObject.services.filter(a => a.type === 'device'))
+            default:
+                return 'Unknown step';
+        }
+    }
 
+    const serviceTab = (services) => (   
+        <div>
+        {services.map(service => (
+            <div className={classes.root} key={service.service}>
+                <ExpansionPanel >
+                    <ExpansionPanelSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1c-content"
+                        id="panel1c-header"
+                    >
+                        <div className={classes.column}>
+                            <Typography className={classes.heading}>{service.service}</Typography>
+                        </div>
+                        <div className={classes.column}>
+                            <Typography className={classes.secondaryHeading}>{service.description}</Typography>
+                        </div>
+                        <div className={classes.column}>
+                            <Typography className={classes.secondaryHeading}>Perumisaika: {service.cancelTime}h</Typography>
+                        </div>
+
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails className={classes.details}>
+                        <div className={classes.column} />
+                        <div className={classes.column}>
+                            <Typography>Hinta: {service.price}€</Typography>
+                        </div>
+                        <div className={clsx(classes.column, classes.helper)}>
+                            <Typography variant="caption">
+                                Varauksen kesto: {service.timelength.hours}h {service.timelength.minutes}m.
+                                    <br />
+                            </Typography>
+                        </div>
+                    </ExpansionPanelDetails>
+                    <Divider />
+                    <ExpansionPanelActions>
+                        <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' onClick={() => editService(service)} >Muokkaa</Button></Tooltip>
+                        <Button size="small" color="secondary" onClick={() => removeService(service)}>
+                            Poista
+                        </Button>
+                    </ExpansionPanelActions>
+                </ExpansionPanel>
+            </div>
+        ))}</div>
+    )
 
     return (
         <div>
@@ -190,6 +251,14 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
 
                 <div className={classes.addServiceForm}>
                     <form>
+                    <Typography variant='h6'>Uuden palvelun lisääminen</Typography>
+                        <Typography>Palvelun käyttökohde</Typography>
+                        <RadioGroup  row style={{justifyContent: 'center'}} value={serviceType} onChange={({target}) => setServiceType(target.value)}>
+                            <FormControlLabel value='human' control={<Radio/>} label='Henkilö'/>
+                            <FormControlLabel value='device' control={<Radio/>} label='Laite'/>
+                        </RadioGroup>
+                        <Divider/>
+                        <br/>
                         <TextField
                             id="service"
                             label="Palvelusi nimi"
@@ -270,7 +339,7 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
 
                                         >
                                             {getNumberArray(23, 1).map(number => (
-                                                <MenuItem value={number}>{number}h</MenuItem>
+                                                <MenuItem key={number+'h'} value={number}>{number}h</MenuItem>
                                             ))}
 
                                         </Select>
@@ -289,7 +358,7 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                                             input={<BootstrapInput />}
                                         >
                                             {getNumberArray(59, 5).map(number => (
-                                                <MenuItem value={number}>{number} min</MenuItem>
+                                                <MenuItem key={number+'min'} value={number}>{number} min</MenuItem>
                                             ))}
                                         </Select>
                                     </span>
@@ -314,7 +383,7 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                                     input={<BootstrapInput />}
                                 >
                                     {getNumberArray(72, 6).map(number => (
-                                        <MenuItem value={number}>{number}h</MenuItem>
+                                        <MenuItem key={number+'ch'} value={number}>{number}h</MenuItem>
                                     ))}
                                 </Select>
                             </span>
@@ -331,51 +400,22 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                     </form>
                 </div>
             }
-            {!bookerObject.services.length === 0 ? <div>Et ole vielä lisännyt palveluita sivustollesi.</div>
-                : <div>
+            {bookerObject.services.length > 0 ?  <div>
+
                     <Typography variant='h5'>Palvelusi</Typography>
                     <Divider />
-                    {bookerObject.services.map(service => (
-                        <div className={classes.root} key={service.service}>
-                            <ExpansionPanel >
-                                <ExpansionPanelSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel1c-content"
-                                    id="panel1c-header"
-                                >
-                                    <div className={classes.column}>
-                                        <Typography className={classes.heading}>{service.service}</Typography>
-                                    </div>
-                                    <div className={classes.column}>
-                                        <Typography className={classes.secondaryHeading}>{service.description}</Typography>
-                                    </div>
-                                    <div className={classes.column}>
-                                        <Typography className={classes.secondaryHeading}>Perumisaika: {service.cancelTime}h</Typography>
-                                    </div>
-
-                                </ExpansionPanelSummary>
-                                <ExpansionPanelDetails className={classes.details}>
-                                    <div className={classes.column} />
-                                    <div className={classes.column}>
-                                        <Typography>Hinta: {service.price}€</Typography>
-                                    </div>
-                                    <div className={clsx(classes.column, classes.helper)}>
-                                        <Typography variant="caption">
-                                            Varauksen kesto: {service.timelength.hours}h {service.timelength.minutes}m.
-                                                <br />
-                                        </Typography>
-                                    </div>
-                                </ExpansionPanelDetails>
-                                <Divider />
-                                <ExpansionPanelActions>
-                                    <Tooltip title={`Muokkaa `} arrow><Button size='small' color='primary' onClick={() => editService(service)} >Muokkaa</Button></Tooltip>
-                                    <Button size="small" color="secondary" onClick={() => removeService(service)}>
-                                        Poista
-                                    </Button>
-                                </ExpansionPanelActions>
-                            </ExpansionPanel>
-                        </div>
-                    ))}</div>
+                    <Tabs
+            centered
+            variant='fullWidth'
+            value={tabValue}
+            onChange={handleTabChange}
+            TabIndicatorProps={{ style: { background: `pink`} }}
+            >
+                <Tab label='Henkilöt'/>
+                <Tab label='Laitteet'/>
+            </Tabs>
+                    {getTabContent(tabValue)}
+                    </div> : <div>Et ole vielä lisännyt palveluita sivustollesi.</div>
             }
 
 {!!selectedService? 
@@ -385,6 +425,14 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                          <DialogContent>
                          <div className={classes.addServiceForm}>
                     <form>
+                    <Typography>Palvelun käyttökohde</Typography>
+                        <RadioGroup  row style={{justifyContent: 'center'}} value={selectedService.type} onChange={({ target }) => setSelectedService({
+                                ...selectedService,
+                                type: target.value
+                            })}>
+                            <FormControlLabel value='human' control={<Radio/>} label='Henkilö'/>
+                            <FormControlLabel value='device' control={<Radio/>} label='Laite'/>
+                        </RadioGroup>
                         <TextField
                             id="service"
                             label="Palvelusi nimi"

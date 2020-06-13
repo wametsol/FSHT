@@ -65,7 +65,6 @@ const BookingPage = () => {
                         setError(true)
                         setLoading(false)
                     }
-                    console.log(response.data)
                     setBookerObject(response.data())
                     document.title = `${response.data().bookerName} ajanvaraus`
 
@@ -76,7 +75,6 @@ const BookingPage = () => {
                         firestore.collection(`booker${pagematch.params.id}`).doc('bookings').collection(c).get()
                         .then(res => {
                             res.docs.map(doc => {
-                                console.log(doc.data())
                                 collections = {...collections,
                                     [`${doc.id}`]: doc.data()
                                 }
@@ -290,8 +288,7 @@ const BookingPage = () => {
 
             // CHECK IF DAILYBOOKINGS EXIST
             for (const b in dailyBookings) {
-                //console.log(dailyBookings[b].worker, ' === ', chosenWorker)
-                if (dailyBookings[b].active === true && (!!chosenWorker && dailyBookings[b].worker === chosenWorker.name) && (dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end >= singleTime.end || dailyBookings[b].times.start < singleTime.end && dailyBookings[b].times.start >= singleTime.start ||  dailyBookings[b].times.start < singleTime.start && dailyBookings[b].times.end > singleTime.start)) {
+                if (dailyBookings[b].active === true && ((!!chosenWorker && !chosenWorker.human && !bookerObject.resources[`${dailyBookings[b].worker}`].human && dailyBookings[b].deviceID === chosenWorker.deviceID ) || (!!chosenWorker && chosenWorker.human && dailyBookings[b].worker === chosenWorker.name)) && (dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end >= singleTime.end || dailyBookings[b].times.start < singleTime.end && dailyBookings[b].times.start >= singleTime.start ||  dailyBookings[b].times.start < singleTime.start && dailyBookings[b].times.end > singleTime.start)) {
                     singleTime.bookedAlready = true
                 }
             }
@@ -409,6 +406,22 @@ const BookingPage = () => {
 
         return humanResources
     }
+    const getNonHumanResources = () => {
+        var nonHumanResources = []
+        Object.keys(bookerObject.resources).map(key => {
+            if (!bookerObject.resources[key].human){
+                var i = 0
+                while (i < bookerObject.resources[key].amountOfResources){
+                    nonHumanResources.push({...bookerObject.resources[key],
+                    deviceID: i+1})
+                    i+=1
+                }
+                
+            }
+        })
+
+        return nonHumanResources
+    }
 
     const getMaxWorktimes = (person) => {
         var maxWorktimes = Object.assign([], !!person.specialDays && !!person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times : getDayContent(getDay(selectedDate), person.timeTables))
@@ -505,7 +518,9 @@ const BookingPage = () => {
                             </FormControl>
 
                             {!chosenService.service ? <em /> : <div>
-                                {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> : <div>Sopivia aikoja vapaana: {getFreeTimes().length}</div>}
+                                {getFreeTimes().length === 0 ? <div><Typography variant='caption'>Ei vapaita aikoja tälle päivälle</Typography><br/>
+                                {prevDayButtons()}{nextDayButtons()}</div> : <div><Typography variant='caption'>Sopivia aikoja vapaana: {getFreeTimes().length}</Typography><br/>
+                                {prevDayButtons()}{nextDayButtons()}</div>}
                             </div>}</div>
                         {!chosenService.service ? <em /> : <div>
                             <div key={chosenService.service} className={classes.singleServiceBox}>
@@ -520,26 +535,54 @@ const BookingPage = () => {
                         </div>}
                     </div>
                     
-                    {!chosenService.service ? <em /> : <div className={classes.freeTimesBox}>
-                        <Typography>Sopivat työntekijät</Typography>
+                    {!!chosenService.service && chosenService.type === 'human' && getFreeTimes().length !== 0  ? 
+                    <div className={classes.freeTimesBox}>
+                    <Typography>Valitse työntekijä</Typography>
+                    <div className={classes.workerBox} >
+
+                    
+                {getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).map(person => (
+                    <div key={person.name} className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
+                        
+                    <Typography>{person.name}</Typography>
+                <Typography variant='caption'>{getFormattedPersonTimes(getMaxWorktimes(person))}</Typography>
+                    </div>
+                ))}</div>
+                    <Divider />
+                    {!!chosenWorker? <div>
+                    {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> :
+                        <div>
+                            {getFreeTimes().map(time => (
+                                <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress, worker: chosenWorker })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
+                            ))}</div>}</div>: <em/>}
+                </div>
+                    
+                    : <em/>}
+                    {!!chosenService.service && chosenService.type === 'device' && getFreeTimes().length !== 0 ? 
+                    <div className={classes.freeTimesBox}>
+                        <Typography>Valitse laite</Typography>
                         <div className={classes.workerBox} >
 
                         
-                    {getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).map(person => (
-                        <div key={person.name} className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
+                    {getNonHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0).map(resource => (
+                        <div key={resource.name+resource.deviceID} className={classes.singleWorker} onClick={() => setChosenWorker(resource)} style={!!chosenWorker && chosenWorker.name === resource.name && chosenWorker.deviceID === resource.deviceID? {backgroundColor:'lightgreen'}: {}}>
                             
-                        <Typography>{person.name}</Typography>
-                    <Typography variant='caption'>{getFormattedPersonTimes(getMaxWorktimes(person))}</Typography>
+                        <Typography>{resource.name} {resource.deviceID}</Typography>
+                    <Typography variant='caption'></Typography>
                         </div>
                     ))}</div>
                         <Divider />
                         {!!chosenWorker? <div>
-                        {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> :
+                        {getFreeTimes().length === 0 ? <div>
+                            <Typography>Ei vapaita aikoja tälle päivälle</Typography>
+                            <Button>Edellinen päivä</Button><Button>Seuraava päivä</Button>
+
+                        </div> :
                             <div>
                                 {getFreeTimes().map(time => (
                                     <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress, worker: chosenWorker })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
                                 ))}</div>}</div>: <em/>}
-                    </div>}
+                    </div> : <em/>}
                     
 
 

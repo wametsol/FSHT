@@ -29,7 +29,7 @@ const UserTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData}) 
                 .then(response => {
                     if (response.empty || bookerObject.admins.filter(a => a.email === newAdmin).length > 0) {
                         setLoading(false)
-                        setErrorMessage('Antamallasi osoitteella ei löytynyt käyttäjää')
+                        setErrorMessage('Antamallasi osoitteella ei löytynyt käyttäjää. Huomioithan että käyttäjän tulee olla rekisteröitynyt ajanvarausjärjestelmän käyttäjäksi.')
                     } else {
                         const adminObject = {
                             email: response.data().email,

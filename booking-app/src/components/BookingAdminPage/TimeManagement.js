@@ -726,14 +726,12 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             <div className={classes.column}>
 
             </div>
-            {console.log(specialDayKeys)}
             {specialDayKeys.map(specialKey => (
                 <div key={specialKey} style={{ marginLeft: '20%', marginRight: '20%' }}>
                     <Divider />
                     <div className={classes.specialDays}>
 
                         <div className={classes.specialDay}>
-                            {console.log(bookerObject.specialDays[specialKey].date)}
                             <Typography className={classes.specialText}>{bookerObject.specialDays[specialKey].date}</Typography>
                         </div>
                         <div className={classes.specialDay}>
@@ -991,7 +989,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             <div className={classes.column}>
 
             </div>
-            {console.log(specialDayKeys)}
             {!!bookerObject.resources[`${selectedResources}`].specialDays?
             <div>
             {Object.keys(bookerObject.resources[`${selectedResources}`].specialDays).map(key => (
@@ -1047,7 +1044,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                                 setSelectedResources(target.value)
                                 setSelectedTimeTables(bookerObject.resources[`${target.value}`].timeTables)} }}>
                             {humanResources.map(r => (
-                                <MenuItem value={r.name}>{r.name}</MenuItem>
+                                <MenuItem key={r.name+'list'} value={r.name}>{r.name}</MenuItem>
                             ))}
                         </Select></FormControl>
                     <br />
@@ -1060,7 +1057,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                         {personWeekdayPanel()}
                         {personWeekendPanel()}
                         {personSpecialPanel()}
-                        {console.log(selectedResources)}
                     </div>}
             </div>
 
@@ -1079,7 +1075,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             {holidayPanel()}
             <Divider />
             <br />
-            {resourcePanel()}
+            {bookerObject.resources.length>0? resourcePanel() : <em/>}
 
 
 

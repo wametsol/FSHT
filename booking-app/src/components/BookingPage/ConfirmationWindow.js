@@ -178,7 +178,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
                     </DialogContentText>
                     <DialogContentText id="alert-dialog-slide-description">
                         Palvelu: {data.service.service} <br />
-                        {data.deviceID === 0? `Työntekijä: ${data.worker.name}` : `Resurssi: ${data.worker.name} ${data.worker.deviceID}`} <br />
+                        {data.worker.deviceID === 0? `Työntekijä: ${data.worker.name}` : `Resurssi: ${data.worker.name} ${data.worker.deviceID}`} <br />
                         <br />
                         Ajankohta<br />
                         {capitalize(format(data.date, "EEEE : dd.MM.yyyy", { locale: fi }))}<br />

@@ -376,7 +376,7 @@ const NewBooker = () => {
             firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
                 firestore.collection(`booker${webAddress}`).doc('bookings').set({init:true})
                 .then((resp) => {
-                firestore.collection('userCollection').doc(user.email).update({bookers: firebase.firestore.FieldValue.arrayUnion({address: webAddress, name: systName})})
+                firestore.collection('userCollection').doc(user.email).set({bookers: { [webAddress]: {address: webAddress, name: systName}}}, {merge: true})
                 .then((res) => {
                     console.log(res)
                     setTimeout(() => {

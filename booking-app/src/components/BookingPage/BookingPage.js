@@ -115,7 +115,7 @@ const BookingPage = () => {
     }, [user])
 
     const fetchUserData = () => {
-        console.log('FECTHING')
+        console.log('FECTHING: ', user)
         try {
             setLoading(true)
             firestore.collection('userCollection').doc(`${user.email}`).get()

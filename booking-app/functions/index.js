@@ -276,14 +276,15 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                 }
                 else if (Object.keys(data.bookings).length === Object.keys(earlierData.bookings).length) {
 
-                    const object = data.bookings[Object.keys(data.bookings).filter(a => !data.bookings[a].active && earlierData.bookings[a].active)[0]]
+                    if (data.bookings[Object.keys(data.bookings).filter(a => !data.bookings[a].active && earlierData.bookings[a].active)[0]]) {
+                        const object = data.bookings[Object.keys(data.bookings).filter(a => !data.bookings[a].active && earlierData.bookings[a].active)[0]]
 
-                    console.log(object)
-                    mailOptions[0] = {
-                        from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
-                        to: `${gmailInfo.email}`,
-                        subject: `Varauksen peruutus sivustolla ${bookerObject.bookerName}  `,
-                        html: `
+                        console.log('Cancel: ',object)
+                        mailOptions[0] = {
+                            from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
+                            to: `${gmailInfo.email}`,
+                            subject: `Varauksen peruutus sivustolla ${bookerObject.bookerName}  `,
+                            html: `
             <h1>Varaus ${object.id} on peruttu</h1>
             <p>Palvelu: ${object.service}</p>
             <p>Peruttu: ${object.cancelled.date}</p>
@@ -293,13 +294,13 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
             <p>Varaustunnus: ${object.id}</p>
             <p>Selite: ${object.cancelled.reason}<br/>
             `
-                    }
-                    mailOptions[1] = {
-                        from: `${bookerObject.bookerName} <${gmailInfo.email}>`,
-                        replyTo: `${bookerObject.publicInformation.email}`,
-                        to: `${gmailInfo.email}`,
-                        subject: `Varauksesi sivustolla ${bookerObject.bookerName} on peruttu `,
-                        html: `
+                        }
+                        mailOptions[1] = {
+                            from: `${bookerObject.bookerName} <${gmailInfo.email}>`,
+                            replyTo: `${bookerObject.publicInformation.email}`,
+                            to: `${gmailInfo.email}`,
+                            subject: `Varauksesi sivustolla ${bookerObject.bookerName} on peruttu `,
+                            html: `
                 <h1>Hei ${object.user.name}, olemme peruneet varauksesi ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)}</h1>
                 <p>Palvelu: ${object.service}</p>
                 <p>Peruttu: ${object.cancelled.date}</p>
@@ -308,15 +309,58 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
 
                 <br/>
                 <p>Terveisin,<br/>
-                ${bookerObject.bookerName},<br/>
+                ${bookerObject.publicInformation.name},<br/>
+                ${bookerObject.bookerName}<br/>
+                ${bookerObject.publicInformation.email}<br/>
+                ${bookerObject.publicInformation.phone}
+                </p>
+                `
+                        } 
+
+                    } else if (data.bookings[Object.keys(data.bookings).filter(a => data.bookings[a].worker !== earlierData.bookings[a].worker )[0]]) {
+                        const object = data.bookings[Object.keys(data.bookings).filter(a => data.bookings[a].worker !== earlierData.bookings[a].worker )[0]]
+                        const earlierBooking = earlierData.bookings[object.id]
+                        console.log('Transfer: ', object)
+
+                        mailOptions[0] = {
+                            from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
+                            to: `${gmailInfo.email}`,
+                            subject: `Varauksen siirto sivustolla ${bookerObject.bookerName}  `,
+                            html: `
+            <h1>Varaus ${object.id} on siirretty henkilöltä ${earlierBooking.worker} -> ${object.worker}</h1>
+            <p>Palvelu: ${object.service}</p>
+            <p>Peruttu: ${object.transferred.date}</p>
+            <p>Ajankohta: ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)}</p>
+            <p>Varaaja: ${object.user.name}, ${object.user.email}</p>
+            <p>Varaustunnus: ${object.id}</p>
+            <p>Selite: ${object.transferred.reason}<br/>
+            `
+                        }
+                        mailOptions[1] = {
+                            from: `${bookerObject.bookerName} <${gmailInfo.email}>`,
+                            replyTo: `${bookerObject.publicInformation.email}`,
+                            to: `${gmailInfo.email}`,
+                            subject: `Ilmoitus koskien varaustasi sivustolla ${bookerObject.bookerName}`,
+                            html: `
+                <h1>Hei ${object.user.name}, olemme siirtäneet varauksesi ${object.service}, ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)} toiselle työntekijälle</h1>
+                <p>Uusi työntekijä: ${object.worker}</p>
+                <p>Siirretty: ${object.transferred.date}</p>
+                <p>Varaustunnus: ${object.id}</p>
+                <p>Selite: ${object.transferred.reason}</p>
+
+                <br/>
+                <p>Terveisin,<br/>
+                ${bookerObject.publicInformation.name},<br/>
                 ${bookerObject.bookerName}<br/>
                 ${bookerObject.publicInformation.email}<br/>
                 ${bookerObject.publicInformation.phone}
                 </p>
                 `
                     }
-
                 }
+            }
+
+
 
                 promises.push(transporter.sendMail(mailOptions[0], (error, data) => {
                     if (error) {

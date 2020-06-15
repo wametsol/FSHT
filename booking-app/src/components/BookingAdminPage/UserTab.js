@@ -25,23 +25,30 @@ const UserTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData}) 
         try {
             setError(false)
             setLoading(true)
+            console.log('Checking if ', user.uid, ' is in ', bookerObject.admins)
             firestore.collection('userCollection').doc(newAdmin).get()
                 .then(response => {
-                    if (response.empty || bookerObject.admins.filter(a => a.email === newAdmin).length > 0) {
+                    if (response.empty || Object.keys(bookerObject.admins).filter(a => a === newAdmin.uid).length > 0) {
                         setLoading(false)
                         setErrorMessage('Antamallasi osoitteella ei löytynyt käyttäjää. Huomioithan että käyttäjän tulee olla rekisteröitynyt ajanvarausjärjestelmän käyttäjäksi.')
                     } else {
+                        console.log(response.data())
+                        const adminUid = response.data().uid
                         const adminObject = {
                             email: response.data().email,
                             name: response.data().name
                         }
-                        firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ admins: firebase.firestore.FieldValue.arrayUnion(adminObject) })
+                        firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').set({ admins: { [`${adminUid}`]: adminObject } }, {merge: true})
                             .then(res => {
-                                console.log(res)
+                                firestore.collection(`userCollection`).doc(`${newAdmin}`).set({bookers : {[`${bookerObject.bookerAddress}`] : {name: bookerObject.bookerName, address: bookerObject.bookerAddress}}}, {merge: true})
+                                .then (resp => {
+                                    console.log(res)
                                 setNewAdmin('')
                                 fetchData()
                                 setLoading(false)
                                 setSuccessMessage(`Käyttäjä ${adminObject.name} lisätty adminksi`)
+                                })
+                                
                             })
                     }
                 })
@@ -51,19 +58,24 @@ const UserTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData}) 
             setError(true)
         }
     }
-    const removeAdmin = (admin) => {
-        console.log(admin)
 
+   
+    const removeAdmin = (admin) => {
+        const adminId = Object.keys(bookerObject.admins).filter(a => bookerObject.admins[a].email === admin.email && bookerObject.admins[a].name === admin.name)[0]
         try {
             setError(false)
             setLoading(true)
-            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ admins: firebase.firestore.FieldValue.arrayRemove(admin) })
+
+            firestore.collection(`userCollection`).doc(`${admin.email}`).update({[`bookers.${bookerObject.bookerAddress}`] : firebase.firestore.FieldValue.delete()})
+                                .then (resp => {
+
+            firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ [`admins.${adminId}`]: firebase.firestore.FieldValue.delete() } )
                 .then(res => {
                     console.log(res)
                     fetchData()
                     setLoading(false)
                 })
-
+            })
         } catch (error) {
             console.log(error)
             setLoading(false)
@@ -92,7 +104,7 @@ const UserTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData}) 
                 {loading ? <CircularProgress className={classes.addButton} size={25} /> : <Button onClick={addNewAdmin}><AddCircleIcon className={classes.addButton} /></Button>}
                 {error ? <div className={classes.errorMessage}>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <em />}
             </div>
-            {bookerObject.admins.map(admin => (
+            {Object.keys(bookerObject.admins).map(a => bookerObject.admins[a]).map(admin => (
                 <div key={admin.email} >
                     <div className={classes.root}>
                         <ExpansionPanel >

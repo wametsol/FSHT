@@ -78,7 +78,7 @@ const HomePage = () => {
                         Luo uusi järjestelmä
                     </Button>
                     <Typography>Hei {user.displayName}, järjestelmäsi: </Typography>
-                    {bookers.map(booker => (
+                    {Object.keys(bookers).map(o => bookers[o]).map(booker => (
                         <div key={booker.name}>
                         <Typography>{booker.name}: </Typography>
                         <Button className={classes.existingBookers} variant="outlined" component={Link} to={`/${booker.address}`}>Sivustolle</Button>

@@ -41,7 +41,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                     setError(true)
                     setLoading(false)
                 }
-                if(response.data().admins.filter(a => a.email === user.email).length>0 || response.data().bookerCreator === user.email){
+                if(Object.keys(response.data().admins).map(a => response.data().admins[a]).filter(a => a.email === user.email).length>0 || response.data().bookerCreator === user.email){
                 setBookerObject(response.data())
                 
                 console.log('Getting subs: ', getSubCollections)

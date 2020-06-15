@@ -1,0 +1,14 @@
+{
+    "rules": {
+      "userCollection": {
+        "$userEmail": {
+          ".read": "auth != null && auth.email == $userEmail",
+          ".write": "auth != null && auth.email == $userEmail"
+        }
+      },
+      "$bookerName": {
+        ".write": "root.child($bookerName+'/baseInformation/admins').val().contains(auth.email)"
+  
+      }
+    }
+  }

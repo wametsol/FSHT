@@ -3,23 +3,21 @@
 ### AIHE
 Ajanvarausjärjestelmä
 
+Järjestelmä jossa rekisteröitynyt käyttäjä voi luoda julkisen ajanvarausjärjestelmän. Tämän jälkeen järjestelmän ylläpitäjä voi päivittää sivustonsa näkymiä, tyylittelyä, palveluita, resursseja, lisätä ylläpitäjiä sekä asettaa sivuston julkiseksi. Julkinen sivusto löytyy tämän jälkeen määritellystä osoitteesta.
 
-Suunnitelma:
-Luodaan järjestelmä jossa rekisteröitynyt käyttäjä voi luoda julkisen ajanvarausnäkymän, jonka avulla tälle käyttäjälle voidaan varata aikoja.
-
----
-
-### SOVELLUS
-Sovellus löytyy osoitteesta: https://ajanvaraus.web.app/ (Päivitetään ajoittain)
-
-Käyttöohjeet: Kirjautunut käyttäjä voi luoda itselleen ajanvaraussivuston, joka tulee näkyviin valittuun osoitteeseen.
-
-(Esim. https://ajanvaraus.web.app/esimerkki)
+Rekisteröityneet käyttäjät voivat sen jälkeen tehdä sivustolla varauksia ja peruuttaa sekä tarkastella aikojaan. Varauksista, peruutuksista ja muutoksista lähetetään automaattinen sähköpostiviesti varauksen tekijälle sekä varausjärjestelmälle. 
 
 ---
-
 
 ### [TUNTIKIRJANPITO](https://github.com/wametsol/FSHT/blob/master/dokumentaatio/tuntikirjanpito.MD)
 [Dokumentaatio](https://github.com/wametsol/FSHT/blob/master/dokumentaatio)
 
 ---
+
+### SOVELLUS
+Sovellus löytyy osoitteesta: https://ajanvaraus.web.app/ (Päivitetty 16.06.2020)
+
+
+
+
+

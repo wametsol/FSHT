@@ -7,7 +7,7 @@ PVM | TUNNIT | SELITE
 14.04.|	5|	Tutustuminen firebaseen ja projektin alustusta.									
 15.04.|	7	|Kirjautuminen, rekisteröinti, backend + db alustus.									
 16.04.|	7	|Tilanhallintaa ja tyylittelyä FE.					Myös tyylittelyä sekä lomakkeiden rakentelua.				
-17.04.|	6	|Datan talletus ja haku BE, ja alkeellinen näyttö FE					DB oikeudet				
+17.04.|	6	|Datan talletus ja haku BE, ja alkeellinen näyttö FE.					DB oikeuksien tarkastelua.				
 20.04.|	6	|Bookerin ja adminpaneelin luomista ja näkymiä.									
 21.04.|	5|	Adminpaneelin muokkausta. 									
 22.04.|	2|	Pieniä korjauksia ja näkymien päivittämistä									
@@ -16,9 +16,9 @@ PVM | TUNNIT | SELITE
 28.04.|	7,5|	Tyylittelyä, varausnäkymää ja varausten käsittelyä.					Varauksia voi perua tällä hetkellä Adminpaneelista				
 29.04.|	5	|Käyttäjän varausnäkymiä varaussivustolla									
 30.04.|	2|	Infotabin luomista adminpaneeliin									
-04.05.|	5|	|Infotabia, yhteystietotabia.					Varaussivuston värien muokkaus adminpaneelista.				
-05.05.|	5|	Poikkeusaikataulujen luomista									
-06.05.|	5|	Poikkeusaikataulujen luomat muutokset aukioloon					Tyylittelyä ja näkymien muokkausta ehtojen mukaan				
+04.05.|	5|	Infotabia, yhteystietotabia.					Varaussivuston värien muokkaus adminpaneelista.				
+05.05.|	5|	Poikkeusaikataulujen luomista			.						
+06.05.|	5|	Poikkeusaikataulujen luomat muutokset aukioloon.			Tyylittelyä ja näkymien muokkausta ehtojen mukaan				
 12.05.|	6|	Tyylittelyä, pieniä muutoksia ja suunnittelua.									
 13.05.|	3|	Peruutusaikojen vaikutus varausten perumiseen.					Jos peruutusaika on umpeutunut, ei varausta voi perua				
 14.05.|	4,5|	Käyttäjän profiilisivun työstöä varaussivustolla.					Käyttäjä voi päivittää tietojaan.				
@@ -36,5 +36,5 @@ PVM | TUNNIT | SELITE
 14.06.|	6,5|	Automaattinen peruutus/muutos/siirto 					Erikoispäivän luonti tarkistaa leikkaavat varaukset				
 15.06.|	7|	Automaattisen siirron päivittelyä (emailit + db muutos)					DB oikeuksien säätöä.				
 16.06.|	8|	Bugien ja DB sääntöjen korjauksia, tyylittelyä. Viimeistelyä sekä dokumentaatiota			
-**YHT**|175h| Tilanne 16.06.2020
+**YHT**|175h| **Tilanne 16.06.2020**
 

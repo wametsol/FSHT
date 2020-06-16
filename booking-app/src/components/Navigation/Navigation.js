@@ -7,7 +7,9 @@ import {
     makeStyles,
     Drawer,
     List,
-    ListItem
+    ListItem,
+    Typography,
+    Divider
 } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu'
 import NotificationsIcon from '@material-ui/icons/Notifications'
@@ -102,8 +104,15 @@ const Navigation = () => {
                             <Button className={classes.logoutButton} variant='outlined' color="inherit" onClick={logout} >Logout</Button>
                             <Drawer anchor='right' open={drawerOpen} onClose={() => setDrawerOpen(false)}>
                                 <List className={classes.list}>
-                                    <ListItem>
-                                        <Button>Profiili</Button>
+                                    <ListItem style={{placeContent:'center'}}>
+                                        <Typography >{user.displayName}</Typography>
+                                    </ListItem>
+                                    <Divider />
+                                    <ListItem >
+                                    <Typography >{user.email}</Typography>
+                                    </ListItem>
+                                    <ListItem >
+                                        <Typography >{user.emailVerified? 'Sähköposti varmennettu' : 'Sähköposti ei varmennettu'}</Typography>
                                     </ListItem>
                                 </List>
                             </Drawer>

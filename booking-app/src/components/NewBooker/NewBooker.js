@@ -57,7 +57,7 @@ const NewBooker = () => {
     })
 
     const getSteps = () => {
-        return ['Sivuston perustiedot', 'Yhteystiedot', 'Rakenne', 'Tarkistus'];
+        return ['Sivuston perustiedot', 'Yhteystiedot', 'Tarkistus'];
     }
 
     const getStepContent = (step) => {
@@ -67,8 +67,6 @@ const NewBooker = () => {
             case 1:
                 return contactInformation()
             case 2:
-                return constructInformation();
-            case 3:
                 return checkInformation()
             default:
                 return 'Unknown step';
@@ -227,6 +225,7 @@ const NewBooker = () => {
             <Typography >Aloitetaan tulevan järjestelmän perustiedoista</Typography>
             <TextField
                 id="name"
+                value={systName}
                 label="Järjestelmäsi nimi"
                 style={{ margin: 8 }}
                 helperText="Tämä tulee sivustosi nimeksi. Esimerkiksi 'Kampaamo kaisa'"
@@ -240,6 +239,7 @@ const NewBooker = () => {
                 
             />
             <TextField
+                value={webAddress}
                 id="address"
                 label="Sivustosi osoite"
                 style={{ margin: 8, width: '75%' }}
@@ -275,10 +275,12 @@ const NewBooker = () => {
             <Typography variant='h4'>Yhteystiedot asiakkaille </Typography>
             <Typography>Voit halutessasi määritellä asiakkaille näkyvät yhteystiedot vielä uudelleen myöhemmin.</Typography>
             <Typography>Järjestelmän ja sinun välinen kommunikaatio tapahtuu kuitenkin tähän talletetun emailin mukaan mukaan.</Typography>
-            <TextField className={classes.basicText} id="contactName" label="Nimi" variant="outlined" onChange={({target}) => setPublicName(target.value)}/>
-            <TextField className={classes.basicText} id="contactCompany" label="Yritys" variant="outlined" onChange={({target}) => setPublicCompany(target.value)} />
+            <TextField value={publicName} className={classes.basicText} id="contactName" label="Nimi" variant="outlined" onChange={({target}) => setPublicName(target.value)}/>
+            <TextField value={publicCompany} className={classes.basicText} id="contactCompany" label="Yritys" variant="outlined" onChange={({target}) => setPublicCompany(target.value)} />
 
-            <TextField InputProps={{
+            <TextField 
+            value={publicEmail}
+            InputProps={{
                 startAdornment: (
                     <InputAdornment position="start">
                         <AlternateEmailIcon />
@@ -286,7 +288,9 @@ const NewBooker = () => {
                 ),
             }} className={classes.basicText} id="bookerEmail" label="Sähköposti" variant="outlined" onChange={({target}) => setPublicEmail(target.value)} 
             required/>
-            <TextField InputProps={{
+            <TextField 
+            value={publicPhone}
+            InputProps={{
                 startAdornment: (
                     <InputAdornment position="start">
                         <PhoneIcon />
@@ -457,6 +461,7 @@ const NewBooker = () => {
                                 color="primary"
                                 onClick={handleNext}
                                 className={classes.button}
+                                disabled={activeStep === 2}
                             >
                                 <ArrowForwardIcon />
                             </Button>

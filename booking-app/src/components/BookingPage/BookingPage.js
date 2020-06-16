@@ -518,7 +518,7 @@ const BookingPage = () => {
                             </FormControl>
 
                             {!chosenService.service ? <em /> : <div>
-                                {getFreeTimes().length === 0 ? <div><Typography variant='caption'>Ei vapaita aikoja tälle päivälle</Typography><br/>
+                                {getFreeTimes().length === 0 || chosenService.type === 'human' && getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).length===0 ? <div><Typography variant='caption'>Ei vapaita aikoja tälle päivälle</Typography><br/>
                                 {prevDayButtons()}{nextDayButtons()}</div> : <div><Typography variant='caption'>Sopivia aikoja vapaana: {getFreeTimes().length}</Typography><br/>
                                 {prevDayButtons()}{nextDayButtons()}</div>}
                             </div>}</div>
@@ -535,9 +535,11 @@ const BookingPage = () => {
                         </div>}
                     </div>
                     
-                    {!!chosenService.service && chosenService.type === 'human' && getFreeTimes().length !== 0  ? 
+                    {!!chosenService.service && chosenService.type === 'human' && getFreeTimes().length !== 0   ? 
+                    
                     <div className={classes.freeTimesBox}>
-                    <Typography>Valitse työntekijä</Typography>
+                        {getFreeTimes().length === 0 || getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).length===0 ? <em/>:
+                    <Typography>Valitse työntekijä</Typography>}
                     <div className={classes.workerBox} >
 
                     

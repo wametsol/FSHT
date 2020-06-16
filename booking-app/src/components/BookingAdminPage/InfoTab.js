@@ -438,8 +438,9 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                     <label htmlFor='uploadImage'>
                         <Button variant='contained' component='span'>Lataa kuva</Button>
                     </label>
-
+                    <br/>
                     {imageUpload ? <Typography>{imageUpload.name}</Typography> : <em />}
+                    <Typography variant='caption'>Huom! Hyväksyttyäsi muutokset, tämä kuva korvaa edellisen palvelimelta. Lataa vain sellaisia kuvia joihin sinulla on käyttöoikeus.</Typography>
                 </div>
                 <div className={classes.halfColumn} >
                     <Typography>Näkymä</Typography>
@@ -480,7 +481,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
             <Divider />
             <ExpansionPanelActions>
                 {!loading ? <div><Button disabled={!imageUpload} color='secondary' onClick={() => setImageUpload(null)} >Peru</Button>
-                    <Tooltip title='Päivittää sivuston taustakuvan. HUOM! tämä poistaa sivuston vanhan kuvan palvelimelta'><Button disabled disabled={!imageUpload} color='primary' onClick={handleUpload} >Päivitä taustakuva</Button></Tooltip></div > : <div style={{ marginRight: '40%' }}>{uploadProgress ? <Typography >Kuvaa ladataan palvelimelle: <CircularProgressWithLabel value={uploadProgress} /></Typography> : <em />}</div>}
+                    <Button disabled={!imageUpload} color='primary' onClick={handleUpload} >Päivitä taustakuva</Button></div > : <div style={{ marginRight: '40%' }}>{uploadProgress ? <span><Typography >Kuvaa ladataan palvelimelle: </Typography><CircularProgressWithLabel value={uploadProgress} /></span> : <em />}</div>}
             </ExpansionPanelActions>
         </ExpansionPanel>
     )

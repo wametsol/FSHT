@@ -682,7 +682,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     }
 
     const getResourceBookings = (date, resource) => {
-        if (!bookings[format(date, 'dd:MM:yyyy')] || !bookings[format(date, 'dd:MM:yyyy')].bookings) return []
+        if (!bookings || !bookings[format(date, 'dd:MM:yyyy')] || !bookings[format(date, 'dd:MM:yyyy')].bookings) return []
         return Object.keys(bookings[format(date, 'dd:MM:yyyy')].bookings).map(r => bookings[format(date, 'dd:MM:yyyy')].bookings[r]).filter(a => a.worker === resource && a.active)
     }
 

@@ -95,12 +95,15 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 {edit ? <div>
                     <div>
                     <Typography variant='h5'>Järjestelmäsi </Typography>
-                    <TextField disabled className={classes.basicText} id="systemName" value={systName} label="Nimi" variant="outlined" onChange={({ target }) => setSystName(target.value)} />
-                    <TextField className={classes.basicText} id="systemEmail" value={systEmail} label="Järjestelmän email" variant="outlined" onChange={({ target }) => setSystEmail(target.value)} />
+                    <div className={classes.contactInfoEditBox}>
+                    <TextField disabled className={classes.basicText} id="systemName" style={{background: '#f5f5f5'}} value={systName} label="Nimi" variant="outlined" onChange={({ target }) => setSystName(target.value)} />
+                    <TextField className={classes.basicText} id="systemEmail" style={{background: '#f5f5f5'}} value={systEmail} label="Järjestelmän email" variant="outlined" onChange={({ target }) => setSystEmail(target.value)} />
+                    </div>
                 </div>
                 <br />
                     <Typography variant='h5'>Julkisesti näkyvät yhteystiedot</Typography>
-                    <TextField className={classes.basicText} id="contactName" value={publicName} label="Nimi" variant="outlined" onChange={({ target }) => setPublicName(target.value)} />
+                    <div className={classes.contactInfoEditBox}>
+                    <TextField className={classes.basicText} id="contactName" style={{background: '#f5f5f5'}} value={publicName} label="Nimi" variant="outlined" onChange={({ target }) => setPublicName(target.value)} />
 
 
                     <TextField InputProps={{
@@ -109,7 +112,7 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                                 <AlternateEmailIcon />
                             </InputAdornment>
                         ),
-                    }} className={classes.basicText} id="bookerEmail" value={publicEmail} label="Sähköposti" variant="outlined" onChange={({ target }) => setPublicEmail(target.value)} />
+                    }} className={classes.basicText} id="bookerEmail" style={{background: '#f5f5f5'}} value={publicEmail} label="Sähköposti" variant="outlined" onChange={({ target }) => setPublicEmail(target.value)} />
 
                     <TextField InputProps={{
                         startAdornment: (
@@ -117,39 +120,43 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                                 <PhoneIcon />
                             </InputAdornment>
                         ),
-                    }} className={classes.basicText} id="bookerPhone" value={publicPhone} label="Puhelinnumero" variant="outlined" onChange={({ target }) => setPublicPhone(target.value)} />
-
+                    }} className={classes.basicText} id="bookerPhone" style={{background: '#f5f5f5'}} value={publicPhone} label="Puhelinnumero" variant="outlined" onChange={({ target }) => setPublicPhone(target.value)} />
+                    </div>
                     <br />
                     <Typography variant='h5'>Julkisesti näkyvät yrityksen tiedot</Typography>
-                    <TextField className={classes.basicText} value={publicCompany} id="contactCompany" label="Yritys" variant="outlined" onChange={({ target }) => setPublicCompany(target.value)} />
-                    <TextField className={classes.basicText} value={publicCompanyID} id="contactCompanyID" label="Y-tunnus" variant="outlined" onChange={({ target }) => setPublicCompanyID(target.value)} />
-                    <TextField className={classes.basicText} value={webAddress} id="webAddress" label="Web Osoite" variant="outlined" onChange={({ target }) => setWebAddress(target.value)} />
+                    <div className={classes.contactInfoEditBox}>
+                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicCompany} id="contactCompany" label="Yritys" variant="outlined" onChange={({ target }) => setPublicCompany(target.value)} />
+                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicCompanyID} id="contactCompanyID" label="Y-tunnus" variant="outlined" onChange={({ target }) => setPublicCompanyID(target.value)} />
+                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={webAddress} id="webAddress" label="Web Osoite" variant="outlined" onChange={({ target }) => setWebAddress(target.value)} />
                     <br/>
-                    <TextField className={classes.basicText} value={publicAddress} id="contactAddress" label="Osoite" variant="outlined" onChange={({ target }) => setPublicAddress(target.value)} />
-                    <TextField className={classes.basicText} value={publicPostNumber} id="contactPostnumber" label="Postinumero" variant="outlined" onChange={({ target }) => setPublicPostNumber(target.value)} />
-                    <TextField className={classes.basicText} value={publicCity} id="contactCity" label="Kaupunki" variant="outlined" onChange={({ target }) => setPublicCity(target.value)} />
+                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicAddress} id="contactAddress" label="Osoite" variant="outlined" onChange={({ target }) => setPublicAddress(target.value)} />
+                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicPostNumber} id="contactPostnumber" label="Postinumero" variant="outlined" onChange={({ target }) => setPublicPostNumber(target.value)} />
+                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicCity} id="contactCity" label="Kaupunki" variant="outlined" onChange={({ target }) => setPublicCity(target.value)} />
+                    </div>
                 </div> : <div>
                 <div>
                     <Typography variant='h5'>Järjestelmäsi </Typography>
-                    <Typography>Nimi: <span style={{fontWeight:600}}>{systName}</span></Typography>
-                    <Typography>Järjestelmän email: <span style={{fontWeight:600}}>{systEmail}</span></Typography>
+                    <div className={classes.contactInfoBox}>
+                    <Typography>Järjestelmän nimi: <span className={classes.boldText}>{systName}</span></Typography>
+                    <Typography>Järjestelmän email: <span className={classes.boldText}>{systEmail}</span></Typography>
+                    </div>
                 </div>
                 <br />
                         <Typography variant='h5'>Yhteystiedot</Typography>
-                        <div style={{margin:'auto', maxWidth: '30%' , border:'solid 1px', textAlign: 'left'}}>
-                        <Typography>Nimi: <span style={{fontWeight:600}}>{publicName}</span></Typography>
-                        <Typography>Sähköposti: <span style={{fontWeight:600}}>{publicEmail}</span></Typography>
-                        <Typography>Puhelin: <span style={{fontWeight:600}}>{publicPhone}</span></Typography>
-                        <Typography>Nettisivusto: <span style={{fontWeight:600}}>{webAddress}</span></Typography>
+                        <div className={classes.contactInfoBox}>
+                        <Typography>Nimi: <span className={classes.boldText}>{publicName}</span></Typography>
+                        <Typography>Sähköposti: <span className={classes.boldText}>{publicEmail}</span></Typography>
+                        <Typography>Puhelin: <span className={classes.boldText}>{publicPhone}</span></Typography>
+                        <Typography>Nettisivusto: <span className={classes.boldText}>{webAddress}</span></Typography>
                         </div>
                         <br />
                         <Typography variant='h5'>Yrityksen tiedot</Typography>
-                        <div style={{margin:'auto', maxWidth: '30%' , border:'solid 1px', textAlign: 'left'}}>
-                        <Typography>Yrityksen nimi: <span style={{fontWeight:600}}>{publicCompany}</span></Typography>
-                        <Typography>Y-tunnus: <span style={{fontWeight:600}}>{publicCompanyID}</span></Typography>
-                        <Typography>Osoite: <span style={{fontWeight:600}}>{publicAddress}</span></Typography>
-                        <Typography>Postinumero: <span style={{fontWeight:600}}>{publicPostNumber}</span></Typography>
-                        <Typography>Toimipaikka: <span style={{fontWeight:600}}>{publicCity}</span></Typography>
+                        <div className={classes.contactInfoBox}>
+                        <Typography>Yrityksen nimi: <span className={classes.boldText}>{publicCompany}</span></Typography>
+                        <Typography>Y-tunnus: <span className={classes.boldText}>{publicCompanyID}</span></Typography>
+                        <Typography>Osoite: <span className={classes.boldText}>{publicAddress}</span></Typography>
+                        <Typography>Postinumero: <span className={classes.boldText}>{publicPostNumber}</span></Typography>
+                        <Typography>Toimipaikka: <span className={classes.boldText}>{publicCity}</span></Typography>
                         </div>
                     </div>}
 

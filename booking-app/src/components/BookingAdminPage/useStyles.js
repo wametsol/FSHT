@@ -331,6 +331,25 @@ const useStyles = makeStyles((theme) => ({
     serviceListPaper: {
         minWidth: 230,
         minHeight: 250
+    },
+
+    contactInfoBox: {
+        margin:'auto',
+        maxWidth: '30%' ,
+        padding: 20,
+        backgroundColor: 'lightgrey',
+        borderRadius: '5px',
+        textAlign: 'left'
+    },
+    contactInfoEditBox: {
+        margin:'auto',
+        maxWidth: '80%' ,
+        padding: 20,
+        backgroundColor: '#ededed',
+        borderRadius: '5px',
+    },
+    boldText: {
+        fontWeight: 600
     }
 }))
 

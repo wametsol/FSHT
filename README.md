@@ -10,7 +10,7 @@ Rekisteröityneet käyttäjät voivat sen jälkeen tehdä sivustolla varauksia j
 ---
 
 ### [TUNTIKIRJANPITO](https://github.com/wametsol/FSHT/blob/master/dokumentaatio/tuntikirjanpito.MD)
-[Dokumentaatio](https://github.com/wametsol/FSHT/blob/master/dokumentaatio)
+[Dokumentaatio ja käyttöohjeet](https://github.com/wametsol/FSHT/blob/master/dokumentaatio)
 
 ---
 

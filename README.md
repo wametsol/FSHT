@@ -19,8 +19,7 @@ Käyttöohjeet: Kirjautunut käyttäjä voi luoda itselleen ajanvaraussivuston, 
 ---
 
 
-### TUNTIKIRJANPITO
-
-link
+### [TUNTIKIRJANPITO](https://github.com/wametsol/FSHT/blob/master/dokumentaatio/tuntikirjanpito.MD)
+[Dokumentaatio](https://github.com/wametsol/FSHT/blob/master/dokumentaatio)
 
 ---

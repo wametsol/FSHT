@@ -3,6 +3,8 @@
 
 * [Jatkokehitys](https://github.com/wametsol/FSHT/blob/master/dokumentaatio/ohjeet.MD)
 
+* [ToDo](https://github.com/wametsol/FSHT/blob/master/dokumentaatio/extraInfo.MD)
+
 ## Käyttöohjeet
 Ohjeet perustuvat (16.06.2020) julkaistuun versioon.
 

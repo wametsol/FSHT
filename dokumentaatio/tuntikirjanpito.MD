@@ -35,6 +35,6 @@ PVM | TUNNIT | SELITE
 13.06.|	7|	Laiteresurssien lisäys ja laitekohtaiset varaukset.					Päivittelyä autom. Viesteihin ja bugien korjausta.				
 14.06.|	6,5|	Automaattinen peruutus/muutos/siirto 					Erikoispäivän luonti tarkistaa leikkaavat varaukset				
 15.06.|	7|	Automaattisen siirron päivittelyä (emailit + db muutos)					DB oikeuksien säätöä.				
-16.06.|	9|	Bugien ja DB sääntöjen korjauksia, tyylittelyä. Viimeistelyä sekä dokumentaatiota			
-**YHT**|176h| **Tilanne 16.06.2020**
+16.06.|	10|	Bugien ja DB sääntöjen korjauksia, tyylittelyä. Viimeistelyä sekä dokumentaatiota			
+**YHT**|177h| **Tilanne 16.06.2020**
 

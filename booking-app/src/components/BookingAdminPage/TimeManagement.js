@@ -1334,6 +1334,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             <div>
                 <div style={{ display: 'flex' }}><Typography variant="h6" style={{ flexBasis: '80%', paddingLeft: '20%' }}>Resurssikohtainen ajanhallinta</Typography>
                     <FormControl style={{ bottom: 10 }}>
+                        {humanResources.length>0? <div>
                         <InputLabel id='resouceTimes'>Valitse henkilö</InputLabel>
                         <Select labelId='resourceTimes'
                             style={{ minWidth: 150 }}
@@ -1347,12 +1348,15 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                             {humanResources.map(r => (
                                 <MenuItem key={r.name + 'list'} value={r.name}>{r.name}</MenuItem>
                             ))}
-                        </Select></FormControl>
+                        </Select>
+                        </div> : <em/> }
+                        
+                        </FormControl>
                     <br />
                     <Divider />
                 </div>
                 {selectedResources === 'default' ? <div>
-                    <Typography variant='caption'>Valitse henkilö nähdäksesi henkilökohtaiset ajat</Typography>
+                    <Typography variant='caption'>{humanResources.length>0?  'Valitse henkilö nähdäksesi henkilökohtaiset ajat' : 'Luo ensin henkilöresursseja ´Resurssit´ välilehdeltä'}</Typography>
                 </div> : <div>
                         <Typography variant='caption'>Henkilön {selectedResources} ajanhallinta</Typography>
                         {personWeekdayPanel()}

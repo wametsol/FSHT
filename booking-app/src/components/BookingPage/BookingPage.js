@@ -124,7 +124,7 @@ const BookingPage = () => {
                         setError(true)
                         setLoading(false)
                     }
-                    console.log(response.data().bookings)
+                    console.log(response.data())
                     setUserData(response.data())
                     setLoading(false)
                     console.log(userData)
@@ -220,7 +220,7 @@ const BookingPage = () => {
             case 0:
                 return BookerHomePage()
             case 1:
-                return !!user ? <UserBookingPage site={bookerObject.bookerAddress} fetchUserData={fetchUserData} bookingsObject={bookings} services={bookerObject.services} userData={userData} /> : <LoginTab fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter} />
+                return !!user ? <UserBookingPage site={bookerObject.bookerAddress} fetchUserData={fetchUserData} bookingsObject={bookings} services={bookerObject.services} userData={userData} /> : <LoginTab fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter} setValue={setValue} />
             case 2:
                 return <ProfilePage userData={userData} fetchUserData={fetchUserData} setSuccessMessage={successMessageSetter} setErrorMessage={errorMessageSetter} />
             default:
@@ -598,7 +598,7 @@ const BookingPage = () => {
         
         return (
             <div className={classes.root}>
-                {(bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && bookerObject.admins.filter(a => a.email === user.email).length > 0)))?
+                {(bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && Object.keys(bookerObject.admins).filter(a => bookerObject.admins[a].email === user.email).length > 0)))?
                 <div>
                     
                 {(!bookerObject.siteSettings.visibleToPublic) ? <div className={classes.notPublicInfo}><Typography variant='h6'>Sivusto ei näy julkisesti, se näkyy vain sivuston ylläpitäjille. Voit julkaista sivuston hallintapaneelista.</Typography></div> : <em />}

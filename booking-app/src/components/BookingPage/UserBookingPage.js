@@ -34,6 +34,9 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
 
     const handleChange = (event, newValue) => {
         setValue(newValue)
+        console.log('Active', activeBookings())
+        console.log('Past: ', pastBookings())
+        console.log('Cancelled: ', cancelledBookings())
     }
 
     const cancelBooking = (booking) => {
@@ -120,15 +123,16 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
     }
 
     const cancelledBookings = () => {
-        return userData.bookings[`${site}`].filter(booking => !booking.active)
+        if (Boolean(userData.bookings[`${site}`])) return userData.bookings[`${site}`].filter(booking => !booking.active)
+        
     }
 
     const activeBookings = () => {
-        return userData.bookings[`${site}`].filter(booking => booking.active && !isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`))))
+        if (Boolean(userData.bookings[`${site}`])) return userData.bookings[`${site}`].filter(booking => booking.active && !isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`))))
     }
 
     const pastBookings = () => {
-        return userData.bookings[`${site}`].filter(booking => booking.active && isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`))))
+        if (Boolean(userData.bookings[`${site}`])) return userData.bookings[`${site}`].filter(booking => booking.active && isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`))))
     }
 
     const getTabContent = (tab) => {
@@ -613,7 +617,7 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
                     value={value}
                     onChange={handleChange}
                     variant='standard'>
-                    <Tab label={'Tulevat'}></Tab>
+                    <Tab label={'Tulevat'} ></Tab>
                     <Tab label={'Menneet'}></Tab>
                     <Tab label={'Perutut'}></Tab>
                 </Tabs>

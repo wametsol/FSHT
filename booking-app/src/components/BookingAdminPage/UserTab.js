@@ -123,9 +123,9 @@ const UserTab = ({setSuccessMessage, setErrorMessage, bookerObject, fetchData}) 
                             <ExpansionPanelDetails className={classes.details}>
                                 <div className={classes.column} />
                                 <div className={classes.column}>
-                                    {admin.email === bookerObject.bookerCreator ? <div><Chip label="Owner" onDelete={() => { }} /></div> : <em />}
-                                    <Chip label="Admin" onDelete={() => { }} />
-                                    <Chip label="Booker" onDelete={() => { }} />
+                                    {admin.email === bookerObject.bookerCreator ? <div><Chip label="Owner" /></div> : <em />}
+                                    <Chip label="Admin" />
+                                    <Chip label="Booker"/>
                                 </div>
                                 <div className={clsx(classes.column, classes.helper)}>
                                     <Typography variant="caption">

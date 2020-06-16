@@ -154,8 +154,8 @@ const NewBooker = () => {
                 setError(false)
                 setLoading(true)
                 console.log('Checking: ', webAddress)
-                firestore.collection(`booker${webAddress}`).get().then( (response) => {
-                    if(response.empty){
+                firestore.collection(`bookerCollection`).get().then( (response) => {
+                    if(response.docs.filter(a => a.id === webAddress).length===0){
                         setTimeout(() => {
                             setSuccess(true)
                             setLoading(false)
@@ -273,8 +273,8 @@ const NewBooker = () => {
     const contactInformation = () => (
         <div>
             <Typography variant='h4'>Yhteystiedot asiakkaille </Typography>
-            <Typography>Voit halutessasi määritellä profiilista poikkeavat yhteystiedot, jotka näytetään asiakkaille sivustollasi.</Typography>
-            <Typography>Järjestelmän ja sinun välinen kommunikaatio tapahtuu kuitenkin profiiliin talletettujen tietojen mukaan.</Typography>
+            <Typography>Voit halutessasi määritellä asiakkaille näkyvät yhteystiedot vielä uudelleen myöhemmin.</Typography>
+            <Typography>Järjestelmän ja sinun välinen kommunikaatio tapahtuu kuitenkin tähän talletetun emailin mukaan mukaan.</Typography>
             <TextField className={classes.basicText} id="contactName" label="Nimi" variant="outlined" onChange={({target}) => setPublicName(target.value)}/>
             <TextField className={classes.basicText} id="contactCompany" label="Yritys" variant="outlined" onChange={({target}) => setPublicCompany(target.value)} />
 
@@ -284,7 +284,8 @@ const NewBooker = () => {
                         <AlternateEmailIcon />
                     </InputAdornment>
                 ),
-            }} className={classes.basicText} id="bookerEmail" label="Sähköposti" variant="outlined" onChange={({target}) => setPublicEmail(target.value)} />
+            }} className={classes.basicText} id="bookerEmail" label="Sähköposti" variant="outlined" onChange={({target}) => setPublicEmail(target.value)} 
+            required/>
             <TextField InputProps={{
                 startAdornment: (
                     <InputAdornment position="start">
@@ -316,6 +317,7 @@ const NewBooker = () => {
         try {
             const bookerObject = {
                 bookerCreator: user.email,
+                systemEmail: publicEmail,
                 bookerName: systName,
                 bookerAddress: webAddress,
                 publicInformation:{
@@ -325,10 +327,12 @@ const NewBooker = () => {
                     phone: publicPhone
                 },
                 services: bookerServices,
-                admins: [{
+                admins: {
+                   [user.uid]: {
                     email: user.email,
                     name: user.displayName
-                }],
+                    }
+                },
                 timeTables: initialTimetable,
                 specialDays: [],
                 resources:[],
@@ -373,18 +377,23 @@ const NewBooker = () => {
                     
                 }
             }
+            
             firestore.collection(`booker${webAddress}`).doc('baseInformation').set(bookerObject).then( (response) => {
                 firestore.collection(`booker${webAddress}`).doc('bookings').set({init:true})
                 .then((resp) => {
                 firestore.collection('userCollection').doc(user.email).set({bookers: { [webAddress]: {address: webAddress, name: systName}}}, {merge: true})
                 .then((res) => {
-                    console.log(res)
-                    setTimeout(() => {
+                    firestore.collection('bookerCollection').doc(webAddress).set({active: true})
+                    .then(r => {
+                        console.log(res)
+                        setTimeout(() => {
                         setLoading(false)
                         setTimeout(() => {
                             history.push(`/${webAddress}/admin`)
                         }, 2000)
                         }, 3000)   
+                    })
+                    
                 })
                 })
             })

@@ -79,6 +79,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                                 fetchData()
                                 setLoading(false)
                                 setSuccessMessage(`Resurssi ${resourceObject.name} lisätty`)
+                                resourceObject.human? setTabValue(0) : setTabValue(1)
                             })
         } catch (error) {
             console.log(error)
@@ -422,7 +423,7 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
                             onChange={({ target }) => setIdenticalResources(target.value)}
                             value={identicalResources}>
                             {getNumberArray(25, 1).filter(number => number != 0).map(number => (
-                                                <MenuItem value={number}>{number}kpl</MenuItem>
+                                                <MenuItem key={number+'res'} value={number}>{number}kpl</MenuItem>
                                             ))}
                             </Select> </div>
                             <FormHelperText>Esimerkiksi Rata 5kpl, joita voidaan varata samanaikaisesti. Järjestelmä erottelee identtiset resurssit numeroilla (Rata 1, Rata 2 jne.)</FormHelperText>
@@ -486,8 +487,8 @@ const Resources = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData
             onChange={handleTabChange}
             TabIndicatorProps={{ style: { background: `pink`} }}
             >
-                <Tab label='Henkilöt'/>
-                <Tab label='Laitteet'/>
+                <Tab label='Henkilöt' style={tabValue===0? {backgroundColor: 'lightgrey'} : {}}/>
+                <Tab label='Laitteet' style={tabValue===1? {backgroundColor: 'lightgrey'} : {}}/>
             </Tabs>
             </div> : <em/> }
             {getTabContent(tabValue)}

@@ -33,7 +33,6 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
     }
 
     const fetchData = () => {
-
         
         firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
             .then((response) => {
@@ -41,7 +40,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                     setError(true)
                     setLoading(false)
                 }
-                if(Object.keys(response.data().admins).map(a => response.data().admins[a]).filter(a => a.email === user.email).length>0 || response.data().bookerCreator === user.email){
+                if(Object.keys(response.data().admins).filter(a => a === user.uid).length>0 || response.data().bookerCreator === user.email){
                 setBookerObject(response.data())
                 
                 console.log('Getting subs: ', getSubCollections)
@@ -71,11 +70,16 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
                 })
                 
 
+            } else {
+                setErrorMessage('Kyseisellä osoitteella ei löytynyt sivustoja, tai oikeutesi eivät riitä')
+                setLoading(false)
+                setError(true)
             }
 
             })
             .catch(error => {
                 console.log(error)
+                setErrorMessage('Kyseisellä osoitteella ei löytynyt sivustoja, tai oikeutesi eivät riitä')
                 setLoading(false)
                 setError(true)
             })
@@ -140,8 +144,8 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
     return (
         <div>
             {!bookerObject ? <div>
-                {loading ? <CircularProgress size={25} /> : <em />}
-                {error ? <div>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <div>Sivustoja ei löydy</div>}
+                {loading ? <CircularProgress size={25} /> : <span>{error ? <div>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <div>Sivustoja ei löydy</div>}</span>}
+                
             </div>
                 : (<Paper>
                     <div className={classes.visibilityBar}>

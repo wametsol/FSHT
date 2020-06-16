@@ -91,10 +91,12 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                 }
                 firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayUnion(serviceObject) })
                     .then((res) => {
+                        serviceType === 'human'? setTabValue(0) : setTabValue(1)
                         resetForm()
                         fetchData()
                         setLoading(false)
                         setSuccessMessage(`Palvelun '${serviceObject.service}' lisääminen onnistui`)
+                        
                     })
             }
         } catch (error) {
@@ -409,10 +411,10 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
             variant='fullWidth'
             value={tabValue}
             onChange={handleTabChange}
-            TabIndicatorProps={{ style: { background: `pink`} }}
+            TabIndicatorProps={{ style: { background: `pink`, backgroundColor: 'pink'} }}
             >
-                <Tab label='Henkilöt'/>
-                <Tab label='Laitteet'/>
+                <Tab label='Henkilöt' style={tabValue===0? {backgroundColor: 'lightgrey'} : {}} />
+                <Tab label='Laitteet' style={tabValue===1? {backgroundColor: 'lightgrey'} : {}} />
             </Tabs>
                     {getTabContent(tabValue)}
                     </div> : <div>Et ole vielä lisännyt palveluita sivustollesi.</div>
@@ -437,7 +439,7 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                             id="service"
                             label="Palvelusi nimi"
                             style={{ margin: 4 }}
-                            helperText="Tämä tulee palvelusi nimeksi. Esimerkiksi 'Hieronta'"
+                            helperText="Nimeä ei voida muuttaa"
                             margin="dense"
                             variant='outlined'
                             disabled
@@ -469,12 +471,12 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                         />
                         <br />
                         <FormControl className={classes.formControl}>
-                            <FormLabel>Hinta</FormLabel>
+                            <FormLabel style={{paddingLeft: 5}}>Hinta</FormLabel>
                             <span>
                                 <TextField
                                     id="price"
                                     //label="Hinta"
-                                    //style={{ margin: 4, width: '120px', height: '42px', marginTop: '17px' }}
+                                    style={{ margin: 4}}
                                     //helperText="Palvelusi hinta"
                                     margin="dense"
                                     className={classes.priceInput}
@@ -499,11 +501,12 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                                 />
                             </span>
 
-                            <FormHelperText>Palvelusi hinta</FormHelperText>
+                            <FormHelperText style={{paddingLeft: 5}}>Palvelusi hinta</FormHelperText>
 
                         </FormControl>
-                        <FormControl style={{ marginLeft: 20 }} >
-                            <FormLabel>Kesto</FormLabel>
+                        <br/>
+                        <FormControl style={{ marginLeft: 4 }} >
+                            <FormLabel style={{paddingLeft: 5}}>Kesto</FormLabel>
                             <div style={{ display: 'inline-flex', border: 'solid 1px lightgrey', borderRadius: '5px', maxHeight: '45px', backgroundColor: 'white' }}>
                                 <FormControl style={{ minWidth: 100 }}>
                                     <InputLabel id="tunnit">Tunnit</InputLabel>
@@ -590,7 +593,7 @@ const ServiceTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchDat
                         </FormControl>
 
 
-                        {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div style={{ display: 'inline' }}><Tooltip title='Lisää uusi palvelu'><Button className={classes.addServiceButton} onClick={updateService}><AddCircleIcon /></Button></Tooltip><Tooltip title='Peru'><Button className={classes.cancelServiceButton} onClick={() => handleEditFormClose()}><CancelIcon /></Button></Tooltip></div>}
+                        {loading ? <CircularProgress className={classes.addButton} size={25} /> : <div style={{ display: 'inline' }}><Tooltip title='Vahvista muokkaus'><Button className={classes.addServiceButton} onClick={updateService}><AddCircleIcon /></Button></Tooltip><Tooltip title='Peru'><Button className={classes.cancelServiceButton} onClick={() => handleEditFormClose()}><CancelIcon /></Button></Tooltip></div>}
                         {error ? <div className={classes.errorMessage}>Tietojen antamisessa tapahtui virhe, tarkasta kentät</div> : <em />}
                     </form>
                     </div>

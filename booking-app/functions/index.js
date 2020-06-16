@@ -115,7 +115,7 @@ exports.sendNewBookingEmailToSystem = functions.region('europe-west3').firestore
                 const promises = []
                 var systemMailOptions = {
                     from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
-                    to: `${gmailInfo.email}`,
+                    to: `${bookerObject.systemEmail}`,
                     subject: `Päivän ${data.bookingDate} ensimmäinen varaus sivustolla ${context.params.bookerAddress[6].toUpperCase() + context.params.bookerAddress.slice(7)}`,
                     html: `
         <h1>${data.service}</h1>
@@ -129,7 +129,7 @@ exports.sendNewBookingEmailToSystem = functions.region('europe-west3').firestore
                 var userMailOptions = {
                     from: `${bookerObject.publicInformation.name} <${bookerObject.publicInformation.email}>`,
                     replyTo: `${bookerObject.publicInformation.email}`,
-                    to: `${gmailInfo.email}`,
+                    to: `${data.user.email}`,
                     subject: `Varausvahvistus sivustolla ${bookerObject.bookerName} `,
                     html: `
                 <h1>Hei ${data.user.name}!</h1>
@@ -237,7 +237,7 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                     console.log(object)
                     mailOptions[0] = {
                         from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
-                        to: `${gmailInfo.email}`,
+                        to: `${bookerObject.systemEmail}`,
                         subject: `Uusi varaus sivustolla ${bookerObject.bookerName}  `,
                         html: `
             <h1>${object.service}</h1>
@@ -250,7 +250,7 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                     mailOptions[1] = {
                         from: `${bookerObject.publicInformation.name} <${bookerObject.publicInformation.email}>`,
                         replyTo: `${bookerObject.publicInformation.email}`,
-                        to: `${gmailInfo.email}`,
+                        to: `${object.user.email}`,
                         subject: `Varausvahvistus sivustolla ${bookerObject.bookerName} `,
                         html: `
                         <h1>Hei ${object.user.name}!</h1>
@@ -282,7 +282,7 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                         console.log('Cancel: ',object)
                         mailOptions[0] = {
                             from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
-                            to: `${gmailInfo.email}`,
+                            to: `${bookerObject.systemEmail}`,
                             subject: `Varauksen peruutus sivustolla ${bookerObject.bookerName}  `,
                             html: `
             <h1>Varaus ${object.id} on peruttu</h1>
@@ -298,7 +298,7 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                         mailOptions[1] = {
                             from: `${bookerObject.bookerName} <${gmailInfo.email}>`,
                             replyTo: `${bookerObject.publicInformation.email}`,
-                            to: `${gmailInfo.email}`,
+                            to: `${object.user.email}`,
                             subject: `Varauksesi sivustolla ${bookerObject.bookerName} on peruttu `,
                             html: `
                 <h1>Hei ${object.user.name}, olemme peruneet varauksesi ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)}</h1>
@@ -324,7 +324,7 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
 
                         mailOptions[0] = {
                             from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
-                            to: `${gmailInfo.email}`,
+                            to: `${bookerObject.systemEmail}`,
                             subject: `Varauksen siirto sivustolla ${bookerObject.bookerName}  `,
                             html: `
             <h1>Varaus ${object.id} on siirretty henkilöltä ${earlierBooking.worker} -> ${object.worker}</h1>
@@ -339,7 +339,7 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                         mailOptions[1] = {
                             from: `${bookerObject.bookerName} <${gmailInfo.email}>`,
                             replyTo: `${bookerObject.publicInformation.email}`,
-                            to: `${gmailInfo.email}`,
+                            to: `${object.user.email}`,
                             subject: `Ilmoitus koskien varaustasi sivustolla ${bookerObject.bookerName}`,
                             html: `
                 <h1>Hei ${object.user.name}, olemme siirtäneet varauksesi ${object.service}, ${object.bookingDate}, klo: ${formatTimes(object.times.start)} - ${formatTimes(object.times.end)} toiselle työntekijälle</h1>

@@ -57,8 +57,8 @@ const Register = () => {
                     uid: registeredUser.user.uid,
                     name: name,
                     email: email,
-                    bookers: [],
-                    bookings: [],
+                    bookers: {},
+                    bookings: {},
                     contactPreferences:{
                         email: true,
                         phone: false

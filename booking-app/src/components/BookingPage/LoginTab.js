@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-const LoginTab = ({setSuccessMessage, setErrorMessage, fetchUserData}) => {
+const LoginTab = ({setSuccessMessage, setErrorMessage, fetchUserData, setValue }) => {
     const classes = useStyles()
     const history = useHistory()
     const [loading, setLoading] = useState(false);
@@ -79,6 +79,7 @@ const LoginTab = ({setSuccessMessage, setErrorMessage, fetchUserData}) => {
                     setLoading(false)
                     setSuccessMessage(`Kirjautuminen onnistui, tervetuloa.`)
                     history.push(`/${pagematch.params.id}`)
+                    setValue(0)
             }).catch(error => {
                 var errorMsg = 'Tapahtui virhe, yritä uudelleen'
                 if(error.code === 'auth/user-not-found'){
@@ -104,8 +105,8 @@ const LoginTab = ({setSuccessMessage, setErrorMessage, fetchUserData}) => {
                     uid: registeredUser.user.uid,
                     name: name,
                     email: email,
-                    bookers: [],
-                    bookings: [],
+                    bookers: {},
+                    bookings: {},
                     contactPreferences:{
                         email:true,
                         phone:false
@@ -117,12 +118,17 @@ const LoginTab = ({setSuccessMessage, setErrorMessage, fetchUserData}) => {
                 }).then(() => {
                     console.log('Added name')
                     //window.localStorage.setItem('loggedBookerUser', JSON.stringify(user))
-                    history.push('/')
+                    history.push(`/${pagematch.params.id}`)
+                    setValue(0)
+                    setSuccessMessage(`Rekisteröinti onnistui, ja sinut kirjattiin sisään.`)
                     return auth.currentUser
                 }).catch((error) => {
                     console.log(error)
                 })
             }).catch((error) => {
+                if(error.message=== 'The email address is badly formatted.'){
+                    setErrorMessage('Tarkista antamasi email.')
+                }
                 console.log(error)
             })
 

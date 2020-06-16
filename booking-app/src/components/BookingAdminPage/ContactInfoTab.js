@@ -23,6 +23,7 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const [edit, setEdit] = useState(false)
 
     const [systName, setSystName] = React.useState(bookerObject.bookerName)
+    const [systEmail, setSystEmail] = React.useState(bookerObject.systemEmail)
     const [webAddress, setWebAddress] = React.useState('')
 
     const [publicName, setPublicName] = React.useState(bookerObject.publicInformation.name)
@@ -30,7 +31,7 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const [publicEmail, setPublicEmail] = React.useState(bookerObject.publicInformation.email)
     const [publicPhone, setPublicPhone] = React.useState(bookerObject.publicInformation.phone)
     const [publicCompanyID, setPublicCompanyID] = React.useState(bookerObject.publicInformation.companyID)
-    const [publicAddress, setPublicyAddress] = React.useState(bookerObject.publicInformation.address)
+    const [publicAddress, setPublicAddress] = React.useState(bookerObject.publicInformation.address)
     const [publicPostNumber, setPublicPostNumber] = React.useState(bookerObject.publicInformation.postnumber)
     const [publicCity, setPublicCity] = React.useState(bookerObject.publicInformation.city)
 
@@ -39,14 +40,16 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         e.preventDefault()
         setEdit(!edit)
         setSystName(bookerObject.bookerName)
+        setSystEmail(bookerObject.systemEmail)
         setPublicName(bookerObject.publicInformation.name)
         setPublicCompany(bookerObject.publicInformation.company)
         setPublicEmail(bookerObject.publicInformation.email)
         setPublicPhone(bookerObject.publicInformation.phone)
         setPublicCompanyID(bookerObject.publicInformation.companyID)
-        setPublicyAddress(bookerObject.publicInformation.address)
+        setPublicAddress(bookerObject.publicInformation.address)
         setPublicPostNumber(bookerObject.publicInformation.postnumber)
         setPublicCity(bookerObject.publicInformation.city)
+        setWebAddress(bookerObject.publicInformation.webAddress)
     }
 
     const acceptChanges = (e) => {
@@ -63,8 +66,9 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             newInfo.postnumber = publicPostNumber
             newInfo.city = publicCity
             newInfo.companyID = publicCompanyID
+            newInfo.webAddress = webAddress
             
-            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('baseInformation').update({ publicInformation: newInfo})
+            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('baseInformation').update({ publicInformation: newInfo, systemEmail: systEmail})
                 .then((res) => {
                     fetchData()
                     setLoading(false)
@@ -82,7 +86,9 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
 
             <div>
-                <Typography variant='h4'>Yhteystiedot asiakkaille </Typography>
+                
+
+                <Typography variant='h4'>Yhteystiedot </Typography>
                 
 
                 
@@ -90,9 +96,10 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     <div>
                     <Typography variant='h5'>Järjestelmäsi </Typography>
                     <TextField disabled className={classes.basicText} id="systemName" value={systName} label="Nimi" variant="outlined" onChange={({ target }) => setSystName(target.value)} />
+                    <TextField className={classes.basicText} id="systemEmail" value={systEmail} label="Järjestelmän email" variant="outlined" onChange={({ target }) => setSystEmail(target.value)} />
                 </div>
                 <br />
-                    <Typography variant='h5'>Yhteystiedot</Typography>
+                    <Typography variant='h5'>Julkisesti näkyvät yhteystiedot</Typography>
                     <TextField className={classes.basicText} id="contactName" value={publicName} label="Nimi" variant="outlined" onChange={({ target }) => setPublicName(target.value)} />
 
 
@@ -113,17 +120,19 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     }} className={classes.basicText} id="bookerPhone" value={publicPhone} label="Puhelinnumero" variant="outlined" onChange={({ target }) => setPublicPhone(target.value)} />
 
                     <br />
-                    <Typography variant='h5'>Yrityksen tiedot</Typography>
+                    <Typography variant='h5'>Julkisesti näkyvät yrityksen tiedot</Typography>
                     <TextField className={classes.basicText} value={publicCompany} id="contactCompany" label="Yritys" variant="outlined" onChange={({ target }) => setPublicCompany(target.value)} />
                     <TextField className={classes.basicText} value={publicCompanyID} id="contactCompanyID" label="Y-tunnus" variant="outlined" onChange={({ target }) => setPublicCompanyID(target.value)} />
+                    <TextField className={classes.basicText} value={webAddress} id="webAddress" label="Web Osoite" variant="outlined" onChange={({ target }) => setWebAddress(target.value)} />
                     <br/>
-                    <TextField className={classes.basicText} value={publicAddress} id="contactAddress" label="Osoite" variant="outlined" onChange={({ target }) => setPublicyAddress(target.value)} />
+                    <TextField className={classes.basicText} value={publicAddress} id="contactAddress" label="Osoite" variant="outlined" onChange={({ target }) => setPublicAddress(target.value)} />
                     <TextField className={classes.basicText} value={publicPostNumber} id="contactPostnumber" label="Postinumero" variant="outlined" onChange={({ target }) => setPublicPostNumber(target.value)} />
                     <TextField className={classes.basicText} value={publicCity} id="contactCity" label="Kaupunki" variant="outlined" onChange={({ target }) => setPublicCity(target.value)} />
                 </div> : <div>
                 <div>
                     <Typography variant='h5'>Järjestelmäsi </Typography>
                     <Typography>Nimi: <span style={{fontWeight:600}}>{systName}</span></Typography>
+                    <Typography>Järjestelmän email: <span style={{fontWeight:600}}>{systEmail}</span></Typography>
                 </div>
                 <br />
                         <Typography variant='h5'>Yhteystiedot</Typography>
@@ -131,6 +140,7 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                         <Typography>Nimi: <span style={{fontWeight:600}}>{publicName}</span></Typography>
                         <Typography>Sähköposti: <span style={{fontWeight:600}}>{publicEmail}</span></Typography>
                         <Typography>Puhelin: <span style={{fontWeight:600}}>{publicPhone}</span></Typography>
+                        <Typography>Nettisivusto: <span style={{fontWeight:600}}>{webAddress}</span></Typography>
                         </div>
                         <br />
                         <Typography variant='h5'>Yrityksen tiedot</Typography>

@@ -8,6 +8,7 @@ Tähän on määritelty omia huomioita mahdollisista tulevista lisäyksistä
 * **Testit**
  * Testausta on toteutettu ainoastaan henkilökohtaisesti kokeilemalla.
 * Mobiilioptimoinnin parannus
+* Järjestelmien ja käyttäjätietojen poisto
 * Tyylittelyn parannus
 * Varausten teko ilman kirjautumista
 * Varausten teko ilman ennalta määriteltyjä resursseja

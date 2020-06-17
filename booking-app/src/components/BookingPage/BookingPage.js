@@ -4,7 +4,7 @@ import { format, getDay, addDays, isBefore, parseISO, isToday } from 'date-fns'
 import { auth, firestore } from '../../firebase'
 import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip, Slide, Snackbar, IconButton, Drawer } from '@material-ui/core'
 import useStyles from './useStyles'
-import { useRouteMatch } from 'react-router-dom'
+import { useRouteMatch, Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
 import CallIcon from '@material-ui/icons/Call'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
@@ -102,7 +102,6 @@ const BookingPage = () => {
     }, [user])
 
     const fetchUserData = () => {
-        console.log('FECTHING: ', user)
         try {
             setLoading(true)
             firestore.collection('userCollection').doc(`${user.email}`).get()
@@ -322,7 +321,7 @@ const BookingPage = () => {
                 <div>
                     <Typography>Lähestyvät poikkeusaikataulut: </Typography>
                     {specialTimes.map(time => (
-                        <div className={classes.specialTimeBox}>
+                        <div key={time.reason+''+time.date} className={classes.specialTimeBox}>
                             <Typography>{time.reason}, {time.date} : <span style={{ fontWeight: 600 }}>{getFormattedTimes(time.times)}</span></Typography>
                         </div>
                     ))}
@@ -573,7 +572,7 @@ const BookingPage = () => {
             {(bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && Object.keys(bookerObject.admins).filter(a => bookerObject.admins[a].email === user.email).length > 0))) ?
                 <div>
 
-            {(!bookerObject.siteSettings.visibleToPublic) ? <div className={classes.notPublicInfo}><Typography variant='h6'>Sivusto ei näy julkisesti, se näkyy vain sivuston ylläpitäjille. Varauksia ei voida tehdä. Voit julkaista sivuston hallintapaneelista. Hallintapaneeli löytyy osoitteesta www.ajanvaraus.web.app/{bookerObject}/admin</Typography></div> : <em />}
+            {(!bookerObject.siteSettings.visibleToPublic) ? <div className={classes.notPublicInfo}><Typography variant='h6'>Sivusto ei näy julkisesti, se näkyy vain sivuston ylläpitäjille. Varauksia ei voida tehdä. Voit julkaista sivuston hallintapaneelista.  {!!bookerObject? <Link to={`/${bookerObject.bookerAddress}/admin`} >Hallintapaneeliin</Link>: 'Hallintapaneeli löytyy osoitteesta: www.ajanvaraus.web.app/omasivu/admin'}</Typography></div> : <em />}
                     {notification()}
                     <div >
                         <div >

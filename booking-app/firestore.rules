@@ -19,7 +19,7 @@ service cloud.firestore {
   }
     match /{booker}/bookings/{document=**}/{days} {
     	allow create: if true
-    	allow read: if get(/databases/$(database)/documents/$(booker)/baseInformation).data.siteSettings.visibleToPublic == true
+    	allow read: if get(/databases/$(database)/documents/$(booker)/baseInformation).data.siteSettings.visibleToPublic == true || get(/databases/$(database)/documents/$(booker)/baseInformation).data.admins.keys().hasAll([(request.auth.uid)])
       allow update: if get(/databases/$(database)/documents/$(booker)/baseInformation).data.admins.keys().hasAll([(request.auth.uid)]) ||
       request.resource.data.diff(resource.data).affectedKeys().hasAll([(request.auth.uid)]) ||
       request.resource.data.diff(resource.data).addedKeys() != null

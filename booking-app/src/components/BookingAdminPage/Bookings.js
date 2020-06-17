@@ -228,7 +228,7 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                 </ExpansionPanelSummary>
             </ExpansionPanel>
             {!bookingsObject[`${format(selectedDate, `dd:MM:yyyy`)}`] ? <em /> : <div>{getBookings().map(booking => (
-                <div className={classes.root} key={booking.times.start + booking.worker}>
+                <div className={classes.root} key={booking.times.start + booking.worker + booking.deviceID}>
                     <ExpansionPanel >
                         <ExpansionPanelSummary
                             expandIcon={<ExpandMoreIcon />}

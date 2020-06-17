@@ -15,7 +15,7 @@ Rekisteröityneet käyttäjät voivat sen jälkeen tehdä sivustolla varauksia j
 ---
 
 ### SOVELLUS
-Sovellus löytyy osoitteesta: https://ajanvaraus.web.app/ (Päivitetty 16.06.2020)
+Sovellus löytyy osoitteesta: https://ajanvaraus.web.app/ (Päivitetty 17.06.2020)
 
 
 

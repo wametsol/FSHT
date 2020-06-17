@@ -36,6 +36,6 @@ PVM | TUNNIT | SELITE
 14.06.|	6,5|	Automaattinen peruutus/muutos/siirto 					Erikoispäivän luonti tarkistaa leikkaavat varaukset				
 15.06.|	7|	Automaattisen siirron päivittelyä (emailit + db muutos)					DB oikeuksien säätöä.				
 16.06.|	10|	Bugien ja DB sääntöjen korjauksia, tyylittelyä. Viimeistelyä sekä dokumentaatiota
-17.06.| 2 | Viimeistelyä, siivousta ja testauksia			
-**YHT**|179h| **Tilanne 17.06.2020**
+17.06.| 3 | Viimeistelyä, siivousta ja testauksia			
+**YHT**|180h| **Tilanne 17.06.2020**
 

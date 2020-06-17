@@ -181,37 +181,6 @@ exports.sendNewBookingEmailToSystem = functions.region('europe-west3').firestore
     })
 
 
-
-
-/*
-exports.sendEmailToSystemOnNewBooking = functions.region('europe-west3').firestore.document('{bookerAddress}/bookings/{yearID}/{dayID}/bookings/{bookingID}')
-.onCreate((snap, context) => {
-    const data = snap.data()
-    console.log('Data: ', data)
-    var mailOptions = {
-        from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
-        to: `${gmailInfo.email}`,
-        subject: `Uusi varaus ${data.bookingDate} sivustolla ${context.params.bookerAddress[6].toUpperCase()+context.params.bookerAddress.slice(7)}`,
-        html: `
-        <h1>${data.service}</h1>
-        <p>Varaaja: ${data.user.name}, ${data.user.email}</p>
-        <p>Työntekijä: ${data.worker}</p>
-        <p>Klo: ${formatTimes(data.times.start)} - ${formatTimes(data.times.end)}</p>
-        `
-
-    }
-
-    return transporter.sendMail(mailOptions, (error, data) => {
-        if(error){
-            console.log(error)
-            return
-        }
-        else {
-            console.log('Sent: ', data)
-        }
-    })
-})*/
-
 exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.document('{bookerAddress}/bookings/{yearID}/{dayID}')
     .onWrite((change, context) => {
         const data = change.after.data()
@@ -279,7 +248,7 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                     if (data.bookings[Object.keys(data.bookings).filter(a => !data.bookings[a].active && earlierData.bookings[a].active)[0]]) {
                         const object = data.bookings[Object.keys(data.bookings).filter(a => !data.bookings[a].active && earlierData.bookings[a].active)[0]]
 
-                        console.log('Cancel: ',object)
+                        console.log('Cancel: ', object)
                         mailOptions[0] = {
                             from: `Anton Ajanvaraaja <${gmailInfo.email}>`,
                             to: `${bookerObject.systemEmail}`,
@@ -315,10 +284,10 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                 ${bookerObject.publicInformation.phone}
                 </p>
                 `
-                        } 
+                        }
 
-                    } else if (data.bookings[Object.keys(data.bookings).filter(a => data.bookings[a].worker !== earlierData.bookings[a].worker )[0]]) {
-                        const object = data.bookings[Object.keys(data.bookings).filter(a => data.bookings[a].worker !== earlierData.bookings[a].worker )[0]]
+                    } else if (data.bookings[Object.keys(data.bookings).filter(a => data.bookings[a].worker !== earlierData.bookings[a].worker)[0]]) {
+                        const object = data.bookings[Object.keys(data.bookings).filter(a => data.bookings[a].worker !== earlierData.bookings[a].worker)[0]]
                         const earlierBooking = earlierData.bookings[object.id]
                         console.log('Transfer: ', object)
 
@@ -356,9 +325,9 @@ exports.sendEmailToSystemOnDayEdit = functions.region('europe-west3').firestore.
                 ${bookerObject.publicInformation.phone}
                 </p>
                 `
+                        }
                     }
                 }
-            }
 
 
 

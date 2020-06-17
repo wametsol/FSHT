@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import 'date-fns'
-import { format, getDay, addDays, isBefore, set } from 'date-fns'
-import firebase, { auth, firestore } from '../../firebase'
+import { format, getDay, addDays } from 'date-fns'
+import firebase, { firestore } from '../../firebase'
 import { ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, Typography, CircularProgress, capitalize, Dialog, DialogTitle, DialogContentText, DialogContent, DialogActions, TextField, Select, MenuItem, ListSubheader } from '@material-ui/core';
-import { useRouteMatch } from 'react-router-dom'
 import useStyles from './useStyles'
 import clsx from 'clsx';
 
-import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText, getSinglePersonDayTimesText, getFormattedPersonTimes } from '../BookingAdminPage/TimeTableServices'
+import { getFormattedTimes, getSingleDayTimesText, getSinglePersonDayTimesText, getFormattedPersonTimes } from '../BookingAdminPage/TimeTableServices'
 
 import DateFnsUtils from '@date-io/date-fns'
 import { fi } from 'date-fns/locale'
 import {
     MuiPickersUtilsProvider,
-    KeyboardTimePicker,
     KeyboardDatePicker,
 } from '@material-ui/pickers';
 
@@ -23,9 +21,6 @@ import BlockIcon from '@material-ui/icons/Block'
 import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded'
 import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
 import DoubleArrowRoundedIcon from '@material-ui/icons/DoubleArrowRounded'
-
-
-
 
 
 
@@ -51,7 +46,6 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
     const handleDateChange = (date) => {
         setSelectedDate(date)
-        console.log(bookingsObject[`${format(date, `MM`)}`][`${format(date, `dd:MM:yyyy`)}`])
     }
 
     const cancelBooking = (booking) => {
@@ -59,12 +53,6 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
         handleClickOpen()
 
     }
-    /*
-    firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ services: firebase.firestore.FieldValue.arrayRemove(service) })
-    
-        firestore.collection(`booker${data.target}`).doc('bookings').update({ [`${format(selectedDate, `dd:MM:yyyy`)}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) }).then(res => {
-            firestore.collection('userCollection').doc(user.email).update({ bookings: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
-    */
     const confirmCancellation = (e) => {
         e.preventDefault()
         setLoading(true)
@@ -82,9 +70,6 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
                 reason: cancelReason
             }
             firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).set({ bookings: { [chosenBooking.id]: updatedObject } }, { merge: true }).then(res => {
-                console.log(res)
-
-                //firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
 
                 firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(chosenBooking) }).then(res => {
 
@@ -102,7 +87,6 @@ const Bookings = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData,
 
                         }, 2000);
                     })
-                    //  })
                 })
 
 

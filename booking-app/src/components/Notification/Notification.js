@@ -24,27 +24,6 @@ const Notification = React.forwardRef((props, ref) => {
   const message = props.message
   const type = props.type
 
-  /*
-  ------
-  Tried to fix <Zoom> transition, which causes 'React strictmode warning'. Issue is with material ui. 
-  
-  Should be fixed in next Material-UI v5 in future.
-  Maybe some other solution to go.
-  ------
-  const [isZoom, setIsZoom] = useState(true)
-
-  const toggleZoom = () => {
-    console.log('TOGGLE')
-    setIsZoom(!isZoom)
-  }
-
-  useImperativeHandle(ref, () => {
-    return {
-      toggleZoom
-    }
-  })
-*/
-
   if (message === null) {
     return null
   }

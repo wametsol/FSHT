@@ -1,25 +1,17 @@
 import React, { useState } from 'react';
-import { ChromePicker } from 'react-color'
-import firebase, { firestore } from '../../firebase'
-import { Typography, CircularProgress, TextField, InputAdornment, Toolbar, Tabs, Tab, Button, Slider, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider } from '@material-ui/core';
-import { useRouteMatch } from 'react-router-dom'
-import clsx from 'clsx';
+import { firestore } from '../../firebase'
+import { Typography, TextField, InputAdornment, Button } from '@material-ui/core';
 
 import useStyles from './useStyles'
 
-import AddCircleIcon from '@material-ui/icons/AddCircle'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import CallIcon from '@material-ui/icons/Call'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
 import PhoneIcon from '@material-ui/icons/Phone';
-import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from './TimeTableServices'
 
 
 
 const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }) => {
     const classes = useStyles()
     const [loading, setLoading] = useState(false)
-    const [success, setSuccess] = useState(false)
     const [edit, setEdit] = useState(false)
 
     const [systName, setSystName] = React.useState(bookerObject.bookerName)
@@ -67,8 +59,8 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             newInfo.city = publicCity
             newInfo.companyID = publicCompanyID
             newInfo.webAddress = webAddress
-            
-            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('baseInformation').update({ publicInformation: newInfo, systemEmail: systEmail})
+
+            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('baseInformation').update({ publicInformation: newInfo, systemEmail: systEmail })
                 .then((res) => {
                     fetchData()
                     setLoading(false)
@@ -86,77 +78,77 @@ const ContactInfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
 
             <div>
-                
+
 
                 <Typography variant='h4'>Yhteystiedot </Typography>
-                
 
-                
+
+
                 {edit ? <div>
                     <div>
-                    <Typography variant='h5'>Järjestelmäsi </Typography>
-                    <div className={classes.contactInfoEditBox}>
-                    <TextField disabled className={classes.basicText} id="systemName" style={{background: '#f5f5f5'}} value={systName} label="Nimi" variant="outlined" onChange={({ target }) => setSystName(target.value)} />
-                    <TextField className={classes.basicText} id="systemEmail" style={{background: '#f5f5f5'}} value={systEmail} label="Järjestelmän email" variant="outlined" onChange={({ target }) => setSystEmail(target.value)} />
+                        <Typography variant='h5'>Järjestelmäsi </Typography>
+                        <div className={classes.contactInfoEditBox}>
+                            <TextField disabled className={classes.basicText} id="systemName" style={{ background: '#f5f5f5' }} value={systName} label="Nimi" variant="outlined" onChange={({ target }) => setSystName(target.value)} />
+                            <TextField className={classes.basicText} id="systemEmail" style={{ background: '#f5f5f5' }} value={systEmail} label="Järjestelmän email" variant="outlined" onChange={({ target }) => setSystEmail(target.value)} />
+                        </div>
                     </div>
-                </div>
-                <br />
+                    <br />
                     <Typography variant='h5'>Julkisesti näkyvät yhteystiedot</Typography>
                     <div className={classes.contactInfoEditBox}>
-                    <TextField className={classes.basicText} id="contactName" style={{background: '#f5f5f5'}} value={publicName} label="Nimi" variant="outlined" onChange={({ target }) => setPublicName(target.value)} />
+                        <TextField className={classes.basicText} id="contactName" style={{ background: '#f5f5f5' }} value={publicName} label="Nimi" variant="outlined" onChange={({ target }) => setPublicName(target.value)} />
 
 
-                    <TextField InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <AlternateEmailIcon />
-                            </InputAdornment>
-                        ),
-                    }} className={classes.basicText} id="bookerEmail" style={{background: '#f5f5f5'}} value={publicEmail} label="Sähköposti" variant="outlined" onChange={({ target }) => setPublicEmail(target.value)} />
+                        <TextField InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <AlternateEmailIcon />
+                                </InputAdornment>
+                            ),
+                        }} className={classes.basicText} id="bookerEmail" style={{ background: '#f5f5f5' }} value={publicEmail} label="Sähköposti" variant="outlined" onChange={({ target }) => setPublicEmail(target.value)} />
 
-                    <TextField InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <PhoneIcon />
-                            </InputAdornment>
-                        ),
-                    }} className={classes.basicText} id="bookerPhone" style={{background: '#f5f5f5'}} value={publicPhone} label="Puhelinnumero" variant="outlined" onChange={({ target }) => setPublicPhone(target.value)} />
+                        <TextField InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <PhoneIcon />
+                                </InputAdornment>
+                            ),
+                        }} className={classes.basicText} id="bookerPhone" style={{ background: '#f5f5f5' }} value={publicPhone} label="Puhelinnumero" variant="outlined" onChange={({ target }) => setPublicPhone(target.value)} />
                     </div>
                     <br />
                     <Typography variant='h5'>Julkisesti näkyvät yrityksen tiedot</Typography>
                     <div className={classes.contactInfoEditBox}>
-                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicCompany} id="contactCompany" label="Yritys" variant="outlined" onChange={({ target }) => setPublicCompany(target.value)} />
-                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicCompanyID} id="contactCompanyID" label="Y-tunnus" variant="outlined" onChange={({ target }) => setPublicCompanyID(target.value)} />
-                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={webAddress} id="webAddress" label="Web Osoite" variant="outlined" onChange={({ target }) => setWebAddress(target.value)} />
-                    <br/>
-                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicAddress} id="contactAddress" label="Osoite" variant="outlined" onChange={({ target }) => setPublicAddress(target.value)} />
-                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicPostNumber} id="contactPostnumber" label="Postinumero" variant="outlined" onChange={({ target }) => setPublicPostNumber(target.value)} />
-                    <TextField className={classes.basicText} style={{background: '#f5f5f5'}} value={publicCity} id="contactCity" label="Kaupunki" variant="outlined" onChange={({ target }) => setPublicCity(target.value)} />
+                        <TextField className={classes.basicText} style={{ background: '#f5f5f5' }} value={publicCompany} id="contactCompany" label="Yritys" variant="outlined" onChange={({ target }) => setPublicCompany(target.value)} />
+                        <TextField className={classes.basicText} style={{ background: '#f5f5f5' }} value={publicCompanyID} id="contactCompanyID" label="Y-tunnus" variant="outlined" onChange={({ target }) => setPublicCompanyID(target.value)} />
+                        <TextField className={classes.basicText} style={{ background: '#f5f5f5' }} value={webAddress} id="webAddress" label="Web Osoite" variant="outlined" onChange={({ target }) => setWebAddress(target.value)} />
+                        <br />
+                        <TextField className={classes.basicText} style={{ background: '#f5f5f5' }} value={publicAddress} id="contactAddress" label="Osoite" variant="outlined" onChange={({ target }) => setPublicAddress(target.value)} />
+                        <TextField className={classes.basicText} style={{ background: '#f5f5f5' }} value={publicPostNumber} id="contactPostnumber" label="Postinumero" variant="outlined" onChange={({ target }) => setPublicPostNumber(target.value)} />
+                        <TextField className={classes.basicText} style={{ background: '#f5f5f5' }} value={publicCity} id="contactCity" label="Kaupunki" variant="outlined" onChange={({ target }) => setPublicCity(target.value)} />
                     </div>
                 </div> : <div>
-                <div>
-                    <Typography variant='h5'>Järjestelmäsi </Typography>
-                    <div className={classes.contactInfoBox}>
-                    <Typography>Järjestelmän nimi: <span className={classes.boldText}>{systName}</span></Typography>
-                    <Typography>Järjestelmän email: <span className={classes.boldText}>{systEmail}</span></Typography>
-                    </div>
-                </div>
-                <br />
+                        <div>
+                            <Typography variant='h5'>Järjestelmäsi </Typography>
+                            <div className={classes.contactInfoBox}>
+                                <Typography>Järjestelmän nimi: <span className={classes.boldText}>{systName}</span></Typography>
+                                <Typography>Järjestelmän email: <span className={classes.boldText}>{systEmail}</span></Typography>
+                            </div>
+                        </div>
+                        <br />
                         <Typography variant='h5'>Yhteystiedot</Typography>
                         <div className={classes.contactInfoBox}>
-                        <Typography>Nimi: <span className={classes.boldText}>{publicName}</span></Typography>
-                        <Typography>Sähköposti: <span className={classes.boldText}>{publicEmail}</span></Typography>
-                        <Typography>Puhelin: <span className={classes.boldText}>{publicPhone}</span></Typography>
-                        <Typography>Nettisivusto: <span className={classes.boldText}>{webAddress}</span></Typography>
+                            <Typography>Nimi: <span className={classes.boldText}>{publicName}</span></Typography>
+                            <Typography>Sähköposti: <span className={classes.boldText}>{publicEmail}</span></Typography>
+                            <Typography>Puhelin: <span className={classes.boldText}>{publicPhone}</span></Typography>
+                            <Typography>Nettisivusto: <span className={classes.boldText}>{webAddress}</span></Typography>
                         </div>
                         <br />
                         <Typography variant='h5'>Yrityksen tiedot</Typography>
                         <div className={classes.contactInfoBox}>
-                        <Typography>Yrityksen nimi: <span className={classes.boldText}>{publicCompany}</span></Typography>
-                        <Typography>Y-tunnus: <span className={classes.boldText}>{publicCompanyID}</span></Typography>
-                        <Typography>Osoite: <span className={classes.boldText}>{publicAddress}</span></Typography>
-                        <Typography>Postinumero: <span className={classes.boldText}>{publicPostNumber}</span></Typography>
-                        <Typography>Toimipaikka: <span className={classes.boldText}>{publicCity}</span></Typography>
+                            <Typography>Yrityksen nimi: <span className={classes.boldText}>{publicCompany}</span></Typography>
+                            <Typography>Y-tunnus: <span className={classes.boldText}>{publicCompanyID}</span></Typography>
+                            <Typography>Osoite: <span className={classes.boldText}>{publicAddress}</span></Typography>
+                            <Typography>Postinumero: <span className={classes.boldText}>{publicPostNumber}</span></Typography>
+                            <Typography>Toimipaikka: <span className={classes.boldText}>{publicCity}</span></Typography>
                         </div>
                     </div>}
 

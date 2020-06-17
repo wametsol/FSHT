@@ -1,5 +1,5 @@
 # Tuntikirjanpito
-Kopioitu excelistä (16.06.2020)
+Kopioitu excelistä (17.06.2020)
 ## Aloitus 14.04.2020
 
 PVM | TUNNIT | SELITE
@@ -35,6 +35,7 @@ PVM | TUNNIT | SELITE
 13.06.|	7|	Laiteresurssien lisäys ja laitekohtaiset varaukset.					Päivittelyä autom. Viesteihin ja bugien korjausta.				
 14.06.|	6,5|	Automaattinen peruutus/muutos/siirto 					Erikoispäivän luonti tarkistaa leikkaavat varaukset				
 15.06.|	7|	Automaattisen siirron päivittelyä (emailit + db muutos)					DB oikeuksien säätöä.				
-16.06.|	10|	Bugien ja DB sääntöjen korjauksia, tyylittelyä. Viimeistelyä sekä dokumentaatiota			
-**YHT**|177h| **Tilanne 16.06.2020**
+16.06.|	10|	Bugien ja DB sääntöjen korjauksia, tyylittelyä. Viimeistelyä sekä dokumentaatiota
+17.06.| 2 | Viimeistelyä, siivousta ja testauksia			
+**YHT**|179h| **Tilanne 17.06.2020**
 

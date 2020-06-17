@@ -10,7 +10,7 @@ export const sameAsBase = (value) => {
 }
 
 export const getFormattedTimes = (times) => {
-    if(isClosed(times)){
+    if (isClosed(times)) {
         return 'suljettu'
     } else {
         return `(${valueLabelFormat(times[0])} - ${valueLabelFormat(times[1])})`
@@ -18,7 +18,7 @@ export const getFormattedTimes = (times) => {
 }
 
 export const getFormattedPersonTimes = (times) => {
-    if(isClosed(times)){
+    if (isClosed(times)) {
         return 'poissa'
     } else {
         return `(${valueLabelFormat(times[0])} - ${valueLabelFormat(times[1])})`
@@ -28,7 +28,7 @@ export const getFormattedPersonTimes = (times) => {
 
 
 export const isClosed = (times) => {
-    if(times[0]===times[1]){
+    if (times[0] === times[1]) {
         return true
     } else {
         return false
@@ -110,31 +110,31 @@ export const valueLabelFormat = (value) => {
     if (value - Math.floor(value) === 0.25) {
         label += Math.floor(value) + '.15'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0) {
         label += Math.floor(value) + '.00'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.33) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0.33) {
         label += Math.floor(value) + '.20'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.67) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0.67) {
         label += Math.floor(value) + '.40'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.08) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0.08) {
         label += Math.floor(value) + '.05'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.17) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0.17) {
         label += Math.floor(value) + '.10'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.42) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0.42) {
         label += Math.floor(value) + '.25'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.58) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0.58) {
         label += Math.floor(value) + '.35'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.83) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0.83) {
         label += Math.floor(value) + '.50'
     }
-    if ((Number((value-Math.floor(value)).toFixed(2))) === 0.92) {
+    if ((Number((value - Math.floor(value)).toFixed(2))) === 0.92) {
         label += Math.floor(value) + '.40'
     }
 

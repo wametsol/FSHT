@@ -1,39 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import 'date-fns'
-import { format, getDay, addDays, isBefore, parseISO, isAfter } from 'date-fns'
+import { parseISO, isAfter } from 'date-fns'
 import { auth, firestore } from '../../firebase'
-import {
-    Tabs, Tab,
-    InputLabel, MenuItem, Select, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize,
+import { CircularProgress, Divider, capitalize,
     Button, Tooltip, Checkbox, Typography, Paper,
     FormControl, FormControlLabel, FormHelperText,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, TextField,
     Backdrop
 } from '@material-ui/core'
 import useStyles from './useStyles'
-import { useRouteMatch } from 'react-router-dom'
-import IconButton from '@material-ui/core/IconButton'
-
-import { Route, Link, useHistory } from 'react-router-dom'
-
-import DateFnsUtils from '@date-io/date-fns'
-import { fi, tr } from 'date-fns/locale'
-import {
-    MuiPickersUtilsProvider,
-    KeyboardTimePicker,
-    KeyboardDatePicker,
-} from '@material-ui/pickers';
-import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText, valueLabelFormat } from '../BookingAdminPage/TimeTableServices'
-import UserBookingPage from './UserBookingPage'
-import ConfirmationWindow from './ConfirmationWindow'
-
-import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded'
-import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
-import DoubleArrowRoundedIcon from '@material-ui/icons/DoubleArrowRounded'
+import { valueLabelFormat } from '../BookingAdminPage/TimeTableServices'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
-import PhoneIcon from '@material-ui/icons/Phone';
-import MenuIcon from '@material-ui/icons/Menu'
-import CallIcon from '@material-ui/icons/Call'
+import PhoneIcon from '@material-ui/icons/Phone'
 import PersonIcon from '@material-ui/icons/Person'
 import HelpIcon from '@material-ui/icons/Help'
 import EditIcon from '@material-ui/icons/Edit'
@@ -43,7 +21,6 @@ import SaveIcon from '@material-ui/icons/Save'
 
 const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessage }) => {
     const user = auth.currentUser
-    console.log(userData)
     const [howToContact, setHowToContact] = useState(userData.contactPreferences)
     const [editPreferences, setEditPreferences] = useState(true)
     const [editInformation, setEditInformation] = useState(true)
@@ -51,7 +28,6 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
     const [profile, setProfile] = useState({ name: userData.name, email: userData.email, phone: userData.phone })
 
     const classes = useStyles()
-    console.log(userData)
 
 
     const handleHTCChange = (event) => {
@@ -67,7 +43,6 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
             setLoading(true)
             firestore.collection(`userCollection`).doc(user.email).update({ name: profile.name, phone: profile.phone })
                 .then(response => {
-                    console.log(response)
                     fetchUserData()
                     setLoading(false)
                     setSuccessMessage('Tietojen päivitys onnistui')
@@ -83,7 +58,6 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
             setLoading(true)
             firestore.collection(`userCollection`).doc(user.email).update({ contactPreferences: howToContact })
                 .then(response => {
-                    console.log(response)
                     fetchUserData()
                     setLoading(false)
                     setSuccessMessage('Tietojen päivitys onnistui')
@@ -189,8 +163,8 @@ const ProfilePage = ({ userData, fetchUserData, setSuccessMessage, setErrorMessa
                                 {Object.keys(userData.bookings).map((bookingsKey) => (
                                     <TableRow key={bookingsKey}>
                                         <TableCell>{capitalize(bookingsKey)}</TableCell>
-                                        <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && !isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
-                                        <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
+                                        <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && !isAfter(new Date(), new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
+                                        <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => booking.active && isAfter(new Date(), new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)))).length}</TableCell>
                                         <TableCell align='right'>{userData.bookings[`${bookingsKey}`].filter(booking => !booking.active).length}</TableCell>
                                         <TableCell align='right'>{userData.bookings[`${bookingsKey}`].length}</TableCell>
                                     </TableRow>

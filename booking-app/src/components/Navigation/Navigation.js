@@ -104,15 +104,15 @@ const Navigation = () => {
                             <Button className={classes.logoutButton} variant='outlined' color="inherit" onClick={logout} >Logout</Button>
                             <Drawer anchor='right' open={drawerOpen} onClose={() => setDrawerOpen(false)}>
                                 <List className={classes.list}>
-                                    <ListItem style={{placeContent:'center'}}>
+                                    <ListItem style={{ placeContent: 'center' }}>
                                         <Typography >{user.displayName}</Typography>
                                     </ListItem>
                                     <Divider />
                                     <ListItem >
-                                    <Typography >{user.email}</Typography>
+                                        <Typography >{user.email}</Typography>
                                     </ListItem>
                                     <ListItem >
-                                        <Typography >{user.emailVerified? 'Sähköposti varmennettu' : 'Sähköposti ei varmennettu'}</Typography>
+                                        <Typography >{user.emailVerified ? 'Sähköposti varmennettu' : 'Sähköposti ei varmennettu'}</Typography>
                                     </ListItem>
                                 </List>
                             </Drawer>

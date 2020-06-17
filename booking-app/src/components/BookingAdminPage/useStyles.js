@@ -1,6 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles'
 import { green } from '@material-ui/core/colors'
-import SwitchBase from '@material-ui/core/internal/SwitchBase'
 
 const useStyles = makeStyles((theme) => ({
     singleService: {
@@ -109,7 +108,6 @@ const useStyles = makeStyles((theme) => ({
     },
     adminDatepicker: {
         display: 'flex',
-        //marginLeft: 20,
         justifyContent: 'center'
     },
     datePickerTitle: {
@@ -139,7 +137,7 @@ const useStyles = makeStyles((theme) => ({
         maxWidth: '75%',
 
     },
-    singleService: {
+    singleService2: {
         textAlign: 'left',
         margin: 20
     },
@@ -311,7 +309,7 @@ const useStyles = makeStyles((theme) => ({
         '&$checked + $track': {
             backgroundColor: 'pink',
             color: 'pink'
-            
+
         },
         '& + $track': {
             backgroundColor: 'lightblue',
@@ -334,16 +332,16 @@ const useStyles = makeStyles((theme) => ({
     },
 
     contactInfoBox: {
-        margin:'auto',
-        maxWidth: '30%' ,
+        margin: 'auto',
+        maxWidth: '30%',
         padding: 20,
         backgroundColor: 'lightgrey',
         borderRadius: '5px',
         textAlign: 'left'
     },
     contactInfoEditBox: {
-        margin:'auto',
-        maxWidth: '80%' ,
+        margin: 'auto',
+        maxWidth: '80%',
         padding: 20,
         backgroundColor: '#ededed',
         borderRadius: '5px',

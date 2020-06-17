@@ -33,48 +33,46 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
     }
 
     const fetchData = () => {
-        
+
         firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
             .then((response) => {
                 if (response.empty) {
                     setError(true)
                     setLoading(false)
                 }
-                if(Object.keys(response.data().admins).filter(a => a === user.uid).length>0 || response.data().bookerCreator === user.email){
-                setBookerObject(response.data())
-                
-                console.log('Getting subs: ', getSubCollections)
-                getSubCollections({docPath: `booker${pagematch.params.id}/bookings` })
-                .then(result => {
-                    console.log(result.data.collections[0])
-                    if(result.data.collections.length===0){
-                        setBookings(undefined)
-                    }else {
-                    var collections = {}
-                    result.data.collections.map(c => {
-                        firestore.collection(`booker${pagematch.params.id}`).doc('bookings').collection(c).get()
-                        .then(res => {
-                            res.docs.map(doc => {
-                                collections = {...collections,
-                                    [`${doc.id}`]: doc.data()
-                                }
-                            })
-                            setBookings(collections)
-                            console.log(collections)
+                if (Object.keys(response.data().admins).filter(a => a === user.uid).length > 0 || response.data().bookerCreator === user.email) {
+                    setBookerObject(response.data())
+
+                    getSubCollections({ docPath: `booker${pagematch.params.id}/bookings` })
+                        .then(result => {
+                            if (result.data.collections.length === 0) {
+                                setBookings(undefined)
+                            } else {
+                                var collections = {}
+                                result.data.collections.map(c => {
+                                    firestore.collection(`booker${pagematch.params.id}`).doc('bookings').collection(c).get()
+                                        .then(res => {
+                                            res.docs.map(doc => {
+                                                collections = {
+                                                    ...collections,
+                                                    [`${doc.id}`]: doc.data()
+                                                }
+                                            })
+                                            setBookings(collections)
+                                            setLoading(false)
+                                        })
+                                })
+                            }
                             setLoading(false)
+
                         })
-                    })
+
+
+                } else {
+                    setErrorMessage('Kyseisellä osoitteella ei löytynyt sivustoja, tai oikeutesi eivät riitä')
+                    setLoading(false)
+                    setError(true)
                 }
-                setLoading(false)
-
-                })
-                
-
-            } else {
-                setErrorMessage('Kyseisellä osoitteella ei löytynyt sivustoja, tai oikeutesi eivät riitä')
-                setLoading(false)
-                setError(true)
-            }
 
             })
             .catch(error => {
@@ -101,7 +99,6 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
         e.preventDefault()
 
         try {
-            console.log('Asetetaan julkisuus: ', !bookerObject.siteSettings.visibleToPublic)
             setLoading(true)
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({ 'siteSettings.visibleToPublic': !bookerObject.siteSettings.visibleToPublic })
                 .then((res) => {
@@ -129,7 +126,7 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
             case 2:
                 return <Resources setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 3:
-                return <TimeManagement setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} bookings={bookings}/>
+                return <TimeManagement setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} bookings={bookings} />
             case 4:
                 return <InfoTab setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} bookerObject={bookerObject} fetchData={fetchData} />
             case 5:
@@ -145,20 +142,20 @@ const BookingAdminPage = ({ setSuccessMessage, setErrorMessage }) => {
         <div>
             {!bookerObject ? <div>
                 {loading ? <CircularProgress size={25} /> : <span>{error ? <div>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <div>Sivustoja ei löydy</div>}</span>}
-                
+
             </div>
                 : (<Paper>
                     <div className={classes.visibilityBar}>
                         <div className={classes.innerVisibilityBox}>
                             <div className={classes.visibilityButtons}>
-                            {bookerObject.siteSettings.visibleToPublic ?
-                                <Typography>Sivustosi on julkinen <Tooltip title='Piilottamalla sivuston, vain sinä ja muut adminit voivat nähdä sivuston'><Button onClick={updatePublicVisibility} variant='contained' className={classes.hideVisibilityBtn}>Piilota</Button></Tooltip> </Typography>
-                                :
-                                <Typography>Sivustosi ei ole julkinen <Tooltip title='Julkaisemalla sivuston, avautuu sivusto kaikille käyttäjille'><Button onClick={updatePublicVisibility} variant='contained' className={classes.publishVisibilityBtn}>Julkaise</Button></Tooltip> </Typography>
-                            }
+                                {bookerObject.siteSettings.visibleToPublic ?
+                                    <Typography>Sivustosi on julkinen <Tooltip title='Piilottamalla sivuston, vain sinä ja muut adminit voivat nähdä sivuston'><Button onClick={updatePublicVisibility} variant='contained' className={classes.hideVisibilityBtn}>Piilota</Button></Tooltip> </Typography>
+                                    :
+                                    <Typography>Sivustosi ei ole julkinen <Tooltip title='Julkaisemalla sivuston, avautuu sivusto kaikille käyttäjille'><Button onClick={updatePublicVisibility} variant='contained' className={classes.publishVisibilityBtn}>Julkaise</Button></Tooltip> </Typography>
+                                }
                             </div>
                             <div className={classes.visibilityButtons}>
-                            <Typography >Siirry sivustolle<Button variant='contained' className={classes.toSiteButton} component={Link} to={`/${bookerObject.bookerAddress}`}>{bookerObject.bookerName}</Button></Typography>
+                                <Typography >Siirry sivustolle<Button variant='contained' className={classes.toSiteButton} component={Link} to={`/${bookerObject.bookerAddress}`}>{bookerObject.bookerName}</Button></Typography>
                             </div>
                         </div>
 

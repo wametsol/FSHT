@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { ChromePicker } from 'react-color'
-import firebase, { firestore, storage, auth } from '../../firebase'
-import { Typography, CircularProgress, TextField, AppBar, Toolbar, Tabs, Tab, Button, Slider, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Checkbox, Card, CardMedia, CardContent, Tooltip, Box } from '@material-ui/core';
+import React, { useState } from 'react';
+import { firestore, storage, auth } from '../../firebase'
+import { Typography, CircularProgress, AppBar, Toolbar, Tabs, Tab, Button, Slider, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Checkbox, Card, CardMedia, CardContent, Box } from '@material-ui/core';
 import { useRouteMatch } from 'react-router-dom'
-import clsx from 'clsx';
 
 import useStyles from './useStyles'
 
-import AddCircleIcon from '@material-ui/icons/AddCircle'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import CallIcon from '@material-ui/icons/Call'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
 
-import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from './TimeTableServices'
+import { sameAsBase, getFormattedTimes, getWeekdayTimes } from './TimeTableServices'
 import ColorPicker from '../Services/ColorPicker'
 
 
@@ -71,7 +68,6 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
     const [footerBorderRadius, setFooterBorderRadius] = useState(bookerObject.siteSettings.footerBorderRadius)
     const [navTabValue, setNavTabValue] = useState(0)
     const [loading, setLoading] = useState(false)
-    const [success, setSuccess] = useState(false)
     const [footerON, setFooterON] = useState(bookerObject.siteSettings.footerOn)
     const [uploadProgress, setUploadProgress] = useState(null)
     const [imageUpload, setImageUpload] = useState(null)
@@ -118,7 +114,6 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
 
 
     const changeBorderRadius = (e, newValue) => {
-        console.log(e)
         setFooterBorderRadius(newValue)
     }
     const changeFooterColor = (e) => {
@@ -208,7 +203,6 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
         e.preventDefault()
 
         try {
-            console.log('Uploading: ', imageUpload.name, ' to server, hold on')
             setLoading(true)
             var metadata = {
                 contentType: 'image/jpeg',
@@ -225,7 +219,6 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                 console.log(error)
                 setErrorMessage('Kuvan lataamisessa tapahtui virhe')
             }, () => {
-                console.log('FINISHED')
 
                 storage.ref(`booker${pagematch.params.id}/images/background.jpg`).getDownloadURL()
                     .then(bgImageUrl => {
@@ -271,67 +264,67 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
             </ExpansionPanelSummary>
             <Typography style={{ textAlign: 'left', marginLeft: '20%' }}>Alapalkki käytössä:<Checkbox color='primary' checked={footerON} onChange={() => setFooterON(!footerON)} /></Typography>
             {footerON ? <div>
-            <Typography className={classes.secondaryHeading}>Tässä näkyvien tietojen päivittäminen tapahtuu niitä koskevilta välilehdiltä</Typography>
-            <div>
+                <Typography className={classes.secondaryHeading}>Tässä näkyvien tietojen päivittäminen tapahtuu niitä koskevilta välilehdiltä</Typography>
+                <div>
 
-                <div style={{ margin: 20 }}>
-                    <div className={classes.footer} style={{ backgroundColor: `rgb(${footerColor.r},${footerColor.g},${footerColor.b},${footerColor.a})`, borderTopLeftRadius: footerBorderRadius, borderTopRightRadius: footerBorderRadius }}>
-                        <Typography style={{ color: rgbLabeller(footerTextColor), fontWeight: 600 }} >Yhteystiedot </Typography>
-                        <div className={classes.footerContent}>
+                    <div style={{ margin: 20 }}>
+                        <div className={classes.footer} style={{ backgroundColor: `rgb(${footerColor.r},${footerColor.g},${footerColor.b},${footerColor.a})`, borderTopLeftRadius: footerBorderRadius, borderTopRightRadius: footerBorderRadius }}>
+                            <Typography style={{ color: rgbLabeller(footerTextColor), fontWeight: 600 }} >Yhteystiedot </Typography>
+                            <div className={classes.footerContent}>
 
-                            <div className={classes.footerObject}>
+                                <div className={classes.footerObject}>
 
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.name}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.name}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
 
-                            </div>
-                            <div className={classes.footerObject}>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.company}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>Y-tunnus: {bookerObject.publicInformation.companyID}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.address}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.postnumber}, {bookerObject.publicInformation.city}</Typography>
-                            </div>
-                            <div className={classes.footerObject}>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>Avoinna: </Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
-                                <Typography style={{ color: rgbLabeller(footerTextColor) }}>{}</Typography>
+                                </div>
+                                <div className={classes.footerObject}>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.company}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>Y-tunnus: {bookerObject.publicInformation.companyID}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.address}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>{bookerObject.publicInformation.postnumber}, {bookerObject.publicInformation.city}</Typography>
+                                </div>
+                                <div className={classes.footerObject}>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>Avoinna: </Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
+                                    <Typography style={{ color: rgbLabeller(footerTextColor) }}>{}</Typography>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <ExpansionPanelDetails className={classes.details}>
+                <ExpansionPanelDetails className={classes.details}>
 
-                <div className={classes.oneFourthColumn} >
+                    <div className={classes.oneFourthColumn} >
 
 
-                    <ColorPicker title='Alapalkin pohjaväri' initialColor={bookerObject.siteSettings.footerColor} changeColor={changeFooterColor} color={footerColor} />
-                    <br />
-                    <Typography>Säädä kulmien pyöreyttä</Typography>
-                    <Slider
-                        disabled={!footerON}
-                        name='Pyöreys'
-                        value={footerBorderRadius}
-                        onChange={changeBorderRadius}
-                        valueLabelDisplay='auto'
-                        aria-labelledby="range-slider"
-                        //getAriaValueText={valuetext}
-                        valueLabelFormat={valueLabelFormat}
-                        step={1}
-                        min={0}
-                        max={100}
-                        type={'number'}
-                        aria-labelledby='input-slider'
-                        marks={marks}></Slider>
+                        <ColorPicker title='Alapalkin pohjaväri' initialColor={bookerObject.siteSettings.footerColor} changeColor={changeFooterColor} color={footerColor} />
+                        <br />
+                        <Typography>Säädä kulmien pyöreyttä</Typography>
+                        <Slider
+                            disabled={!footerON}
+                            name='Pyöreys'
+                            value={footerBorderRadius}
+                            onChange={changeBorderRadius}
+                            valueLabelDisplay='auto'
+                            aria-labelledby="range-slider"
+                            //getAriaValueText={valuetext}
+                            valueLabelFormat={valueLabelFormat}
+                            step={1}
+                            min={0}
+                            max={100}
+                            type={'number'}
+                            aria-labelledby='input-slider5'
+                            marks={marks}></Slider>
 
-                </div>
-                <div className={classes.oneFourthColumn}>
-                    <ColorPicker title='Alapalkin tekstiväri' initialColor={bookerObject.siteSettings.footerTextColor} changeColor={changeFooterTextColor} color={footerTextColor} disabled={!footerON} />
-                </div>
-            </ExpansionPanelDetails></div> : <em />}
+                    </div>
+                    <div className={classes.oneFourthColumn}>
+                        <ColorPicker title='Alapalkin tekstiväri' initialColor={bookerObject.siteSettings.footerTextColor} changeColor={changeFooterTextColor} color={footerTextColor} disabled={!footerON} />
+                    </div>
+                </ExpansionPanelDetails></div> : <em />}
             <Divider />
             <ExpansionPanelActions>
                 {!loading ? <div><Button disabled={sameAsInitialFooterStyle()} color='secondary' onClick={resetFooterStyling}>Peru muutokset</Button>
@@ -391,7 +384,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                         min={0}
                         max={100}
                         type={'number'}
-                        aria-labelledby='input-slider'
+                        aria-labelledby='input-slider6'
                         marks={marks}
                         disabled></Slider>
 
@@ -438,7 +431,7 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
                     <label htmlFor='uploadImage'>
                         <Button variant='contained' component='span'>Lataa kuva</Button>
                     </label>
-                    <br/>
+                    <br />
                     {imageUpload ? <Typography>{imageUpload.name}</Typography> : <em />}
                     <Typography variant='caption'>Huom! Hyväksyttyäsi muutokset, tämä kuva korvaa edellisen palvelimelta. Lataa vain sellaisia kuvia joihin sinulla on käyttöoikeus.</Typography>
                 </div>
@@ -486,9 +479,6 @@ const InfoTab = ({ setSuccessMessage, setErrorMessage, bookerObject, fetchData }
         </ExpansionPanel>
     )
 
-
-
-    console.log(bookerObject)
     return (
         <div>
             <Typography variant="h5">Sivuston näkymät</Typography>

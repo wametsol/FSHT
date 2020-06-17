@@ -8,9 +8,9 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 import { Typography, CircularProgress, capitalize } from '@material-ui/core';
 import firebase, { auth, firestore } from '../../firebase'
-import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText } from '../BookingAdminPage/TimeTableServices'
+import { getFormattedTimes } from '../BookingAdminPage/TimeTableServices'
 import 'date-fns'
-import { format, getDay } from 'date-fns'
+import { format } from 'date-fns'
 import { fi } from 'date-fns/locale'
 import { v1 as uuid } from 'uuid'
 
@@ -26,20 +26,15 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
     const [success, setSuccess] = useState(false)
     const [error, setError] = useState(false)
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
     const confirmBooking = () => {
 
-        console.log(data)
         const bookingObject = {
             id: uuid(),
             bookingDate: format(data.date, `dd/MM/yyyy`),
             whenBooked: format(new Date(), 'dd/MM/yyyy:HH.mm'),
             service: data.service.service,
             worker: data.worker.name,
-            deviceID: !!data.worker.deviceID? data.worker.deviceID : 0,
+            deviceID: !!data.worker.deviceID ? data.worker.deviceID : 0,
             user: {
                 name: auth.currentUser.displayName,
                 email: auth.currentUser.email,
@@ -57,62 +52,26 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
         try {
             setLoading(true)
             firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).get().then(col => {
-                //console.log(!!doc.data()[`${format(data.date, `dd:MM:yyyy`)}`])
-                //console.log(doc.data()[`${format(data.date, `dd:MM:yyyy`)}`])
-
 
                 if (col.docs.length > 0 && col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`)).length > 0) {
-                    console.log(data)
-                    //console.log(col.docs.filter(d => d.id === format(data.date, `MM`))[0].data()[`${format(data.date, `dd:MM:yyyy`)}`].filter(b => b.worker === data.worker.name))
-                    console.log((col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0]))
-                    //console.log(Object.keys(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings).map(k => col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings[k]))
                     if (!(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings) ||
-                     (Object.keys(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings).map(k => col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings[k]).filter(booking => booking.times.start === data.times.start 
-                        && booking.active===true && booking.worker === data.worker.name && booking.deviceID === data.worker.deviceID )).length === 0) {
+                        (Object.keys(col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings).map(k => col.docs.filter(d => d.id === format(data.date, `dd:MM:yyyy`))[0].data().bookings[k]).filter(booking => booking.times.start === data.times.start
+                            && booking.active === true && booking.worker === data.worker.name && booking.deviceID === data.worker.deviceID)).length === 0) {
 
-                            firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).set({bookings:{[bookingObject.id]:  bookingObject }}, {merge: true}).then(res => {
-                                firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
-                                    .then((res) => {
-                                        setSuccess(true)
-                                        setLoading(false)
-                                        setTimeout(() => {
-                                            handleSuccess()
-                                            fetchUserData()
-                                            setSuccess(false)
-                                            setOpen(false)
-                                        }, 2000);
-                                        console.log(res)
-                                    })
-                            })
-                        
-                    //const existingBookings = col.docs.map(d => console.log(d.data())[`${format(data.date, `dd:MM:yyyy`)}`])
-                    //.data()[`${format(data.date, `dd:MM:yyyy`)}`]
-                    
-                    
-                    
-                        /*
-
-                        firestore.collection(`booker${data.target}`).doc('bookings').update({ [`${format(data.date, `dd:MM:yyyy`)}.${bookingObject.id}`]: bookingObject }).then(res => {
-
+                        firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).set({ bookings: { [bookingObject.id]: bookingObject } }, { merge: true }).then(res => {
                             firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
                                 .then((res) => {
                                     setSuccess(true)
-                            setLoading(false)
-                            setTimeout(() => {
-                                setSuccess(false)
-                                setOpen(false)
-                            }, 2000);
-                                    console.log(res)
+                                    setLoading(false)
+                                    setTimeout(() => {
+                                        handleSuccess()
+                                        fetchUserData()
+                                        setSuccess(false)
+                                        setOpen(false)
+                                    }, 2000)
                                 })
-                            console.log(res)
-                            
-
-                        })*/
-
-
-                        
+                        })
                     } else {
-                        console.log('AIKA ON JO VARATTU')
                         setError(true)
                         setLoading(false)
                         setTimeout(() => {
@@ -124,8 +83,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
 
 
                 } else {
-                    console.log('EI OO, TEHÄÄN!')
-                    firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).set({bookings: { [bookingObject.id]:  bookingObject }}, {merge: true}).then(res => {
+                    firestore.collection(`booker${data.target}`).doc('bookings').collection(`${format(data.date, `yyyy`)}`).doc(`${format(data.date, `dd:MM:yyyy`)}`).set({ bookings: { [bookingObject.id]: bookingObject } }, { merge: true }).then(res => {
                         firestore.collection('userCollection').doc(user.email).update({ [`bookings.${data.target}`]: firebase.firestore.FieldValue.arrayUnion(bookingObject) })
                             .then((res) => {
                                 handleSuccess()
@@ -137,13 +95,11 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
                                     setOpen(false)
                                 }, 2000);
                             })
-                        console.log(`Added document at '${res}'`);
 
 
                     })
                 }
             })
-            console.log(bookingObject)
 
 
 
@@ -156,8 +112,7 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
     const handleClose = () => {
         setConfirmationData({})
         setOpen(false);
-    };
-    console.log(data)
+    }
     return (
         <div>
             <Dialog
@@ -178,21 +133,21 @@ const ConfirmationWindow = ({ setOpen, open, data, setConfirmationData, target, 
                     </DialogContentText>
                     <DialogContentText id="alert-dialog-slide-description">
                         Palvelu: {data.service.service} <br />
-                        {data.worker.human? `Työntekijä: ${data.worker.name}` : `Resurssi: ${data.worker.name} ${data.worker.deviceID}`} <br />
+                        {data.worker.human ? `Työntekijä: ${data.worker.name}` : `Resurssi: ${data.worker.name} ${data.worker.deviceID}`} <br />
                         <br />
                         Ajankohta<br />
                         {capitalize(format(data.date, "EEEE : dd.MM.yyyy", { locale: fi }))}<br />
-                        Klo: {getFormattedTimes([data.times.start, data.times.end])}<br/>
+                        Klo: {getFormattedTimes([data.times.start, data.times.end])}<br />
                         Varauksen kesto: {data.service.timelength.hours !== 0 ? <span>{data.service.timelength.hours}h</span> : <em />} {data.service.timelength.minutes !== 0 ? <span>{data.service.timelength.minutes}min</span> : <em />}<br />
                         <br />
-                        {data.service.price > 0? `Hinta: ${data.service.price}€`: `Palvelu on ilmainen`}<br />
+                        {data.service.price > 0 ? `Hinta: ${data.service.price}€` : `Palvelu on ilmainen`}<br />
 
                     </DialogContentText>
 
-                    
+
                 </DialogContent>
 
-                {error ? <Typography style={{ margin: 'auto' }}>Aika on jo varattu, yritä uudelleen</Typography> : <div style={{ margin: 'auto' }} > {success ? <Typography >Varauksesi onnistui{<CheckIcon />}</Typography> : <div>{loading ? <div style={{ margin: 'auto', marginBottom: 20}}><Typography style={{display: 'inline'}} >Varaustasi vahvistetaan</Typography><CircularProgress size={25} /></div> : <div>
+                {error ? <Typography style={{ margin: 'auto' }}>Aika on jo varattu, yritä uudelleen</Typography> : <div style={{ margin: 'auto' }} > {success ? <Typography >Varauksesi onnistui{<CheckIcon />}</Typography> : <div>{loading ? <div style={{ margin: 'auto', marginBottom: 20 }}><Typography style={{ display: 'inline' }} >Varaustasi vahvistetaan</Typography><CircularProgress size={25} /></div> : <div>
                     <DialogActions>
                         <Button onClick={handleClose} color="secondary">
                             Palaa

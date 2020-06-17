@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-const Register = () => {
+const Register = ({ setErrorMessage, setSuccessMessage }) => {
     const classes = useStyles()
     const history = useHistory()
 
@@ -53,30 +53,32 @@ const Register = () => {
         try {
             auth.createUserWithEmailAndPassword(email, password).then((registeredUser) => {
                 firestore.collection('userCollection').doc(email)
-                .set({
-                    uid: registeredUser.user.uid,
-                    name: name,
-                    email: email,
-                    bookers: {},
-                    bookings: {},
-                    contactPreferences:{
-                        email: true,
-                        phone: false
-                    }
-                })
+                    .set({
+                        uid: registeredUser.user.uid,
+                        name: name,
+                        email: email,
+                        bookers: {},
+                        bookings: {},
+                        contactPreferences: {
+                            email: true,
+                            phone: false
+                        }
+                    })
                 var user = auth.currentUser
                 user.updateProfile({
                     displayName: name
                 }).then(() => {
-                    console.log('Added name')
-                    //window.localStorage.setItem('loggedBookerUser', JSON.stringify(user))
                     history.push('/')
+                    setSuccessMessage('Rekisteröinti onnistui, sinut kirjataan sisään')
                     return auth.currentUser
                 }).catch((error) => {
                     console.log(error)
                 })
             }).catch((error) => {
                 console.log(error)
+                if (error.code === 'auth/email-already-in-use') {
+                    setErrorMessage('Tämä sähköposti on jo käytössä')
+                }
             })
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Slider, Typography, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, CircularProgress, TextField, capitalize, Select, MenuItem, Dialog, InputLabel, FormControl, DialogTitle, DialogContent, DialogContentText, DialogActions, RadioGroup, FormControlLabel, Radio, FormHelperText } from '@material-ui/core';
+import { Slider, Typography, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Tooltip, Button, CircularProgress, TextField, capitalize, Select, MenuItem, Dialog, InputLabel, FormControl, DialogTitle, DialogContent, DialogContentText, DialogActions, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import useStyles from './useStyles'
 import clsx from 'clsx'
 
@@ -10,13 +10,12 @@ import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
 
 import firebase, { firestore } from '../../firebase'
 import { useRouteMatch } from 'react-router-dom'
-import { sameAsBase, isClosed, getFormattedTimes, getFormattedPersonTimes, getWeekdayTimes, getWeekdayPersonTimes, valueLabelFormat, valuetext, getSingleDayTimesText, getSingleDayTimes, getSinglePersonDayTimesText, getDayContent } from './TimeTableServices'
+import { sameAsBase, isClosed, getFormattedTimes, getFormattedPersonTimes, getWeekdayTimes, getWeekdayPersonTimes, valueLabelFormat, valuetext, getSingleDayTimesText, getSingleDayTimes, getDayContent } from './TimeTableServices'
 
 import DateFnsUtils from '@date-io/date-fns'
 import { fi } from 'date-fns/locale'
 import {
     MuiPickersUtilsProvider,
-    KeyboardTimePicker,
     KeyboardDatePicker,
 } from '@material-ui/pickers'
 import { format, getDay, addDays, isBefore, parseISO } from 'date-fns'
@@ -55,8 +54,8 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     const [loading, setLoading] = useState(false)
     const [holidayFormOpen, setHolidayFormOpen] = useState(false)
     const [holidayForm2Open, setHolidayForm2Open] = useState(false)
-    const [selectedDate, setSelectedDate] = useState(new Date)
-    const [resourceSelectedDate, setResourceSelectedDate] = useState(new Date)
+    const [selectedDate, setSelectedDate] = useState(new Date())
+    const [resourceSelectedDate, setResourceSelectedDate] = useState(new Date())
     const [resourceSpecialTimes, setResourceSpecialTimes] = useState([8, 16])
     const [specialDayTimes, setSpecialDayTimes] = useState([8, 16])
     const [specialDayReason, setSpecialDayReason] = useState('')
@@ -89,7 +88,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         if (event === 2 && isClosed(value.base)) {
             newValue = [8, 16]
         }
-        console.log(newValue)
         setValue({
             ...value,
             base: newValue,
@@ -382,7 +380,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             setBookingsToBeModified(bookingsToBeModified.concat(getResourceBookings(resourceSelectedDate, selectedResources).filter(a => a.active && a.times.start < resourceSpecialTimes[0] || a.times.end > resourceSpecialTimes[1])))
             setToTransfer(Array(bookingsToBeModified.length).fill(false))
             setConfirmPopFormOpen(true)
-            console.log('ON VARAUKSIA EI VOI')
         }
     }
 
@@ -402,11 +399,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
         try {
             const bookingsToCancel = bookingsToBeModified.filter(b => b.action === 'cancel')
             const bookingsToTransfer = bookingsToBeModified.filter(b => b.action === 'transfer')
-            console.log('Aloitetaan muutokset', bookingsToBeModified)
-            console.log('--------------------')
-            console.log('Seuraavat varaukset perutaan: ', bookingsToCancel)
-            console.log('Seuraavat varaukset Siirretään: ', bookingsToTransfer)
-            console.log('Seuraavat varaukset jätetään: ', bookingsToBeModified.filter(b => b.action === 'leave'))
 
             var cancelReady = false
             var transferReady = false
@@ -415,53 +407,47 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 bookingsToCancel.map((booking, index) => {
                     setCancelMessage(`Perutaan varausta ${index + 1} / ${bookingsToCancel.length}`)
                     const { action, transferTo, ...oldObject } = bookingsToCancel[index]
-                    let updatedObject = Object.assign({}, oldObject )
+                    let updatedObject = Object.assign({}, oldObject)
                     updatedObject.active = false
                     updatedObject.cancelled = {
-                        date: format(new Date, `dd:MM:yyyy:HH.mm`),
+                        date: format(new Date(), `dd:MM:yyyy:HH.mm`),
                         reason: cancelReason
                     }
-
-                    console.log('Cancelling ', updatedObject)
                     firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(resourceSelectedDate, `yyyy`)}`).doc(`${format(resourceSelectedDate, `dd:MM:yyyy`)}`).set({ bookings: { [updatedObject.id]: updatedObject } }, { merge: true }).then(res => {
                         firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(oldObject) }).then(res => {
 
                             firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
-                        if (index + 1 === bookingsToCancel.length) cancelReady = true
-                        if (cancelReady && transferReady) {
-                            setSuccessMessage('Varausten muutokset onnistuivat')
-                            addResourceSpecialDay(e)
-                            handleConfirmationFormClose()
-                        }
+                                if (index + 1 === bookingsToCancel.length) cancelReady = true
+                                if (cancelReady && transferReady) {
+                                    setSuccessMessage('Varausten muutokset onnistuivat')
+                                    addResourceSpecialDay(e)
+                                    handleConfirmationFormClose()
+                                }
+                            })
+                        })
                     })
-                })
-            })
 
                 })
             } else {
                 cancelReady = true
             }
             if (bookingsToTransfer.length > 0) {
-                var transferBookings = 0
 
                 bookingsToTransfer.map((booking, index) => {
                     setTransferMessage(`Siirretään varauksia ${index + 1} / ${bookingsToTransfer.length}`)
-                    const {action, transferTo, transferred, ...oldObject } = bookingsToTransfer[index]
-                    let updatedObject = Object.assign({}, oldObject )
+                    const { action, transferTo, transferred, ...oldObject } = bookingsToTransfer[index]
+                    let updatedObject = Object.assign({}, oldObject)
                     updatedObject.transferred = {
-                        date: format(new Date, `dd:MM:yyyy:HH.mm`),
+                        date: format(new Date(), `dd:MM:yyyy:HH.mm`),
                         reason: cancelReason,
                         from: bookingsToTransfer[index].worker
                     }
                     updatedObject.worker = bookingsToTransfer[index].transferTo
-                    console.log(oldObject)
-                    console.log('Pushing ', updatedObject)
                     firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(resourceSelectedDate, `yyyy`)}`).doc(`${format(resourceSelectedDate, `dd:MM:yyyy`)}`).set({ bookings: { [updatedObject.id]: updatedObject } }, { merge: true }).then(res => {
                         firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(oldObject) }).then(res => {
 
                             firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
 
-                                console.log(index + 1, ' = ', bookingsToTransfer.length)
                                 if (index + 1 === bookingsToTransfer.length) transferReady = true
                                 if (cancelReady && transferReady) {
                                     setSuccessMessage('Varausten muutokset onnistuivat')
@@ -479,40 +465,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 transferReady = true
             }
 
-
-
-
-            /*
-            firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(resourceSelectedDate, `yyyy`)}`).doc(`${format(resourceSelectedDate, `dd:MM:yyyy`)}`).set({ bookings: { [chosenBooking.id]: updatedObject } }, { merge: true }).then(res => {
-                console.log(res)
-
-                //firestore.collection(`booker${bookerObject.bookerAddress}`).doc('bookings').collection(`${format(selectedDate, `yyyy`)}`).doc(`${format(selectedDate, `dd:MM:yyyy`)}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(b) }).then(resp => {
-
-                firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayRemove(chosenBooking) }).then(res => {
-
-                    firestore.collection('userCollection').doc(chosenBooking.user.email).update({ [`bookings.${bookerObject.bookerAddress}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
-
-                        setTimeout(() => {
-                            setSuccess(true)
-                            setTimeout(() => {
-                                setReason('')
-                                fetchData()
-                                setOpen(false)
-                                setSuccess(false)
-                                setLoading(false)
-                            }, 2000);
-
-                        }, 2000);
-                    })
-                    //  })
-                })
-
-
-
-
-            }).catch(err => {
-                console.log(err)
-            })*/
         } catch (error) {
             console.log(error)
         }
@@ -525,8 +477,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
     const addResourceSpecialDay = (e) => {
         e.preventDefault()
-        console.log(resourceSelectedDate)
-        console.log(resourceSpecialTimes)
 
         try {
             setLoading(true)
@@ -534,8 +484,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 date: format(resourceSelectedDate, 'dd/MM/yyyy'),
                 times: resourceSpecialTimes,
             }
-            console.log(bookerObject.resources[`${selectedResources}`].specialDays)
-            console.log([`${format(resourceSelectedDate, `dd:MM:yyyy`)}`], resSpecialDayObject)
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').update({
                 [`resources.${selectedResources}`]:
                 {
@@ -559,7 +507,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     }
 
     const removeResourceSpecialDay = (key, person) => {
-        console.log(key)
         try {
             setLoading(true)
 
@@ -591,9 +538,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
     const addNewSpecialDay = (e) => {
         e.preventDefault()
-        console.log(selectedDate)
-        console.log(specialDayReason)
-        console.log(specialDayTimes)
 
         try {
             setLoading(true)
@@ -628,7 +572,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     }
 
     const deleteSpecialDay = (key) => {
-        console.log(key)
         try {
             setLoading(true)
             firestore.collection(`booker${pagematch.params.id}`).doc('baseInformation').get()
@@ -648,13 +591,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                             setSpecialDayReason('')
                         })
                 })
-            /*
-            console.log(cRef)
-            const removed = cRef.update({
-                specialDays: {
-                    [`${bookerObject.specialDays[key].date}`]: firebase.firestore.FieldValue.delete()
-                }
-            })*/
 
         } catch (error) {
             setErrorMessage(`Tapahtui virhe`)
@@ -687,19 +623,13 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
     }
 
     const checkIfResourceIsAvailable = (date, resource, times) => {
-        console.log('Tarkistetaan henkilö: ', resource)
         if (!bookerObject.resources[`${resource}`].human) return false
         const resourceWorkingHours = !!bookerObject.resources[`${resource}`].specialDays && !!bookerObject.resources[`${resource}`].specialDays[`${format(date, 'dd:MM:yyyy')}`] ? getDayContent(bookerObject.resources[`${resource}`].specialDays[`${format(date, 'dd:MM:yyyy')}`].times)
             : getDayContent(getDay(date), bookerObject.resources[`${resource}`].timeTables)
-        console.log(times)
-        console.log(resourceWorkingHours)
-        console.log(getResourceBookings(date, resource))
-        console.log(bookerObject.resources[`${resource}`])
-        console.log(times.start < resourceWorkingHours[0] || times.end > resourceWorkingHours[1])
+
         if (times.start < resourceWorkingHours[0] || times.end > resourceWorkingHours[1]) return false
         var availability = true
         getResourceBookings(date, resource).map(booking => {
-            console.log(booking.times.start <= times.start && booking.times.end >= times.end)
             if (booking.times.start <= times.start && booking.times.end >= times.end) availability = false
             else if (booking.times.start > times.start && booking.times.start < times.end) availability = false
         })
@@ -709,7 +639,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
 
     const confirmationForm = () => (
         <div>
-            {console.log(toTransfer)}
             <Dialog open={confirmPopFormOpen} onClose={handleConfirmationFormClose} maxWidth='lg'>
                 <DialogTitle style={{ textAlign: 'center' }}>Vahvista ajanmuutos</DialogTitle>
                 <DialogContent>
@@ -721,7 +650,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     </DialogContentText>
                     {bookingsToBeModified.map((booking, index) => {
                         if (!bookingsToBeModified[index].action) bookingsToBeModified[index].action = 'cancel'
-                        var tfTo = true
                         return (
                             <div style={{ fontWeight: 600 }}>-{booking.service}, {valueLabelFormat(booking.times.start)} - {valueLabelFormat(booking.times.end)} <div style={{ display: 'inline', marginLeft: 5 }}>
                                 <RadioGroup style={{ display: 'inline' }} row defaultValue='cancel' onChange={({ target }) => {
@@ -740,7 +668,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                                         editedList[index] = restOf
                                     }
                                     setBookingsToBeModified(editedList)
-                                    console.log(target.value, ' ja ', bookingsToBeModified[index])
                                 }}>
                                     <FormControlLabel value='cancel' label='Peru' control={<Radio />} />
                                     <FormControlLabel value='leave' label='Jätä' control={<Radio />} />
@@ -796,7 +723,6 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                 <DialogActions>
                     {loading ? <span>{transferMessage}  {cancelMessage} <CircularProgress /> </span> :
                         <div style={{ margin: 10, float: 'right' }}>
-                            {console.log(bookingsToBeModified)}
                             {cancelReason === '' || bookingsToBeModified.filter(b => b.action === 'transfer' && !b.transferTo || b.transferTo === 'selectPerson').length > 0 ? <Button disabled>Vahvista muutokset</Button> : <Button onClick={submitConfirmationForm} style={{ backgroundColor: 'green', color: 'white' }} variant='contained'>Vahvista muutokset</Button>}
                             <Button onClick={handleConfirmationFormClose} color='secondary' variant='contained'>Peru</Button>
                         </div>
@@ -928,7 +854,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     <div className={classes.halfDiv}>
                         <div>
                             <Tooltip title={`${capitalize(format(addDays(selectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(selectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(selectedDate, -1), 'MM/dd/yyyy')} `}>
-                                <span className={classes.dayBtn}><Button className={classes.dayBtn} disabled={isBefore(selectedDate, new Date)} onClick={() => setSelectedDate(addDays(selectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
+                                <span className={classes.dayBtn}><Button className={classes.dayBtn} disabled={isBefore(selectedDate, new Date())} onClick={() => setSelectedDate(addDays(selectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
                             <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
                                 <KeyboardDatePicker
                                     //disableToolbar
@@ -985,7 +911,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                                 min={0}
                                 max={24}
                                 type={'number'}
-                                aria-labelledby='input-slider'
+                                aria-labelledby='input-slider2'
                                 marks={marks}
                             //disabled={editWeekDays}
                             />
@@ -1157,7 +1083,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     min={0}
                     max={24}
                     type={'number'}
-                    aria-labelledby='input-slider'
+                    aria-labelledby='input-slider3'
                     marks={marks}
                     disabled={disabled}
                 />
@@ -1189,7 +1115,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                     <div className={classes.halfDiv}>
                         <div>
                             <Tooltip title={`${capitalize(format(addDays(resourceSelectedDate, -1), "EEEE", { locale: fi }).substring(0, format(addDays(resourceSelectedDate, -1), "EEEE", { locale: fi }).length - 2))} ${format(addDays(resourceSelectedDate, -1), 'MM/dd/yyyy')} `}>
-                                <span className={classes.dayBtn}><Button className={classes.dayBtn} disabled={isBefore(resourceSelectedDate, new Date)} onClick={() => setResourceSelectedDate(addDays(resourceSelectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
+                                <span className={classes.dayBtn}><Button className={classes.dayBtn} disabled={isBefore(resourceSelectedDate, new Date())} onClick={() => setResourceSelectedDate(addDays(resourceSelectedDate, -1))} size='small'><NavigateBeforeRoundIcon /></Button></span></Tooltip>
                             <MuiPickersUtilsProvider utils={DateFnsUtils} locale={fi}>
                                 <KeyboardDatePicker
                                     //disableToolbar
@@ -1240,7 +1166,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                                 min={0}
                                 max={24}
                                 type={'number'}
-                                aria-labelledby='input-slider'
+                                aria-labelledby='input-slider4'
                                 marks={marks}
                                 disabled={Boolean(bookerObject.resources[selectedResources].specialDays) && Boolean(bookerObject.resources[selectedResources].specialDays[format(resourceSelectedDate, 'dd:MM:yyyy')])}
                             //disabled={editWeekDays}
@@ -1266,7 +1192,7 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
                                 {getResourceBookings(resourceSelectedDate, selectedResources).filter(a => a.active && a.times.start < resourceSpecialTimes[0] || a.times.end > resourceSpecialTimes[1]).map(b => (
                                     <Typography>{b.service}, {valueLabelFormat(b.times.start)} - {valueLabelFormat(b.times.end)} </Typography>
                                 ))}
-                            </div> : <Typography>Leikkaavat varaukset: {getResourceBookings(resourceSelectedDate, selectedResources).length-getResourceBookings(resourceSelectedDate, selectedResources).filter(a => a.active && a.times.start > resourceSpecialTimes[0] && a.times.end < resourceSpecialTimes[1]).length}</Typography>
+                            </div> : <Typography>Leikkaavat varaukset: {getResourceBookings(resourceSelectedDate, selectedResources).length - getResourceBookings(resourceSelectedDate, selectedResources).filter(a => a.active && a.times.start > resourceSpecialTimes[0] && a.times.end < resourceSpecialTimes[1]).length}</Typography>
                             }
 
                             <div style={{ margin: 10, float: 'right' }}>
@@ -1334,29 +1260,29 @@ const TimeManagement = ({ setSuccessMessage, setErrorMessage, bookerObject, fetc
             <div>
                 <div style={{ display: 'flex' }}><Typography variant="h6" style={{ flexBasis: '80%', paddingLeft: '20%' }}>Resurssikohtainen ajanhallinta</Typography>
                     <FormControl style={{ bottom: 10 }}>
-                        {humanResources.length>0? <div>
-                        <InputLabel id='resouceTimes'>Valitse henkilö</InputLabel>
-                        <Select labelId='resourceTimes'
-                            style={{ minWidth: 150 }}
-                            value={selectedResources}
-                            onChange={({ target }) => {
-                                if (!!target.value) {
-                                    setSelectedResources(target.value)
-                                    setSelectedTimeTables(bookerObject.resources[`${target.value}`].timeTables)
-                                }
-                            }}>
-                            {humanResources.map(r => (
-                                <MenuItem key={r.name + 'list'} value={r.name}>{r.name}</MenuItem>
-                            ))}
-                        </Select>
-                        </div> : <em/> }
-                        
-                        </FormControl>
+                        {humanResources.length > 0 ? <div>
+                            <InputLabel id='resouceTimes'>Valitse henkilö</InputLabel>
+                            <Select labelId='resourceTimes'
+                                style={{ minWidth: 150 }}
+                                value={selectedResources}
+                                onChange={({ target }) => {
+                                    if (!!target.value) {
+                                        setSelectedResources(target.value)
+                                        setSelectedTimeTables(bookerObject.resources[`${target.value}`].timeTables)
+                                    }
+                                }}>
+                                {humanResources.map(r => (
+                                    <MenuItem key={r.name + 'list'} value={r.name}>{r.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </div> : <em />}
+
+                    </FormControl>
                     <br />
                     <Divider />
                 </div>
                 {selectedResources === 'default' ? <div>
-                    <Typography variant='caption'>{humanResources.length>0?  'Valitse henkilö nähdäksesi henkilökohtaiset ajat' : 'Luo ensin henkilöresursseja ´Resurssit´ välilehdeltä'}</Typography>
+                    <Typography variant='caption'>{humanResources.length > 0 ? 'Valitse henkilö nähdäksesi henkilökohtaiset ajat' : 'Luo ensin henkilöresursseja ´Resurssit´ välilehdeltä'}</Typography>
                 </div> : <div>
                         <Typography variant='caption'>Henkilön {selectedResources} ajanhallinta</Typography>
                         {personWeekdayPanel()}

@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-const Login = ({setSuccessMessage, setErrorMessage}) => {
+const Login = ({ setSuccessMessage, setErrorMessage }) => {
     const classes = useStyles()
     const history = useHistory()
     const [loading, setLoading] = useState(false);
@@ -80,12 +80,11 @@ const Login = ({setSuccessMessage, setErrorMessage}) => {
                 }, 1000)
             }).catch(error => {
                 var errorMsg = 'Tapahtui virhe, yritä uudelleen'
-                if(error.code === 'auth/user-not-found'){
+                if (error.code === 'auth/user-not-found') {
                     errorMsg = 'Virheellinen sähköposti tai salasana'
                 }
                 setLoading(false)
                 setErrorMessage(errorMsg)
-                console.log(error.code)
             })
         } catch (exception) {
             console.log(exception)
@@ -130,7 +129,7 @@ const Login = ({setSuccessMessage, setErrorMessage}) => {
                                         component={Link}
                                         to='/register'
                                         disabled={loading}>
-                                        Rekisteröintiin->
+                                        Rekisteröintiin
                                     </Button>
                                 </div>}
                         </div>}

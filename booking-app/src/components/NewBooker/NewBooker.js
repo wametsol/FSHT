@@ -1,5 +1,5 @@
 import React, {  useState } from 'react';
-import firebase, { auth, firestore } from '../../firebase'
+import { auth, firestore } from '../../firebase'
 import { Stepper, Step, StepButton, Typography, Button, TextField, InputAdornment, CircularProgress } from '@material-ui/core';
 import useStyles from './useStyles'
 import {useHistory } from 'react-router-dom'
@@ -36,8 +36,6 @@ const NewBooker = () => {
     const [publicEmail, setPublicEmail] = React.useState('')
     const [publicPhone, setPublicPhone] = React.useState('')
 
-
-    // serviceObject : {serviceName, serviceDesc}
     const [bookerServices, setBookerServices] = React.useState([])
     
 
@@ -133,9 +131,16 @@ const NewBooker = () => {
         setCompleted(newReseted)
         setActiveStep(0)
 
-        if(activeStep==0){
+        if(activeStep===0){
             setSystName('')
             setWebAddress('')
+            setSuccess(false)
+        }
+        if(activeStep===1){
+            setPublicName('')
+            setPublicCompany('')
+            setPublicEmail('')
+            setPublicPhone('')
             setSuccess(false)
         }
     }
@@ -151,7 +156,6 @@ const NewBooker = () => {
                 setSuccess(false)
                 setError(false)
                 setLoading(true)
-                console.log('Checking: ', webAddress)
                 firestore.collection(`bookerCollection`).get().then( (response) => {
                     if(response.docs.filter(a => a.id === webAddress).length===0){
                         setTimeout(() => {
@@ -171,7 +175,6 @@ const NewBooker = () => {
         }
     }
     const isReady = () => {
-        console.log(completed)
         Object.keys(completed).map(key => {
             if(!completed[key]){
                 return false
@@ -211,12 +214,6 @@ const NewBooker = () => {
                 </div>
             )}
             
-        </div>
-    )
-
-    const constructInformation = () => (
-        <div>
-
         </div>
     )
 
@@ -389,7 +386,6 @@ const NewBooker = () => {
                 .then((res) => {
                     firestore.collection('bookerCollection').doc(webAddress).set({active: true})
                     .then(r => {
-                        console.log(res)
                         setTimeout(() => {
                         setLoading(false)
                         setTimeout(() => {
@@ -471,7 +467,7 @@ const NewBooker = () => {
                                         Kohta {activeStep + 1} on jo täytetty. <Button size='small' color='secondary' onClick={resetOne}>Nollaa</Button>
                                     </Typography>
                                 ) : (<Typography>Kun olet valmis kohdan {activeStep + 1}: ''{getSteps()[activeStep]}'' kanssa, paina
-                                    <Button disabled={(loading || (activeStep==0 && !success || systName.length < 4))} variant="contained" color="primary" style={{ margin: 8 }} onClick={handleComplete}>
+                                    <Button disabled={(loading || (activeStep===0 && !success || systName.length < 4))} variant="contained" color="primary" style={{ margin: 8 }} onClick={handleComplete}>
                                         {isReady() ? 'Lopetus' : 'Valmis'}
                                     </Button></Typography>
                                     ))}

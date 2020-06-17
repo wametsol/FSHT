@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import firebase, { auth, firestore } from '../../firebase'
-import { Tabs, Tab, Paper, CircularProgress, Typography, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@material-ui/core';
-import { useRouteMatch } from 'react-router-dom'
-import { format, getDay, addDays, isBefore, formatDistance, formatDistanceToNow, parseISO, sub, isAfter } from 'date-fns'
-import { sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText, valueLabelFormat } from '../BookingAdminPage/TimeTableServices'
+import { Tabs, Tab, CircularProgress, Typography, ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails, ExpansionPanelSummary, Divider, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from '@material-ui/core';
+import { format, parseISO, sub, isAfter } from 'date-fns'
+import { getFormattedTimes, valueLabelFormat } from '../BookingAdminPage/TimeTableServices'
 import useStyles from './useStyles'
 
 import clsx from 'clsx';
@@ -15,13 +14,10 @@ import DoneAllIcon from '@material-ui/icons/DoneAll'
 
 const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserData }) => {
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    //const [userData, setUserData] = useState(null)
     const [chosenBooking, setChosenBooking] = useState(null)
     const [reason, setReason] = useState('')
     const [open, setOpen] = useState(false)
     const [success, setSuccess] = useState(false)
-    const user = auth.currentUser
     const classes = useStyles()
     const [value, setValue] = useState(0)
 
@@ -34,9 +30,6 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
 
     const handleChange = (event, newValue) => {
         setValue(newValue)
-        console.log('Active', activeBookings())
-        console.log('Past: ', pastBookings())
-        console.log('Cancelled: ', cancelledBookings())
     }
 
     const cancelBooking = (booking) => {
@@ -67,31 +60,28 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
             let updatedObject = { ...chosenBooking }
             updatedObject.active = false
             updatedObject.cancelled = {
-                date: format(new Date, `dd:MM:yyyy:HH.mm`),
+                date: format(new Date(), `dd:MM:yyyy:HH.mm`),
                 reason: cancelReason
             }
 
-            
 
 
-            firestore.collection(`booker${site}`).doc('bookings').collection(`${dateObj.slice(6)}`).doc(`${dateObj}`).set({bookings:{[chosenBooking.id]:  updatedObject }}, {merge: true}).then(res => {
-                //firestore.collection(`booker${site}`).doc('bookings').collection(`${dateObj.slice(6)}`).doc(`${dateObj}`).update({ bookings: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(resp => {
-                    firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayRemove(chosenBooking) }).then(res => {
-                        firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
+
+            firestore.collection(`booker${site}`).doc('bookings').collection(`${dateObj.slice(6)}`).doc(`${dateObj}`).set({ bookings: { [chosenBooking.id]: updatedObject } }, { merge: true }).then(res => {
+                firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayRemove(chosenBooking) }).then(res => {
+                    firestore.collection('userCollection').doc(updatedObject.user.email).update({ [`bookings.${site}`]: firebase.firestore.FieldValue.arrayUnion(updatedObject) }).then(res => {
+                        setTimeout(() => {
+                            setSuccess(true)
                             setTimeout(() => {
-                                setSuccess(true)
-                                setTimeout(() => {
-                                    setReason('')
-                                    fetchUserData()
-                                    setOpen(false)
-                                    setSuccess(false)
-                                    setLoading(false)
-                                }, 2000);
-
+                                setReason('')
+                                fetchUserData()
+                                setOpen(false)
+                                setSuccess(false)
+                                setLoading(false)
                             }, 2000);
-                        })
-                        //  })
-                 //   })
+
+                        }, 2000);
+                    })
 
 
 
@@ -100,7 +90,6 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
                     console.log(err)
                 })
 
-                //}
             })
 
         } catch (error) {
@@ -112,7 +101,7 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
         if (!services.filter(s => s.service === booking.service)[0]) {
             return true
         }
-        return isAfter(new Date, sub(new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)), { hours: services.filter(service => service.service === booking.service)[0].cancelTime }))
+        return isAfter(new Date(), sub(new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`)), { hours: services.filter(service => service.service === booking.service)[0].cancelTime }))
     }
 
     const lastCancelTime = (booking) => {
@@ -124,15 +113,15 @@ const UserBookingPage = ({ site, bookingsObject, services, userData, fetchUserDa
 
     const cancelledBookings = () => {
         if (Boolean(userData.bookings[`${site}`])) return userData.bookings[`${site}`].filter(booking => !booking.active)
-        
+
     }
 
     const activeBookings = () => {
-        if (Boolean(userData.bookings[`${site}`])) return userData.bookings[`${site}`].filter(booking => booking.active && !isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`))))
+        if (Boolean(userData.bookings[`${site}`])) return userData.bookings[`${site}`].filter(booking => booking.active && !isAfter(new Date(), new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`))))
     }
 
     const pastBookings = () => {
-        if (Boolean(userData.bookings[`${site}`])) return userData.bookings[`${site}`].filter(booking => booking.active && isAfter(new Date, new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`))))
+        if (Boolean(userData.bookings[`${site}`])) return userData.bookings[`${site}`].filter(booking => booking.active && isAfter(new Date(), new Date(parseISO(`${booking.bookingDate.substring(6, 10)}-${booking.bookingDate.substring(3, 5)}-${booking.bookingDate.substring(0, 2)}T${valueLabelFormat(booking.times.start).substring(0, 2)}:${valueLabelFormat(booking.times.start).substring(3, 5)}`))))
     }
 
     const getTabContent = (tab) => {

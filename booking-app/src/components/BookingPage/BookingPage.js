@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import 'date-fns'
-import { format, getDay, addDays, isBefore, parseISO, isToday, getTime } from 'date-fns'
+import { format, getDay, addDays, isBefore, parseISO, isToday } from 'date-fns'
 import { auth, firestore } from '../../firebase'
-import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip, Slide, Snackbar, IconButton, Drawer, Icon } from '@material-ui/core'
+import { Tabs, Tab, Button, FormControl, InputLabel, MenuItem, Select, Typography, Paper, CircularProgress, AppBar, Toolbar, Card, CardMedia, CardContent, Divider, capitalize, Tooltip, Slide, Snackbar, IconButton, Drawer } from '@material-ui/core'
 import useStyles from './useStyles'
 import { useRouteMatch } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
 import CallIcon from '@material-ui/icons/Call'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
-import { Route, Link, useHistory } from 'react-router-dom'
 
 import DateFnsUtils from '@date-io/date-fns'
 import { fi } from 'date-fns/locale'
 import {
     MuiPickersUtilsProvider,
-    KeyboardTimePicker,
     KeyboardDatePicker,
 } from '@material-ui/pickers';
-import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText, getFormattedPersonTimes, getSinglePersonDayTimesText, getDayContent } from '../BookingAdminPage/TimeTableServices'
+import { isClosed, sameAsBase, getFormattedTimes, getWeekdayTimes, getSingleDayTimes, getSingleDayTimesText, getFormattedPersonTimes, getDayContent } from '../BookingAdminPage/TimeTableServices'
 
 import UserBookingPage from './UserBookingPage'
 import ConfirmationWindow from './ConfirmationWindow'
@@ -28,7 +26,6 @@ import NavigateBeforeRoundIcon from '@material-ui/icons/NavigateBefore'
 import DoubleArrowRoundedIcon from '@material-ui/icons/DoubleArrowRounded'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 
-import Notification from '../Notification/Notification'
 import { Alert } from '@material-ui/lab'
 import LoginTab from './LoginTab'
 
@@ -57,7 +54,7 @@ const BookingPage = () => {
 
     useEffect(() => {
         try {
-            
+
             setLoading(true)
             firestore.collection(`booker${pagematch.params.id}`).doc(`baseInformation`).get()
                 .then((response) => {
@@ -73,26 +70,18 @@ const BookingPage = () => {
                     const years = ['2020', '2021']
                     years.map(c => {
                         firestore.collection(`booker${pagematch.params.id}`).doc('bookings').collection(c).get()
-                        .then(res => {
-                            res.docs.map(doc => {
-                                collections = {...collections,
-                                    [`${doc.id}`]: doc.data()
-                                }
+                            .then(res => {
+                                res.docs.map(doc => {
+                                    collections = {
+                                        ...collections,
+                                        [`${doc.id}`]: doc.data()
+                                    }
+                                })
+                                setBookings(collections)
+                                setLoading(false)
                             })
-                            setBookings(collections)
-                            console.log(collections)
-                            setLoading(false)
-                        })
                     })
-
                     setLoading(false)
-                    /*
-                    
-                    response.forEach(doc => {
-                        console.log(doc.data())
-                        setBookerObject(doc.data())
-                        setLoading(false)
-                    })*/
                 })
                 .catch(error => {
                     console.log(error)
@@ -101,8 +90,6 @@ const BookingPage = () => {
                 })
 
 
-
-            console.log(bookerObject)
         } catch (error) {
             console.log(error)
             setLoading(false)
@@ -110,7 +97,7 @@ const BookingPage = () => {
         }
     }, [])
     useEffect(() => {
-        
+
         fetchUserData()
     }, [user])
 
@@ -124,10 +111,8 @@ const BookingPage = () => {
                         setError(true)
                         setLoading(false)
                     }
-                    console.log(response.data())
                     setUserData(response.data())
                     setLoading(false)
-                    console.log(userData)
                 })
                 .catch(error => {
                     console.log(error)
@@ -157,7 +142,6 @@ const BookingPage = () => {
         try {
             auth.signOut()
                 .then((res) => {
-                    console.log(res)
                     setValue(0)
                     fetchUserData()
                 })
@@ -237,7 +221,6 @@ const BookingPage = () => {
     const handleSelectChange = (e) => {
         setChosenService(e.target.value)
         setChosenWorker(null)
-        //console.log(getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
     }
     const dayHasSpecialTimes = () => {
         if (!bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]]) {
@@ -249,7 +232,7 @@ const BookingPage = () => {
 
 
     const getFreeTimes = () => {
-        const dailyBookings = Boolean(bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]])? bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]].bookings : []
+        const dailyBookings = Boolean(bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]]) ? bookings[[`${format(selectedDate, `dd:MM:yyyy`)}`]].bookings : []
 
         var dayTimes
         // CHECK IF DAY IS IN SPECIAL DAYS
@@ -259,11 +242,9 @@ const BookingPage = () => {
             dayTimes = (getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables))
         }
 
-        //console.log(bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
-
         const timeSlot = chosenService.timelength.hours + chosenService.timelength.minutes / 60
 
-        
+
 
         var timeObject = []
         for (var x = dayTimes[0]; x < dayTimes[1]; x += timeSlot) {
@@ -279,22 +260,21 @@ const BookingPage = () => {
                 continue
             }
             // PREVENT BOOKINGS IF TIME HAS PASSED OR IS TOO CLOSE
-            const currentHH = Number(format(new Date, 'HH'))
-            const currentMM = Number(format(new Date, 'mm'))
-            if(isToday(selectedDate) && singleTime.start < currentHH+(currentMM/60)){
+            const currentHH = Number(format(new Date(), 'HH'))
+            const currentMM = Number(format(new Date(), 'mm'))
+            if (isToday(selectedDate) && singleTime.start < currentHH + (currentMM / 60)) {
                 continue
-                
+
             }
 
             // CHECK IF DAILYBOOKINGS EXIST
             for (const b in dailyBookings) {
-                if (dailyBookings[b].active === true && ((!!chosenWorker && !chosenWorker.human && !bookerObject.resources[`${dailyBookings[b].worker}`].human && dailyBookings[b].deviceID === chosenWorker.deviceID ) || (!!chosenWorker && chosenWorker.human && dailyBookings[b].worker === chosenWorker.name)) && (dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end >= singleTime.end || dailyBookings[b].times.start < singleTime.end && dailyBookings[b].times.start >= singleTime.start ||  dailyBookings[b].times.start < singleTime.start && dailyBookings[b].times.end > singleTime.start)) {
+                if (dailyBookings[b].active === true && ((!!chosenWorker && !chosenWorker.human && !bookerObject.resources[`${dailyBookings[b].worker}`].human && dailyBookings[b].deviceID === chosenWorker.deviceID) || (!!chosenWorker && chosenWorker.human && dailyBookings[b].worker === chosenWorker.name)) && (dailyBookings[b].times.start <= singleTime.start && dailyBookings[b].times.end >= singleTime.end || dailyBookings[b].times.start < singleTime.end && dailyBookings[b].times.start >= singleTime.start || dailyBookings[b].times.start < singleTime.start && dailyBookings[b].times.end > singleTime.start)) {
                     singleTime.bookedAlready = true
                 }
             }
             timeObject.push(singleTime)
         }
-        //console.log(timeObject)
         return timeObject
     }
 
@@ -308,7 +288,6 @@ const BookingPage = () => {
 
         Object.keys(bookerObject.specialDays).map(key => {
             const specDate = bookerObject.specialDays[key].date
-            //console.log(isBefore(selectedDate, parseISO(`${specDate.substring(6, 10)}-${specDate.substring(3, 5)}-${specDate.substring(0, 2)}`)))
             if (isBefore(addDays(selectedDate, -1), parseISO(`${specDate.substring(6, 10)}-${specDate.substring(3, 5)}-${specDate.substring(0, 2)}`))) {
                 specialTimes.push(bookerObject.specialDays[key])
             }
@@ -399,7 +378,7 @@ const BookingPage = () => {
     const getHumanResources = () => {
         var humanResources = []
         Object.keys(bookerObject.resources).map(key => {
-            if (bookerObject.resources[key].human){
+            if (bookerObject.resources[key].human) {
                 humanResources.push(bookerObject.resources[key])
             }
         })
@@ -409,14 +388,16 @@ const BookingPage = () => {
     const getNonHumanResources = () => {
         var nonHumanResources = []
         Object.keys(bookerObject.resources).map(key => {
-            if (!bookerObject.resources[key].human){
+            if (!bookerObject.resources[key].human) {
                 var i = 0
-                while (i < bookerObject.resources[key].amountOfResources){
-                    nonHumanResources.push({...bookerObject.resources[key],
-                    deviceID: i+1})
-                    i+=1
+                while (i < bookerObject.resources[key].amountOfResources) {
+                    nonHumanResources.push({
+                        ...bookerObject.resources[key],
+                        deviceID: i + 1
+                    })
+                    i += 1
                 }
-                
+
             }
         })
 
@@ -424,33 +405,24 @@ const BookingPage = () => {
     }
 
     const getMaxWorktimes = (person) => {
-        var maxWorktimes = Object.assign([], !!person.specialDays && !!person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times : getDayContent(getDay(selectedDate), person.timeTables))
-        if(maxWorktimes[0]===maxWorktimes[1]){
+        var maxWorktimes = Object.assign([], !!person.specialDays && !!person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`] ? person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times : getDayContent(getDay(selectedDate), person.timeTables))
+        if (maxWorktimes[0] === maxWorktimes[1]) {
             return maxWorktimes
         }
-        //console.log('Initial times: ', maxWorktimes)
-        //console.log('Specialday: ', dayHasSpecialTimes())
-        //console.log('Special times: ', bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]])
-        var openinHours = dayHasSpecialTimes()? bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times : getDayContent(getDay(selectedDate), bookerObject.timeTables)
+        var openinHours = dayHasSpecialTimes() ? bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times : getDayContent(getDay(selectedDate), bookerObject.timeTables)
 
-        
-        //console.log('Initial openingtimes: ',openinHours)
-        if (maxWorktimes[0]<openinHours[0]){
+        if (maxWorktimes[0] < openinHours[0]) {
             maxWorktimes[0] = openinHours[0]
         }
-        if (maxWorktimes[1]>openinHours[1]){
+        if (maxWorktimes[1] > openinHours[1]) {
             maxWorktimes[1] = openinHours[1]
         }
-        //console.log('Returning times: ',maxWorktimes)
-        //console.log('Initial times: ', !!person.specialDays && !!person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`]? person.specialDays[`${format(selectedDate, 'dd:MM:yyyy')}`].times : getDayContent(getDay(selectedDate), person.timeTables))
         return maxWorktimes
     }
 
     const workerHasShift = (day, worker) => {
-       // console.log('Työntekijä: ', worker)
-        var workerDayTimes = !!worker.specialDays && !!worker.specialDays[`${format(day, 'dd:MM:yyyy')}`]? worker.specialDays[`${format(day, 'dd:MM:yyyy')}`].times : getDayContent(getDay(day), worker.timeTables)
-       // console.log('Ajat: ',workerDayTimes)
-        if (workerDayTimes[0] !== workerDayTimes[1]){
+        var workerDayTimes = !!worker.specialDays && !!worker.specialDays[`${format(day, 'dd:MM:yyyy')}`] ? worker.specialDays[`${format(day, 'dd:MM:yyyy')}`].times : getDayContent(getDay(day), worker.timeTables)
+        if (workerDayTimes[0] !== workerDayTimes[1]) {
             return true
         }
 
@@ -490,8 +462,6 @@ const BookingPage = () => {
 
                 <Divider />
             </Card>
-            {/*dayHasSpecialTimes()? (bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times[0] === bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times[1]) ? <div className={classes.closedInfo}><Typography>Suljettu, valitse toinen päivä</Typography></div> : <div className={classes.closedInfo}><Typography>Käytössä poikkeusaikataulu</Typography></div> :
-                         <em/>*/}
             {dayHasSpecialTimes() ? <div className={classes.specialInfo}><Typography>{bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].reason}, käytössä poikkeusaikataulu</Typography> </div> : <em />}
             {(getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables)[0] === getSingleDayTimes(getDay(selectedDate), bookerObject.timeTables)[1]) || (dayHasSpecialTimes() && (bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times[0] === bookerObject.specialDays[[`${format(selectedDate, `dd:MM:yyyy`)}`]].times[1])) ? <div className={classes.closedInfo}><Typography>Suljettu, valitse toinen päivä</Typography></div> : <div>
 
@@ -518,9 +488,9 @@ const BookingPage = () => {
                             </FormControl>
 
                             {!chosenService.service ? <em /> : <div>
-                                {getFreeTimes().length === 0 || chosenService.type === 'human' && getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).length===0 ? <div><Typography variant='caption'>Ei vapaita aikoja tälle päivälle</Typography><br/>
-                                {prevDayButtons()}{nextDayButtons()}</div> : <div><Typography variant='caption'>Sopivia aikoja vapaana: {getFreeTimes().length}</Typography><br/>
-                                {prevDayButtons()}{nextDayButtons()}</div>}
+                                {getFreeTimes().length === 0 || chosenService.type === 'human' && getHumanResources().filter(r => r.services.filter(a => a === chosenService.service).length > 0 && workerHasShift(selectedDate, r)).length === 0 ? <div><Typography variant='caption'>Ei vapaita aikoja tälle päivälle</Typography><br />
+                                    {prevDayButtons()}{nextDayButtons()}</div> : <div><Typography variant='caption'>Sopivia aikoja vapaana: {getFreeTimes().length}</Typography><br />
+                                        {prevDayButtons()}{nextDayButtons()}</div>}
                             </div>}</div>
                         {!chosenService.service ? <em /> : <div>
                             <div key={chosenService.service} className={classes.singleServiceBox}>
@@ -531,190 +501,190 @@ const BookingPage = () => {
                                     <Typography>Varauksen kesto: {chosenService.timelength.hours !== 0 ? <span>{chosenService.timelength.hours}h</span> : <em />} {chosenService.timelength.minutes !== 0 ? <span>{chosenService.timelength.minutes}min</span> : <em />}</Typography>
                                 </div>
                             </div>
-                            
+
                         </div>}
                     </div>
-                    
-                    {!!chosenService.service && chosenService.type === 'human' && getFreeTimes().length !== 0   ? 
-                    
-                    <div className={classes.freeTimesBox}>
-                        {getFreeTimes().length === 0 || getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).length===0 ? <em/>:
-                    <Typography>Valitse työntekijä</Typography>}
-                    <div className={classes.workerBox} >
 
-                    
-                {getHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0 && workerHasShift(selectedDate , r)).map(person => (
-                    <div key={person.name} className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name? {backgroundColor:'lightgreen'}: {}}>
-                        
-                    <Typography>{person.name}</Typography>
-                <Typography variant='caption'>{getFormattedPersonTimes(getMaxWorktimes(person))}</Typography>
-                    </div>
-                ))}</div>
-                    <Divider />
-                    {!!chosenWorker? <div>
-                    {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> :
-                        <div>
-                            {getFreeTimes().map(time => (
-                                <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress, worker: chosenWorker })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
-                            ))}</div>}</div>: <em/>}
-                </div>
-                    
-                    : <em/>}
-                    {!!chosenService.service && chosenService.type === 'device' && getFreeTimes().length !== 0 ? 
-                    <div className={classes.freeTimesBox}>
-                        <Typography>Valitse laite</Typography>
-                        <div className={classes.workerBox} >
+                    {!!chosenService.service && chosenService.type === 'human' && getFreeTimes().length !== 0 ?
 
-                        
-                    {getNonHumanResources().filter(r => r.services.filter(a => a === chosenService.service ).length>0).map(resource => (
-                        <div key={resource.name+resource.deviceID} className={classes.singleWorker} onClick={() => setChosenWorker(resource)} style={!!chosenWorker && chosenWorker.name === resource.name && chosenWorker.deviceID === resource.deviceID? {backgroundColor:'lightgreen'}: {}}>
-                            
-                        <Typography>{resource.name} {resource.deviceID}</Typography>
-                    <Typography variant='caption'></Typography>
+                        <div className={classes.freeTimesBox}>
+                            {getFreeTimes().length === 0 || getHumanResources().filter(r => r.services.filter(a => a === chosenService.service).length > 0 && workerHasShift(selectedDate, r)).length === 0 ? <em /> :
+                                <Typography>Valitse työntekijä</Typography>}
+                            <div className={classes.workerBox} >
+
+
+                                {getHumanResources().filter(r => r.services.filter(a => a === chosenService.service).length > 0 && workerHasShift(selectedDate, r)).map(person => (
+                                    <div key={person.name} className={classes.singleWorker} onClick={() => setChosenWorker(person)} style={!!chosenWorker && chosenWorker.name === person.name ? { backgroundColor: 'lightgreen' } : {}}>
+
+                                        <Typography>{person.name}</Typography>
+                                        <Typography variant='caption'>{getFormattedPersonTimes(getMaxWorktimes(person))}</Typography>
+                                    </div>
+                                ))}</div>
+                            <Divider />
+                            {!!chosenWorker ? <div>
+                                {getFreeTimes().length === 0 ? <div>Ei vapaita aikoja</div> :
+                                    <div>
+                                        {getFreeTimes().map(time => (
+                                            <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress, worker: chosenWorker })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
+                                        ))}</div>}</div> : <em />}
                         </div>
-                    ))}</div>
-                        <Divider />
-                        {!!chosenWorker? <div>
-                        {getFreeTimes().length === 0 ? <div>
-                            <Typography>Ei vapaita aikoja tälle päivälle</Typography>
-                            <Button>Edellinen päivä</Button><Button>Seuraava päivä</Button>
 
-                        </div> :
-                            <div>
-                                {getFreeTimes().map(time => (
-                                    <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress, worker: chosenWorker })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
-                                ))}</div>}</div>: <em/>}
-                    </div> : <em/>}
-                    
+                        : <em />}
+                    {!!chosenService.service && chosenService.type === 'device' && getFreeTimes().length !== 0 ?
+                        <div className={classes.freeTimesBox}>
+                            <Typography>Valitse laite</Typography>
+                            <div className={classes.workerBox} >
 
 
-                    {confirmationOpen ? <ConfirmationWindow setOpen={setConfirmationOpen} open={confirmationOpen} data={confirmationData} setConfirmationData={setConfirmationData} fetchUserData={fetchUserData} handleSuccess={handleSuccess}/> : <em />}
+                                {getNonHumanResources().filter(r => r.services.filter(a => a === chosenService.service).length > 0).map(resource => (
+                                    <div key={resource.name + resource.deviceID} className={classes.singleWorker} onClick={() => setChosenWorker(resource)} style={!!chosenWorker && chosenWorker.name === resource.name && chosenWorker.deviceID === resource.deviceID ? { backgroundColor: 'lightgreen' } : {}}>
+
+                                        <Typography>{resource.name} {resource.deviceID}</Typography>
+                                        <Typography variant='caption'></Typography>
+                                    </div>
+                                ))}</div>
+                            <Divider />
+                            {!!chosenWorker ? <div>
+                                {getFreeTimes().length === 0 ? <div>
+                                    <Typography>Ei vapaita aikoja tälle päivälle</Typography>
+                                    <Button>Edellinen päivä</Button><Button>Seuraava päivä</Button>
+
+                                </div> :
+                                    <div>
+                                        {getFreeTimes().map(time => (
+                                            <Paper key={time.start}>{getFormattedTimes([time.start, time.end])}<Button disabled={time.bookedAlready} size='small' onClick={() => popConfirmation({ service: chosenService, times: time, date: selectedDate, target: bookerObject.bookerAddress, worker: chosenWorker })}>{time.bookedAlready ? <span>VARATTU</span> : <span>Varaa</span>}</Button></Paper>
+                                        ))}</div>}</div> : <em />}
+                        </div> : <em />}
+
+
+
+                    {confirmationOpen ? <ConfirmationWindow setOpen={setConfirmationOpen} open={confirmationOpen} data={confirmationData} setConfirmationData={setConfirmationData} fetchUserData={fetchUserData} handleSuccess={handleSuccess} /> : <em />}
                 </Paper>
             </div>}
         </div>
     )
 
-    
-    
 
-        
-        return (
-            <div className={classes.root}>
-                {(bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && Object.keys(bookerObject.admins).filter(a => bookerObject.admins[a].email === user.email).length > 0)))?
+
+
+
+    return (
+        <div className={classes.root}>
+            {(bookerObject && (bookerObject.siteSettings.visibleToPublic || (!!user && Object.keys(bookerObject.admins).filter(a => bookerObject.admins[a].email === user.email).length > 0))) ?
                 <div>
-                    
-                {(!bookerObject.siteSettings.visibleToPublic) ? <div className={classes.notPublicInfo}><Typography variant='h6'>Sivusto ei näy julkisesti, se näkyy vain sivuston ylläpitäjille. Voit julkaista sivuston hallintapaneelista.</Typography></div> : <em />}
-                {notification()}
-                <div >
+
+            {(!bookerObject.siteSettings.visibleToPublic) ? <div className={classes.notPublicInfo}><Typography variant='h6'>Sivusto ei näy julkisesti, se näkyy vain sivuston ylläpitäjille. Varauksia ei voida tehdä. Voit julkaista sivuston hallintapaneelista. Hallintapaneeli löytyy osoitteesta www.ajanvaraus.web.app/{bookerObject}/admin</Typography></div> : <em />}
+                    {notification()}
                     <div >
-                        
+                        <div >
+
                             <AppBar position="static" style={{ backgroundColor: `rgb(${bookerObject.siteSettings.navColor.r},${bookerObject.siteSettings.navColor.g},${bookerObject.siteSettings.navColor.b},${bookerObject.siteSettings.navColor.a})` }}>
-                                
+
                                 {window.innerWidth > 600 ?
-                                <Toolbar className={classes.bookingTopbar} variant="dense">
-                                    <span style={{ display: 'contents' }}>
-                                        <Tabs
-                                            value={value}
-                                            onChange={handleChange}
-                                            TabIndicatorProps={{ style: { background: `rgb(${bookerObject.siteSettings.navText2Color.r},${bookerObject.siteSettings.navText2Color.g},${bookerObject.siteSettings.navText2Color.b},${bookerObject.siteSettings.navText2Color.a})` } }}
-                                            variant='standard'>
-                                            <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
-                                            {!user ?
-                                                <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(1)} className={classes.menuButton} color="inherit">Kirjaudu</span>} />
-                                                :
-                                                <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>} />}
+                                    <Toolbar className={classes.bookingTopbar} variant="dense">
+                                        <span style={{ display: 'contents' }}>
+                                            <Tabs
+                                                value={value}
+                                                onChange={handleChange}
+                                                TabIndicatorProps={{ style: { background: `rgb(${bookerObject.siteSettings.navText2Color.r},${bookerObject.siteSettings.navText2Color.g},${bookerObject.siteSettings.navText2Color.b},${bookerObject.siteSettings.navText2Color.a})` } }}
+                                                variant='standard'>
+                                                <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >{bookerObject.bookerName}</span>}></Tab>
+                                                {!user ?
+                                                    <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(1)} className={classes.menuButton} color="inherit">Kirjaudu</span>} />
+                                                    :
+                                                    <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(1)} className={classes.menuButton} variant='outlined' color="inherit" >Varaukset</span>} />}
+                                                {!user ? <em />
+                                                    :
+                                                    <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(2)} className={classes.menuButton} variant='outlined' color="inherit" >Profiili</span>}></Tab>}
+                                            </Tabs>
                                             {!user ? <em />
                                                 :
-                                                <Tab label={<span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} onClick={() => setValue(2)} className={classes.menuButton} variant='outlined' color="inherit" >Profiili</span>}></Tab>}
-                                        </Tabs>
-                                        {!user ? <em />
-                                            :
-                                            <Button variant='outlined' onClick={signOut}>Logout</Button>}
+                                                <Button variant='outlined' onClick={signOut}>Logout</Button>}
 
 
-                                    </span></Toolbar>
+                                        </span></Toolbar>
                                     :
                                     <Toolbar className={classes.bookingTopbar} variant="dense">
-                                                <Button onClick={() => setValue(0)}>
-                                                    <span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >{bookerObject.bookerName}</span>
-                                                </Button>
-                                                <IconButton
-                                                    edge='start'
-                                                    onClick={handleMenu}
-                                                    style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >
-                                                    <MenuIcon />
-                                                </IconButton>
-                                            <Drawer
-                                                anchor='top'
-                                                variant='temporary'
-                                                open={mobileMenuOpen}
-                                                onClose={handleMenuClose}>
-                                                <IconButton style={{padding: 0}} onClick={() => handleMenuClose()}><KeyboardArrowUpIcon/></IconButton>
-                                                <Button onClick={() => {
-                                                    setValue(0)
-                                                    handleMenuClose()
-                                                }}>Etusivu</Button>
-                                                <Button onClick={() => {
-                                                    setValue(1)
-                                                    handleMenuClose()
-                                                }}>Varaukset</Button>
-                                                <Button onClick={() => {
-                                                    setValue(2)
-                                                    handleMenuClose()
-                                                }}>Profiili</Button>
-                                            </Drawer>
-                                            </Toolbar>}
+                                        <Button onClick={() => setValue(0)}>
+                                            <span style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >{bookerObject.bookerName}</span>
+                                        </Button>
+                                        <IconButton
+                                            edge='start'
+                                            onClick={handleMenu}
+                                            style={{ color: `rgb(${bookerObject.siteSettings.navTextColor.r},${bookerObject.siteSettings.navTextColor.g},${bookerObject.siteSettings.navTextColor.b},${bookerObject.siteSettings.navTextColor.a})` }} className={classes.homeButton} >
+                                            <MenuIcon />
+                                        </IconButton>
+                                        <Drawer
+                                            anchor='top'
+                                            variant='temporary'
+                                            open={mobileMenuOpen}
+                                            onClose={handleMenuClose}>
+                                            <IconButton style={{ padding: 0 }} onClick={() => handleMenuClose()}><KeyboardArrowUpIcon /></IconButton>
+                                            <Button onClick={() => {
+                                                setValue(0)
+                                                handleMenuClose()
+                                            }}>Etusivu</Button>
+                                            <Button onClick={() => {
+                                                setValue(1)
+                                                handleMenuClose()
+                                            }}>Varaukset</Button>
+                                            <Button onClick={() => {
+                                                setValue(2)
+                                                handleMenuClose()
+                                            }}>Profiili</Button>
+                                        </Drawer>
+                                    </Toolbar>}
                             </AppBar>
-                            
+
+                        </div>
+                        <div>{getTabContent(value)}</div>
+
+
                     </div>
-                    <div>{getTabContent(value)}</div>
+                    <br />
+                    <br />
+                    {bookerObject.siteSettings.footerOn ? <span>
+                        <div className={classes.footer} style={{ backgroundColor: `rgb(${bookerObject.siteSettings.footerColor.r},${bookerObject.siteSettings.footerColor.g},${bookerObject.siteSettings.footerColor.b},${bookerObject.siteSettings.footerColor.a})`, borderTopRightRadius: bookerObject.siteSettings.footerBorderRadius, borderTopLeftRadius: bookerObject.siteSettings.footerBorderRadius }}>
+                            <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor), fontWeight: 600 }}>Yhteystiedot </Typography>
+                            <div className={classes.footerContent}>
 
+                                <div className={classes.footerObject} >
 
-                </div>
-                <br />
-                <br />
-                {bookerObject.siteSettings.footerOn ? <span>
-                    <div className={classes.footer} style={{ backgroundColor: `rgb(${bookerObject.siteSettings.footerColor.r},${bookerObject.siteSettings.footerColor.g},${bookerObject.siteSettings.footerColor.b},${bookerObject.siteSettings.footerColor.a})`, borderTopRightRadius: bookerObject.siteSettings.footerBorderRadius, borderTopLeftRadius: bookerObject.siteSettings.footerBorderRadius }}>
-                        <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor), fontWeight: 600 }}>Yhteystiedot </Typography>
-                        <div className={classes.footerContent}>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{bookerObject.publicInformation.name}</Typography>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
 
-                            <div className={classes.footerObject} >
-
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{bookerObject.publicInformation.name}</Typography>
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}><AlternateEmailIcon /> {bookerObject.publicInformation.email}</Typography>
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}><CallIcon /> {bookerObject.publicInformation.phone}</Typography>
-
-                            </div>
-                            <div className={classes.footerObject}>
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{bookerObject.publicInformation.company}</Typography>
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>Y-tunnus:{bookerObject.publicInformation.companyID}</Typography>
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{bookerObject.publicInformation.address}</Typography>
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{bookerObject.publicInformation.postnumber}, {bookerObject.publicInformation.city}</Typography>
-                            </div>
-                            <div className={classes.footerObject}>
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>Avoinna: </Typography>
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
-                                {isClosed(bookerObject.timeTables.weekEnds.sat) && isClosed(bookerObject.timeTables.weekEnds.sun) ? <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }} >Viikonloppuisin: suljettu</Typography> : <div>
-                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
-                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
-                                </div>}
-                                <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{}</Typography>
+                                </div>
+                                <div className={classes.footerObject}>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{bookerObject.publicInformation.company}</Typography>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>Y-tunnus:{bookerObject.publicInformation.companyID}</Typography>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{bookerObject.publicInformation.address}</Typography>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{bookerObject.publicInformation.postnumber}, {bookerObject.publicInformation.city}</Typography>
+                                </div>
+                                <div className={classes.footerObject}>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>Avoinna: </Typography>
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{sameAsBase(bookerObject.timeTables) ? <span>Arkisin: {getFormattedTimes(bookerObject.timeTables.base)}</span> : <span>{getWeekdayTimes(bookerObject.timeTables)}</span>}</Typography>
+                                    {isClosed(bookerObject.timeTables.weekEnds.sat) && isClosed(bookerObject.timeTables.weekEnds.sun) ? <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }} >Viikonloppuisin: suljettu</Typography> : <div>
+                                        <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>La: {getFormattedTimes(bookerObject.timeTables.weekEnds.sat)}</Typography>
+                                        <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>Su: {getFormattedTimes(bookerObject.timeTables.weekEnds.sun)}</Typography>
+                                    </div>}
+                                    <Typography style={{ color: rgbLabeller(bookerObject.siteSettings.footerTextColor) }}>{}</Typography>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </span> : <em />}
+                    </span> : <em />}
 
-            </div>
-            :
-            <div>
-            {loading ? <CircularProgress size={25} /> : <div>
-                <Typography>
-                    Sivuston osoite on virheellinen, tai sivuston ylläpitäjä on asettanut sivuston piilotetuksi</Typography></div>}
-            {error ? <div>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <em />}
-        </div>}
-            </div>
-        )
-    }
+                </div>
+                :
+                <div>
+                    {loading ? <CircularProgress size={25} /> : <div>
+                        <Typography>
+                            Sivuston osoite on virheellinen, tai sivuston ylläpitäjä on asettanut sivuston piilotetuksi</Typography></div>}
+                    {error ? <div>Virhe on sattunut, tarkista osoite ja yritä uudelleen</div> : <em />}
+                </div>}
+        </div>
+    )
+}
 
 
 

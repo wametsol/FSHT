@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { auth, firestore } from '../../firebase'
-import { Typography, Button} from '@material-ui/core';
+import { Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
 import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
-    newBooker:{
+    newBooker: {
         margin: 20,
         backgroundColor: '#00c7d1',
         color: 'grey',
@@ -14,9 +14,9 @@ const useStyles = makeStyles((theme) => ({
             background: 'linear-gradient(#00c7d1 10%, #00d199 70%)',
             fontWeight: 'bold'
         }
-        
+
     },
-    existingBookers:{
+    existingBookers: {
         margin: 20,
         display: 'inline',
         backgroundColor: '#b8d4bf',
@@ -46,11 +46,10 @@ const HomePage = () => {
                         setError(true)
                         setLoading(false)
                     }
-                    console.log(response.data())
-                    
+
                     setBookers(response.data().bookers)
                     setLoading(false)
-                    
+
                 })
                 .catch(error => {
                     console.log(error)
@@ -80,15 +79,15 @@ const HomePage = () => {
                     <Typography>Hei {user.displayName}, järjestelmäsi: </Typography>
                     {Object.keys(bookers).map(o => bookers[o]).map(booker => (
                         <div key={booker.name}>
-                        <Typography>{booker.name}: </Typography>
-                        <Button className={classes.existingBookers} variant="outlined" component={Link} to={`/${booker.address}`}>Sivustolle</Button>
-                        <Button className={classes.existingBookers} variant="outlined" component={Link} to={`/${booker.address}/admin`}>Admin paneeliin</Button>
-                        <Typography>________________________________________________</Typography>
+                            <Typography>{booker.name}: </Typography>
+                            <Button className={classes.existingBookers} variant="outlined" component={Link} to={`/${booker.address}`}>Sivustolle</Button>
+                            <Button className={classes.existingBookers} variant="outlined" component={Link} to={`/${booker.address}/admin`}>Admin paneeliin</Button>
+                            <Typography>________________________________________________</Typography>
                         </div>
                     ))}
-                    
-                    
-                    
+
+
+
 
                 </div>)
             }

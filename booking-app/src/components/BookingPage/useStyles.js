@@ -7,10 +7,10 @@ const useStyles = makeStyles((theme) => ({
         margin: 'auto',
         marginBottom: '15vh',
         minHeight: '80vh',
-        [theme.breakpoints.down('sm')]:{
+        [theme.breakpoints.down('sm')]: {
             maxWidth: '90%',
         },
-        [theme.breakpoints.down('xs')]:{
+        [theme.breakpoints.down('xs')]: {
             maxWidth: '100%',
         }
 
@@ -47,13 +47,13 @@ const useStyles = makeStyles((theme) => ({
     footer: {
         margin: 'auto',
         minHeight: '15vh',
-        bottom:0,
+        bottom: 0,
         left: 0,
         right: 0,
-        [theme.breakpoints.down('sm')]:{
+        [theme.breakpoints.down('sm')]: {
             maxWidth: '90%',
         },
-        [theme.breakpoints.down('xs')]:{
+        [theme.breakpoints.down('xs')]: {
             maxWidth: '100%',
             position: 'static',
             padding: 2
@@ -63,12 +63,12 @@ const useStyles = makeStyles((theme) => ({
     singleService: {
         textAlign: 'left',
         margin: 20,
-        [theme.breakpoints.down('sm')]:{
+        [theme.breakpoints.down('sm')]: {
             maxWidth: '90%',
         },
     },
     singleServiceBox: {
-        [theme.breakpoints.down('xs')]:{
+        [theme.breakpoints.down('xs')]: {
             marginLeft: '5vh',
             marginRight: '5vh'
         },
@@ -89,7 +89,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         justifyContent: 'center',
         backgroundColor: ' #f2f2f2',
-        [theme.breakpoints.down('xs')]:{
+        [theme.breakpoints.down('xs')]: {
             display: 'inline-block',
             minWidth: '100%'
         }
@@ -144,14 +144,14 @@ const useStyles = makeStyles((theme) => ({
         flexBasis: '60%'
     },
     cardTitleBox: {
-        display:'flex'
+        display: 'flex'
     },
-    weekBtn:{
+    weekBtn: {
         marginTop: '10px',
         alignSelf: 'center'
 
     },
-    dayBtn:{
+    dayBtn: {
         marginTop: '10px',
         alignSelf: 'center'
     },
@@ -172,7 +172,7 @@ const useStyles = makeStyles((theme) => ({
     },
     column: {
         flexBasis: '25%',
-        [theme.breakpoints.down('xs')]:{
+        [theme.breakpoints.down('xs')]: {
             flexBasis: '50%',
         }
     },
@@ -187,16 +187,16 @@ const useStyles = makeStyles((theme) => ({
             textDecoration: 'underline',
         },
     },
-    green:{
-        color:green[500]
+    green: {
+        color: green[500]
     },
     errorMessage: {
         color: 'red'
     },
-    pastIcon:{
+    pastIcon: {
         color: 'orange'
     },
-    profileBox:{
+    profileBox: {
         flexBasis: '50%',
         backgroundColor: 'white',
         textAlign: 'left',
@@ -206,7 +206,7 @@ const useStyles = makeStyles((theme) => ({
     upperBox: {
         display: 'flex',
         backgroundColor: '#fffbf0',
-        [theme.breakpoints.down('xs')]:{
+        [theme.breakpoints.down('xs')]: {
             display: 'contents',
         }
     },
@@ -220,7 +220,7 @@ const useStyles = makeStyles((theme) => ({
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
         color: '#fff',
-      },
+    },
     notPublicInfo: {
         padding: '20px',
         backgroundColor: 'ivory'
